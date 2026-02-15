@@ -219,7 +219,7 @@ BasicObj* exec(std::string code){
       }
       else{
         right=exec(acc);
-        BasicObj* old;
+        BasicObj* old=res;
         if (op=='+'){
           res=res->add(right);
         }
@@ -232,6 +232,17 @@ BasicObj* exec(std::string code){
       continue;
     }
     acc+=code[i];
+  }
+  if (!acc.empty()){
+    right=exec(acc);
+    BasicObj* old=res;
+    if (op=='+'){
+      res=res->add(right);
+    }
+    if (op=='-'){
+      res=res->sub(right);
+    }
+    delete old;
   }
   return res;
 }
