@@ -32,6 +32,8 @@ class BasicObj{
     std::map<std::string,BasicObj*> attrs;
 };
 
+typedef std::map<std::string,BasicObj*> Namespace;
+
 class IntObj:public BasicObj{
     int a;
     public:
@@ -119,17 +121,7 @@ class FloatObj:public BasicObj{
 };
 
 BasicObj* exec(std::string code){
-    bool quoted=false;
-    for (int i=0;i<code.size();i++){
-      if (code[i]=='"'){
-        quoted=!quoted;
-        continue;
-      }
-      if (!quoted && code[i]==' '){
-        code.erase(code.begin()+i);
-      }
-    }
-
+  std::cout<<"Recieved "<<code<<std::endl;
     bool isInt=true;
     bool isFloat=false;
     for (int i=0;i<code.size();i++){
@@ -148,24 +140,98 @@ BasicObj* exec(std::string code){
     else if (isInt){
       return new IntObj(std::stoi(code));
     }
-  std::string name;
-  int splitterPos=0;
+    bool hasOp=false;
+    for (int i=0;i<code.size();i++){
+      if (code[i]=='+' || code[i]=='-'){
+        hasOp=true;
+        break;
+      }
+    }
+    if (!hasOp){
+      std::cout<<"Short "<<code<<std::endl;
+      BasicObj* res=nullptr;;
+      BasicObj *left,*right;
+      bool side=false;
+      char op;
+      std::string acc;
+      for (auto i:code){
+        if (i=='*' || i=='/'){
+          if (!side){
+            left=exec(acc);
+            if (!res) res=left;
+            op=i;
+            side=true;
+            acc="";
+            continue;
+          }
+          else{
+            right=exec(acc);
+            BasicObj* old=res;
+            if (op=='*'){
+              res=res->mul(right);
+            }
+            else if(op=='/'){
+              res=res->div(right);
+            }
+            delete old;
+            side=false;
+          }
+          continue;
+          acc="";
+        }
+        acc+=i;
+      }
+      if (!acc.empty()){
+        right=exec(acc);
+        BasicObj* old=res;
+        if (op=='*'){
+          res=res->mul(right);
+        }
+        else if(op=='/'){
+          res=res->div(right);
+        }
+        delete old;
+        side=false;
+      }
+      return res;
+    }
+    bool quoted=false;
+    for (int i=0;i<code.size();i++){
+      if (code[i]=='"'){
+        quoted=!quoted;
+        continue;
+      }
+      if (!quoted && code[i]==' '){
+        code.erase(code.begin()+i);
+      }
+    }
+  BasicObj* res=nullptr;
+  BasicObj* right;
+  std::string acc;
+  bool side=false;
+  char op;
   for (int i=0;i<code.size();i++){
-    if (!std::isalpha(code[i]) || code[i]!='_'){
-      splitterPos=i;
-      break;
+    if (code[i]=='+' || code[i]=='-'){
+      if (!side){
+        op=code[i];
+        res=exec(acc);
+        side=true;
+      }
+      else{
+        right=exec(acc);
+        BasicObj* old;
+        if (op=='+'){
+          res=res->add(right);
+        }
+        if (op=='-'){
+          res=res->sub(right);
+        }
+        delete old;
+      }
+      acc="";
+      continue;
     }
-    name+=code[i];
+    acc+=code[i];
   }
-  std::vector<BasicObj*> args;
-  if (code[splitterPos]=='('){
-    std::string inGap;
-    for (int i=splitterPos+1;;i++){
-      if (code[i]==')') break;
-      inGap+=code[i];
-    }
-    std::vector<std::string> tokens;
-    /*finish*/
-  }
-  return new BasicObj();
+  return res;
 }
