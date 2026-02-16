@@ -19,13 +19,9 @@ class BasicObj;
 class BasicObj{
     public:
     virtual BasicObj* add(BasicObj*){throw NotAvailable();};
-    virtual BasicObj* radd(BasicObj*){throw NotAvailable();};
     virtual BasicObj* sub(BasicObj*){throw NotAvailable();};
-    virtual BasicObj* rsub(BasicObj*){throw NotAvailable();};
     virtual BasicObj* mul(BasicObj*){throw NotAvailable();};
-    virtual BasicObj* rmul(BasicObj*){throw NotAvailable();};
     virtual BasicObj* div(BasicObj*){throw NotAvailable();};
-    virtual BasicObj* rdiv(BasicObj*){throw NotAvailable();};
     virtual std::string str(){throw NotAvailable();};
     virtual void free(){throw NotAvailable();};
     virtual BasicObj* call(std::vector<BasicObj*>){throw NotAvailable();};
@@ -46,7 +42,7 @@ class IntObj:public BasicObj{
         return new IntObj(a+i->a);
       }
       else{
-        return b->radd(this);
+        return b->add(this);
       }
     }
     BasicObj* sub(BasicObj* b) override{
@@ -54,7 +50,7 @@ class IntObj:public BasicObj{
         return new IntObj(a-i->a);
       }
       else{
-        return b->rsub(this);
+        return b->sub(this);
       }
     }
     BasicObj* div(BasicObj* b) override{
@@ -62,7 +58,7 @@ class IntObj:public BasicObj{
         return new IntObj(a/i->a);
       }
       else{
-        return b->rdiv(this);
+        return b->div(this);
       }
     }
     BasicObj* mul(BasicObj* b) override{
@@ -70,7 +66,7 @@ class IntObj:public BasicObj{
         return new IntObj(a*i->a);
       }
       else{
-        return b->rmul(this);
+        return b->mul(this);
       }
     }
     std::string str() override{
@@ -89,7 +85,7 @@ class FloatObj:public BasicObj{
         return new FloatObj(a+i->a);
       }
       else{
-        return b->radd(this);
+        return b->add(this);
       }
     }
     BasicObj* sub(BasicObj* b) override{
@@ -97,7 +93,7 @@ class FloatObj:public BasicObj{
         return new FloatObj(a-i->a);
       }
       else{
-        return b->rsub(this);
+        return b->sub(this);
       }
     }
     BasicObj* div(BasicObj* b) override{
@@ -105,7 +101,7 @@ class FloatObj:public BasicObj{
         return new FloatObj(a/i->a);
       }
       else{
-        return b->rdiv(this);
+        return b->div(this);
       }
     }
     BasicObj* mul(BasicObj* b) override{
@@ -113,7 +109,7 @@ class FloatObj:public BasicObj{
         return new FloatObj(a*i->a);
       }
       else{
-        return b->rmul(this);
+        return b->mul(this);
       }
     }
     std::string str() override{
