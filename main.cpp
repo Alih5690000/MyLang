@@ -173,8 +173,11 @@ BasicObj* exec(std::string code, Namespace n){
       return new IntObj(std::stoi(code));
     }
     bool hasOp=false;
+    int gapDepth=0;
     for (int i=0;i<code.size();i++){
-      if (code[i]=='+' || code[i]=='-'){
+      if (i=='(') gapDepth++;
+      if (i==')') gapDepth--;
+      if ((code[i]=='+' || code[i]=='-') && gapDepth==0){
         hasOp=true;
         break;
       }
