@@ -186,8 +186,11 @@ BasicObj* exec(std::string code, Namespace n){
       bool side=false;
       char op;
       std::string acc;
+      int gapDepth=0;
       for (auto i:code){
-        if (i=='*' || i=='/'){
+        if (i=='(') gapDepth++;
+        if (i==')') gapDepth--;
+        if ((i=='*' || i=='/') && gapDepth==0){
           if (!side){
             left=exec(acc);
             if (!res) res=left;
@@ -232,8 +235,11 @@ BasicObj* exec(std::string code, Namespace n){
   std::string acc;
   bool side=false;
   char op;
+  int gapDepth=0;
   for (int i=0;i<code.size();i++){
-    if (code[i]=='+' || code[i]=='-'){
+    if (code[i]=='(') gapDepth++;
+    if (code[i]==')') gapDepth--;
+    if ((code[i]=='+' || code[i]=='-') && gapDepth==0){
       if (!side){
         op=code[i];
         res=exec(acc);
