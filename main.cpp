@@ -4,6 +4,7 @@
 #include <sstream>
 #include <iostream>
 #include <exception>
+#include <sstream>
 #include <cctype>
 
 class NotAvailable:public std::exception{
@@ -120,8 +121,43 @@ class FloatObj:public BasicObj{
     }
 };
 
-BasicObj* exec(std::string code){
-  std::cout<<"Recieved "<<code<<std::endl;
+BasicObj* exec(std::string code, Namespace n){
+    bool quoted=false;
+    for (int i=0;i<code.size();i++){
+      if (code[i]=='"'){
+        quoted=!quoted;
+        continue;
+      }
+      if (!quoted && code[i]==' '){
+        code.erase(code.begin()+i);
+      }
+    }
+    if (code[0]=='('){
+      code.erase(code.begin());
+      code.erase(code.end()-1);
+      return exec(code);
+    } 
+    std::cout<<"Recieved "<<code<<std::endl;
+    std::string name;
+    for (int i=0;i<code.size();i++) {
+       if (!std::isalpha(code[i]) || code[i] ! ='_') {
+         if (code[i] =='(') {
+           std::string inGap;
+           for (int j=i;j<code.size();j++){
+             if (code[j] ==')') break;
+             inGap+=code[j] ;
+           }
+           std::vector<BasicObj*> args;
+           std::string tmp;
+           std::stringstream ss(code) ;
+           while (getline(ss,tmp,',') 
+              args.push_back(exec(tmp));
+           BasicObj* a=exec(name);
+           a->call(args);
+         } 
+       } 
+       name+=i;
+    } 
     bool isInt=true;
     bool isFloat=false;
     for (int i=0;i<code.size();i++){
@@ -194,16 +230,6 @@ BasicObj* exec(std::string code){
         side=false;
       }
       return res;
-    }
-    bool quoted=false;
-    for (int i=0;i<code.size();i++){
-      if (code[i]=='"'){
-        quoted=!quoted;
-        continue;
-      }
-      if (!quoted && code[i]==' '){
-        code.erase(code.begin()+i);
-      }
     }
   BasicObj* res=nullptr;
   BasicObj* right;
