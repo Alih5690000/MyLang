@@ -14,6 +14,13 @@ class NotAvailable:public std::exception{
   }
 };
 
+class ValueError:public std::exception{
+  public:
+  const char* what() const noexcept override{
+    return "Value is invalid for that operation";
+  }
+};
+
 class BasicObj;
 
 class BasicObj{
@@ -32,8 +39,8 @@ class BasicObj{
 typedef std::map<std::string,BasicObj*> Namespace;
 
 class IntObj:public BasicObj{
-    int a;
     public:
+    int a;
     IntObj(int a){
         this->a=a;
     }
@@ -75,13 +82,16 @@ class IntObj:public BasicObj{
 };
 
 class FloatObj:public BasicObj{
-    float a;
     public:
+    float a;
     FloatObj(float a){
         this->a=a;
     }
     BasicObj* add(BasicObj* b) override{
       if (auto i=dynamic_cast<FloatObj*>(b)){
+        return new FloatObj(a+i->a);
+      }
+      else if(auto i=dynamic_cast<IntObj*>(b)){
         return new FloatObj(a+i->a);
       }
       else{
@@ -92,6 +102,9 @@ class FloatObj:public BasicObj{
       if (auto i=dynamic_cast<FloatObj*>(b)){
         return new FloatObj(a-i->a);
       }
+      else if(auto i=dynamic_cast<IntObj*>(b)){
+        return new FloatObj(a-i->a);
+      }
       else{
         return b->sub(this);
       }
@@ -100,12 +113,18 @@ class FloatObj:public BasicObj{
       if (auto i=dynamic_cast<FloatObj*>(b)){
         return new FloatObj(a/i->a);
       }
+      else if(auto i=dynamic_cast<IntObj*>(b)){
+        return new FloatObj(a/i->a);
+      }
       else{
         return b->div(this);
       }
     }
     BasicObj* mul(BasicObj* b) override{
       if (auto i=dynamic_cast<FloatObj*>(b)){
+        return new FloatObj(a*i->a);
+      }
+      else if(auto i=dynamic_cast<IntObj*>(b)){
         return new FloatObj(a*i->a);
       }
       else{
@@ -117,7 +136,36 @@ class FloatObj:public BasicObj{
     }
 };
 
-BasicObj* exec(std::string code, Namespace n){
+BasicObj* exec(std::string code, Namespace& n);
+
+class FunctionObject:public BasicObj{
+    public:
+    std::vector<std::string> argNames;
+    std::string code;
+    FunctionObject(std::vector<std::string> argNames,std::string code){
+      this->argNames=argNames;
+      this->code=code;
+    }
+    BasicObj* call(std::vector<BasicObj*> args) override{
+      if (args.size()!=argNames.size()){
+        throw ValueError();
+      }
+      Namespace n;
+      for (int i=0;i<args.size();i++){
+        n[argNames[i]]=args[i];
+      }
+      return exec(code,n);
+    }
+};
+
+void remBrackets(std::string& code){
+  if (code[0]=='(' && code[code.size()-1]==')'){
+    code=code.substr(1,code.size()-2);
+  }
+}
+
+BasicObj* exec(std::string code, Namespace& n){
+    try{
     bool quoted=false;
     for (int i=0;i<code.size();i++){
       if (code[i]=='"'){
@@ -128,32 +176,54 @@ BasicObj* exec(std::string code, Namespace n){
         code.erase(code.begin()+i);
       }
     }
-    if (code[0]=='('){
-      code.erase(code.begin());
-      code.erase(code.end()-1);
-      return exec(code);
-    } 
-    std::cout<<"Recieved "<<code<<std::endl;
     std::string name;
+    bool sheerName=true;
     for (int i=0;i<code.size();i++) {
-       if (!std::isalpha(code[i]) || code[i] ! ='_') {
+       if (!std::isalpha(code[i]) && code[i] != '_'){ 
+         sheerName=false;
+         if (name.empty()) break;
          if (code[i] =='(') {
+           i++;
            std::string inGap;
            for (int j=i;j<code.size();j++){
              if (code[j] ==')') break;
-             inGap+=code[j] ;
+             inGap+=code[j];
            }
            std::vector<BasicObj*> args;
            std::string tmp;
-           std::stringstream ss(code) ;
-           while (getline(ss,tmp,',') 
-              args.push_back(exec(tmp));
-           BasicObj* a=exec(name);
-           a->call(args);
+           std::stringstream ss(inGap);
+           while (getline(ss,tmp,','))
+              args.push_back(exec(tmp,n));
+           BasicObj* a=exec(name,n);
+           try{
+             return a->call(args);
+           }
+           catch (...){
+            std::cout<<"Tried call to "<<name<<" with args "<<inGap<<std::endl;
+            throw;
+           }
          } 
+         else if(code[i]=='='){
+            std::string value;
+            for (int j=i+1;j<code.size();j++){
+              value+=code[j];
+            }
+            BasicObj* res=exec(value,n);\
+            delete n[name];
+            n[name]=res;
+            return res;
+         }
        } 
-       name+=i;
+       name+=code[i];
     } 
+    if (sheerName){
+      if (n.find(name)!=n.end()){
+        return n[name];
+      }
+      else{
+        throw ValueError();
+      }
+    }
     bool isInt=true;
     bool isFloat=false;
     for (int i=0;i<code.size();i++){
@@ -175,8 +245,8 @@ BasicObj* exec(std::string code, Namespace n){
     bool hasOp=false;
     int gapDepth=0;
     for (int i=0;i<code.size();i++){
-      if (i=='(') gapDepth++;
-      if (i==')') gapDepth--;
+      if (code[i]=='(') gapDepth++;
+      if (code[i]==')') gapDepth--;
       if ((code[i]=='+' || code[i]=='-') && gapDepth==0){
         hasOp=true;
         break;
@@ -184,7 +254,7 @@ BasicObj* exec(std::string code, Namespace n){
     }
     if (!hasOp){
       std::cout<<"Short "<<code<<std::endl;
-      BasicObj* res=nullptr;;
+      BasicObj* res=nullptr;
       BasicObj *left,*right;
       bool side=false;
       char op;
@@ -195,7 +265,8 @@ BasicObj* exec(std::string code, Namespace n){
         if (i==')') gapDepth--;
         if ((i=='*' || i=='/') && gapDepth==0){
           if (!side){
-            left=exec(acc);
+            remBrackets(acc);
+            left=exec(acc,n);
             if (!res) res=left;
             op=i;
             side=true;
@@ -203,7 +274,8 @@ BasicObj* exec(std::string code, Namespace n){
             continue;
           }
           else{
-            right=exec(acc);
+            remBrackets(acc);
+            right=exec(acc,n);
             BasicObj* old=res;
             if (op=='*'){
               res=res->mul(right);
@@ -220,7 +292,7 @@ BasicObj* exec(std::string code, Namespace n){
         acc+=i;
       }
       if (!acc.empty()){
-        right=exec(acc);
+        right=exec(acc,n);
         BasicObj* old=res;
         if (op=='*'){
           res=res->mul(right);
@@ -238,18 +310,20 @@ BasicObj* exec(std::string code, Namespace n){
   std::string acc;
   bool side=false;
   char op;
-  int gapDepth=0;
+  gapDepth=0;
   for (int i=0;i<code.size();i++){
     if (code[i]=='(') gapDepth++;
     if (code[i]==')') gapDepth--;
     if ((code[i]=='+' || code[i]=='-') && gapDepth==0){
       if (!side){
         op=code[i];
-        res=exec(acc);
+        remBrackets(acc);
+        res=exec(acc,n);
         side=true;
       }
       else{
-        right=exec(acc);
+        remBrackets(acc);
+        right=exec(acc,n);
         BasicObj* old=res;
         if (op=='+'){
           res=res->add(right);
@@ -265,7 +339,8 @@ BasicObj* exec(std::string code, Namespace n){
     acc+=code[i];
   }
   if (!acc.empty()){
-    right=exec(acc);
+    remBrackets(acc);
+    right=exec(acc,n);
     BasicObj* old=res;
     if (op=='+'){
       res=res->add(right);
@@ -276,4 +351,16 @@ BasicObj* exec(std::string code, Namespace n){
     delete old;
   }
   return res;
+    }
+    catch (const ValueError&){
+      throw;
+    }
+}
+
+void doCode(std::string code, Namespace& n){
+    std::string acc;
+    std::stringstream ss(code);
+    while (std::getline(ss, acc, ';')) {
+      exec(acc,n);
+    }
 }

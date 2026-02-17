@@ -2,7 +2,11 @@
 #include "main.cpp"
 
 int main(){
-    BasicObj* a=exec("3*4+3*3");
-    std::cout<<a->str()<<std::endl;
+    FunctionObject* f=new FunctionObject({"x"},"x+5");
+    Namespace n=Namespace();
+    n["f"]=f;
+    doCode("f(10);a=5",n);
+    BasicObj* res=exec("f(a)",n);
+    std::cout<<res->str()<<std::endl;
     return 0;
 }
