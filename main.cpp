@@ -21,10 +21,20 @@ class ValueError:public std::exception{
   }
 };
 
+class SyntaxError:public std::exception{
+  public:
+  const char* what() const noexcept override{
+    return "Invalid syntax";
+  }
+};
+
 class BasicObj;
+
+static std::vector<BasicObj*> __objs;
 
 class BasicObj{
     public:
+    int refcount=1;
     virtual BasicObj* add(BasicObj*,bool){throw NotAvailable();};
     virtual BasicObj* sub(BasicObj*,bool){throw NotAvailable();};
     virtual BasicObj* mul(BasicObj*,bool){throw NotAvailable();};
@@ -36,7 +46,10 @@ class BasicObj{
     virtual bool asbool(){throw NotAvailable();};
     virtual void free(){throw NotAvailable();};
     virtual BasicObj* call(std::vector<BasicObj*>){throw NotAvailable();};
-    virtual ~BasicObj(){};
+    BasicObj(){
+      __objs.push_back(this);
+    }
+    virtual ~BasicObj()=default;
     std::map<std::string,BasicObj*> attrs;
 };
 
@@ -67,6 +80,7 @@ public:
     bool asbool() override {
         return !value.empty();
     }
+    ~StringObject() override = default;
 };
 
 class IntObj:public BasicObj{
@@ -158,6 +172,7 @@ class IntObj:public BasicObj{
     bool asbool() override{
       return a;
     }
+    ~IntObj() override = default;
 };
 
 class BoolObj:public BasicObj{
@@ -167,6 +182,10 @@ class BoolObj:public BasicObj{
   bool asbool() override{
     return a;
   }
+  std::string str() override{
+    return a?"true":"false";
+  }
+  ~BoolObj() override = default;
 };
 
 class FloatObj:public BasicObj{
@@ -279,6 +298,7 @@ class FloatObj:public BasicObj{
     bool asbool() override{
       return a;
     }
+    ~FloatObj() override = default;
 };
 
 BasicObj* exec(std::string code, Namespace& n);
@@ -310,7 +330,7 @@ void remBrackets(std::string& code){
 }
 
 BasicObj* exec(std::string code, Namespace& n){
-  std::cout<<"source "<<code<<std::endl;
+  //std::cout<<"source "<<code<<std::endl;
     try{
     bool quoted=false;
     for (int i=0;i<code.size();i++){
@@ -318,8 +338,9 @@ BasicObj* exec(std::string code, Namespace& n){
         quoted=!quoted;
         continue;
       }
-      if (!quoted && code[i]==' '){
+      if (!quoted && (code[i]==' ' || code[i]=='\n' || code[i]=='\t')){
         code.erase(code.begin()+i);
+        i--;
       }
     }
     if (code[0]=='"' && code.back()=='"'){
@@ -369,9 +390,87 @@ BasicObj* exec(std::string code, Namespace& n){
             return nullptr;
           }
           bracedepth--;
+          continue;
         }
         body+=code[i];
       }
+    }
+    else if (code.size()>=3 && code[0]=='f' && code[1]=='o' && code[2]=='r'){
+      std::cout<<"for came "<<code<<std::endl;
+      std::string expr;
+      int depth=1;
+      int exprendpos;
+      for (int i=4;i<code.size();i++){
+        if (code[i]=='(') depth++;
+        if (code[i]==')'){ 
+          depth--;
+          if (depth==0){
+            std::cout<<"expr is "<<expr<<std::endl;
+            exprendpos=i;
+            break;
+          }
+        }
+        expr+=code[i];
+      }
+      std::string cond;
+      std::string counter;
+      std::string tmp;
+      std::stringstream ss(expr);
+      if (getline(ss,tmp,';')){
+        exec(tmp,n);
+        std::cout<<"Init is "<<tmp<<std::endl;
+      }
+      else{
+        throw SyntaxError();
+      }
+      if (getline(ss,tmp,';')){
+        cond=tmp;
+        std::cout<<"Cond is "<<tmp<<std::endl;
+      }
+      else{
+        throw SyntaxError();
+      }
+      if (getline(ss,tmp,';')){
+        counter=tmp;
+        std::cout<<"Counter is "<<tmp<<std::endl;
+      }
+      else{
+        throw SyntaxError();
+      }
+      std::string body;
+      int bracedepth=0;
+      bool started=false;
+      for (int i=exprendpos+1;i<code.size();i++){
+        if (!started){
+          if (code[i]=='{'){
+            started=true;
+            continue;
+          }
+          else continue;
+        }
+        if (code[i]=='{'){
+          bracedepth++;
+        }
+        else if (code[i]=='}'){
+          if (bracedepth==0){
+            break;
+          }
+          bracedepth--;
+          continue;
+        }
+        body+=code[i];
+      }
+      std::cout<<"Body is "<<body<<std::endl;
+      int i=0;
+      for(;;){
+        BasicObj* condObj = exec(cond, n);
+        if (!condObj) break;
+        if (!condObj->asbool()) break;
+        exec(body,n);
+        exec(counter,n);
+        i++;
+      }
+      return nullptr;
     }
     std::string name;
     bool sheerName=true;
@@ -414,9 +513,10 @@ BasicObj* exec(std::string code, Namespace& n){
               value+=code[j];
             }
             BasicObj* res=exec(value,n);
-            if (n.find(name)!=n.end())
-              delete n[name];
+            BasicObj* old=n[name];
             n[name]=res;
+            if (old && old!=res) old->refcount--;
+            std::cout<<"After asigning "<<name<<" is "<<n[name]->str()<<std::endl;
             return res;
          }
        } 
@@ -449,6 +549,7 @@ BasicObj* exec(std::string code, Namespace& n){
       return new IntObj(std::stoi(code));
     }
     bool hasOp=false;
+    bool hasMul=false;
     int gapDepth=0;
     int compPos=-1;
     std::string compOp;
@@ -470,6 +571,9 @@ BasicObj* exec(std::string code, Namespace& n){
         }
         if (code[i]=='<' || code[i]=='>'){
           compPos=i; compOp=std::string(1,code[i]); break;
+        }
+        if (code[i]=='*' || code[i]=='/'){
+          hasMul=true;
         }
         if (code[i]=='+' || code[i]=='-'){
           hasOp=true; break;
@@ -494,7 +598,7 @@ BasicObj* exec(std::string code, Namespace& n){
       else if (compOp=="<=") cres = L->less(R,false) || L->equal(R,false);
       return new IntObj(cres?1:0);
     }
-    if (!hasOp){
+    if (!hasOp && hasMul){
       std::cout<<"Short "<<code<<std::endl;
       BasicObj* res=nullptr;
       BasicObj *left,*right;
@@ -602,10 +706,13 @@ BasicObj* exec(std::string code, Namespace& n){
 void doCode(std::string code, Namespace& n){
     std::string acc;
     int depth = 0;
+    int depth2=0;
     for (auto i:code){
       if (i=='{') depth++;
       if (i=='}') depth--;
-      if (i==';' && depth==0){
+      if (i=='(') depth2++;
+      if (i==')') depth2--;
+      if (i==';' && depth==0 && depth2==0){
         exec(acc,n);
         acc.clear();
         continue;
@@ -615,4 +722,11 @@ void doCode(std::string code, Namespace& n){
     if (!acc.empty()){
       exec(acc,n);
     }
+}
+
+void __clean(){
+  for (auto i:__objs){
+    if (i->refcount<=0)
+      delete i;
+  }
 }
