@@ -725,8 +725,10 @@ void doCode(std::string code, Namespace& n){
 }
 
 void __clean(){
-  for (auto i:__objs){
-    if (i->refcount<=0)
-      delete i;
+  for (int i=__objs.size()-1;i>=0;i--){
+    if (__objs[i] ->refcount<=0){
+      __objs.erase(__objs.begin()+i);
+      delete __objs[i];
+    } 
   }
 }
