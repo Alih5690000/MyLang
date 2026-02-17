@@ -323,6 +323,103 @@ class FunctionObject:public BasicObj{
     }
 };
 
+class ClassObject;
+
+class InstanceObject : public BasicObj {
+public:
+    ClassObject* klass;
+
+    InstanceObject(ClassObject* cls, std::vector<BasicObj*> args = {}) {
+        klass = cls;
+
+        if (klass->attrs.count("__constructor__")) {
+            auto* ctor = dynamic_cast<FunctionObject*>(klass->attrs["__constructor__"]);
+            std::vector<BasicObj*> callArgs = { this }; // self as first argument
+            callArgs.insert(callArgs.end(), args.begin(), args.end());
+            ctor->call(callArgs);
+        }
+    }
+
+    BasicObj* add(BasicObj* other, bool swapped) override {
+        if (klass->attrs.count("__add__")) {
+            auto* func = dynamic_cast<FunctionObject*>(klass->attrs["__add__"]);
+            std::vector<BasicObj*> args = { this, other };
+            return func->call(args);
+        }
+        throw NotAvailable();
+    }
+
+    BasicObj* sub(BasicObj* other, bool swapped) override {
+        if (klass->attrs.count("__sub__")) {
+            auto* func = dynamic_cast<FunctionObject*>(klass->attrs["__sub__"]);
+            std::vector<BasicObj*> args = { this, other };
+            return func->call(args);
+        }
+        throw NotAvailable();
+    }
+
+    BasicObj* mul(BasicObj* other, bool swapped) override {
+        if (klass->attrs.count("__mul__")) {
+            auto* func = dynamic_cast<FunctionObject*>(klass->attrs["__mul__"]);
+            std::vector<BasicObj*> args = { this, other };
+            return func->call(args);
+        }
+        throw NotAvailable();
+    }
+
+    BasicObj* div(BasicObj* other, bool swapped) override {
+        if (klass->attrs.count("__div__")) {
+            auto* func = dynamic_cast<FunctionObject*>(klass->attrs["__div__"]);
+            std::vector<BasicObj*> args = { this, other };
+            return func->call(args);
+        }
+        throw NotAvailable();
+    }
+
+    bool equal(BasicObj* other, bool swapped) override {
+        if (klass->attrs.count("__eq__")) {
+            auto* func = dynamic_cast<FunctionObject*>(klass->attrs["__eq__"]);
+            std::vector<BasicObj*> args = { this, other };
+            auto* res = func->call(args);
+            return res->asbool();
+        }
+        throw NotAvailable();
+    }
+
+    bool asbool() override {
+        if (klass->attrs.count("__bool__")) {
+            auto* func = dynamic_cast<FunctionObject*>(klass->attrs["__bool__"]);
+            std::vector<BasicObj*> args = { this };
+            auto* res = func->call(args);
+            return res->asbool();
+        }
+        return true;
+    }
+
+    std::string str() override {
+        if (klass->attrs.count("__str__")) {
+            auto* func = dynamic_cast<FunctionObject*>(klass->attrs["__str__"]);
+            std::vector<BasicObj*> args = { this };
+            auto* res = func->call(args);
+            return res->str();
+        }
+        return "<InstanceObject>";
+    }
+};
+
+
+class ClassObject:public BasicObject{
+  public:
+  ClassObject(const std::string& a){
+      Namespace cls;
+      doCode(a,cls);
+      attrs=cls;
+  }
+  BasicObject* call(std::vector<BasicObj*> args){
+    return new InstanceObject(this,args);
+  }
+};
+
 void remBrackets(std::string& code){
   if (code[0]=='(' && code[code.size()-1]==')'){
     code=code.substr(1,code.size()-2);
