@@ -42,6 +42,33 @@ class BasicObj{
 
 typedef std::map<std::string,BasicObj*> Namespace;
 
+class StringObject : public BasicObj {
+public:
+    std::string value;
+
+    StringObject(const std::string& v) : value(v) {}
+
+    std::string str() override {
+        return value;
+    }
+
+    BasicObj* add(BasicObj* other, bool) override {
+        StringObject* o = dynamic_cast<StringObject*>(other);
+        if (!o) throw NotAvailable();
+        return new StringObject(value + o->value);
+    }
+
+    bool equal(BasicObj* other, bool) override {
+        StringObject* o = dynamic_cast<StringObject*>(other);
+        if (!o) throw NotAvailable();
+        return value == o->value;
+    }
+
+    bool asbool() override {
+        return !value.empty();
+    }
+};
+
 class IntObj:public BasicObj{
     public:
     int a;
@@ -295,6 +322,10 @@ BasicObj* exec(std::string code, Namespace& n){
         code.erase(code.begin()+i);
       }
     }
+    if (code[0]=='"' && code.back()=='"'){
+      code = code.substr(1, code.size()-2);
+      return new StringObject(code);
+    }
     if (code.empty()) return nullptr;
     if (!code.empty() && code.back()==';') code.pop_back();
     if (code.empty()) return nullptr;
@@ -361,6 +392,12 @@ BasicObj* exec(std::string code, Namespace& n){
            std::stringstream ss(inGap);
            while (getline(ss,tmp,','))
               args.push_back(exec(tmp,n));
+           if (name=="print"){
+            for (auto i:args){
+              std::cout<<i->str();
+            }
+            return nullptr;
+           }
            BasicObj* a=exec(name,n);
            if (!a) throw ValueError();
            try{
