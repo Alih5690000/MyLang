@@ -25,11 +25,15 @@ class BasicObj;
 
 class BasicObj{
     public:
-    virtual BasicObj* add(BasicObj*){throw NotAvailable();};
-    virtual BasicObj* sub(BasicObj*){throw NotAvailable();};
-    virtual BasicObj* mul(BasicObj*){throw NotAvailable();};
-    virtual BasicObj* div(BasicObj*){throw NotAvailable();};
+    virtual BasicObj* add(BasicObj*,bool){throw NotAvailable();};
+    virtual BasicObj* sub(BasicObj*,bool){throw NotAvailable();};
+    virtual BasicObj* mul(BasicObj*,bool){throw NotAvailable();};
+    virtual BasicObj* div(BasicObj*,bool){throw NotAvailable();};
     virtual std::string str(){throw NotAvailable();};
+    virtual bool greater(BasicObj*,bool){throw NotAvailable();};
+    virtual bool less(BasicObj*,bool){throw NotAvailable();};
+    virtual bool equal(BasicObj*,bool){throw NotAvailable();};
+    virtual bool asbool(){throw NotAvailable();};
     virtual void free(){throw NotAvailable();};
     virtual BasicObj* call(std::vector<BasicObj*>){throw NotAvailable();};
     virtual ~BasicObj(){};
@@ -44,41 +48,98 @@ class IntObj:public BasicObj{
     IntObj(int a){
         this->a=a;
     }
-    BasicObj* add(BasicObj* b) override{
+    BasicObj* add(BasicObj* b,bool swapped) override{
       if (auto i=dynamic_cast<IntObj*>(b)){
-        return new IntObj(a+i->a);
+        return new IntObj(this->a + i->a);
       }
       else{
-        return b->add(this);
+        if (!swapped)
+          return b->add(this,true);
+        else
+          throw ValueError();
       }
     }
-    BasicObj* sub(BasicObj* b) override{
+    BasicObj* sub(BasicObj* b,bool swapped) override{
       if (auto i=dynamic_cast<IntObj*>(b)){
-        return new IntObj(a-i->a);
+        return new IntObj(this->a - i->a);
       }
       else{
-        return b->sub(this);
+        if (!swapped)
+          return b->sub(this,true);
+        else
+          throw ValueError();
       }
     }
-    BasicObj* div(BasicObj* b) override{
+    BasicObj* div(BasicObj* b,bool swapped) override{
       if (auto i=dynamic_cast<IntObj*>(b)){
-        return new IntObj(a/i->a);
+        return new IntObj(this->a / i->a);
       }
       else{
-        return b->div(this);
+        if (!swapped)
+          return b->div(this,true);
+        else
+          throw ValueError();
       }
     }
-    BasicObj* mul(BasicObj* b) override{
+    BasicObj* mul(BasicObj* b,bool swapped) override{
       if (auto i=dynamic_cast<IntObj*>(b)){
-        return new IntObj(a*i->a);
+        return new IntObj(this->a * i->a);
       }
       else{
-        return b->mul(this);
+        if (!swapped)
+          return b->mul(this,true);
+        else
+          throw ValueError();
+      }
+    }
+    bool greater(BasicObj* b,bool swapped) override{
+      if (auto i=dynamic_cast<IntObj*>(b)){
+        return this->a > i->a;
+      }
+      else{
+        if (!swapped)
+          return b->greater(this,true);
+        else
+          throw ValueError();
+      }
+    }
+    bool less(BasicObj* b,bool swapped) override{
+      if (auto i=dynamic_cast<IntObj*>(b)){
+        return this->a < i->a;
+      }
+      else{
+        if (!swapped)
+          return b->less(this,true);
+        else
+          throw ValueError();
+      }
+    }
+    bool equal(BasicObj* b,bool swapped) override{
+      if (auto i=dynamic_cast<IntObj*>(b)){
+        return this->a == i->a;
+      }
+      else{
+        if (!swapped)
+          return b->equal(this,true);
+        else
+          throw ValueError();
       }
     }
     std::string str() override{
       return std::to_string(a);
     }
+    bool asbool() override{
+      return a;
+    }
+};
+
+class BoolObj:public BasicObj{
+  public:
+  bool a;
+  BoolObj(bool s):a(s){}
+  bool asbool() override{
+    return a;
+  }
 };
 
 class FloatObj:public BasicObj{
@@ -87,52 +148,109 @@ class FloatObj:public BasicObj{
     FloatObj(float a){
         this->a=a;
     }
-    BasicObj* add(BasicObj* b) override{
+    BasicObj* add(BasicObj* b,bool swapped) override{
       if (auto i=dynamic_cast<FloatObj*>(b)){
-        return new FloatObj(a+i->a);
+        return new FloatObj(this->a + i->a);
       }
       else if(auto i=dynamic_cast<IntObj*>(b)){
-        return new FloatObj(a+i->a);
+        return new FloatObj(this->a + i->a);
       }
       else{
-        return b->add(this);
+        if (!swapped)
+          return b->add(this,true);
+        else
+          throw ValueError();
       }
     }
-    BasicObj* sub(BasicObj* b) override{
+    BasicObj* sub(BasicObj* b,bool swapped) override{
       if (auto i=dynamic_cast<FloatObj*>(b)){
-        return new FloatObj(a-i->a);
+        return new FloatObj(this->a - i->a);
       }
       else if(auto i=dynamic_cast<IntObj*>(b)){
-        return new FloatObj(a-i->a);
+        return new FloatObj(this->a - i->a);
       }
       else{
-        return b->sub(this);
+        if (!swapped)
+          return b->sub(this,true);
+        else
+          throw ValueError();
       }
     }
-    BasicObj* div(BasicObj* b) override{
+    BasicObj* div(BasicObj* b,bool swapped) override{
       if (auto i=dynamic_cast<FloatObj*>(b)){
-        return new FloatObj(a/i->a);
+        return new FloatObj(this->a / i->a);
       }
       else if(auto i=dynamic_cast<IntObj*>(b)){
-        return new FloatObj(a/i->a);
+        return new FloatObj(this->a / i->a);
       }
       else{
-        return b->div(this);
+        if (!swapped)
+          return b->div(this,true);
+        else
+          throw ValueError();
       }
     }
-    BasicObj* mul(BasicObj* b) override{
+    BasicObj* mul(BasicObj* b,bool swapped) override{
       if (auto i=dynamic_cast<FloatObj*>(b)){
-        return new FloatObj(a*i->a);
+        return new FloatObj(this->a * i->a);
       }
       else if(auto i=dynamic_cast<IntObj*>(b)){
-        return new FloatObj(a*i->a);
+        return new FloatObj(this->a * i->a);
       }
       else{
-        return b->mul(this);
+        if (!swapped)
+          return b->mul(this,true);
+        else
+          throw ValueError();
+      }
+    }
+    bool greater(BasicObj* b,bool swapped) override{
+      if (auto i=dynamic_cast<FloatObj*>(b)){
+        return this->a > i->a;
+      }
+      else if(auto i=dynamic_cast<IntObj*>(b)){
+        return this->a > i->a;
+      }
+      else{
+        if (!swapped)
+          return b->greater(this,true);
+        else
+          throw ValueError();
+      }
+    }
+    bool less(BasicObj* b,bool swapped) override{
+      if (auto i=dynamic_cast<FloatObj*>(b)){
+        return this->a < i->a;
+      }
+      else if(auto i=dynamic_cast<IntObj*>(b)){
+        return this->a < i->a;
+      }
+      else{
+        if (!swapped)
+          return b->less(this,true);
+        else
+          throw ValueError();
+      }
+    }
+    bool equal(BasicObj* b,bool swapped) override{
+      if (auto i=dynamic_cast<FloatObj*>(b)){
+        return this->a == i->a;
+      }
+      else if(auto i=dynamic_cast<IntObj*>(b)){
+        return this->a == i->a;
+      }
+      else{
+        if (!swapped)
+          return b->equal(this,true);
+        else
+          throw ValueError();
       }
     }
     std::string str() override{
       return std::to_string(a);
+    }
+    bool asbool() override{
+      return a;
     }
 };
 
@@ -165,6 +283,7 @@ void remBrackets(std::string& code){
 }
 
 BasicObj* exec(std::string code, Namespace& n){
+  std::cout<<"source "<<code<<std::endl;
     try{
     bool quoted=false;
     for (int i=0;i<code.size();i++){
@@ -176,12 +295,60 @@ BasicObj* exec(std::string code, Namespace& n){
         code.erase(code.begin()+i);
       }
     }
+    if (code.empty()) return nullptr;
+    if (!code.empty() && code.back()==';') code.pop_back();
+    if (code.empty()) return nullptr;
+    if (code.size()>=2 && code[0]=='i' && code[1]=='f'){
+      std::cout<<"if"<<std::endl;
+      std::string expr;
+      int depth=1;
+      BasicObj* e=nullptr;
+      int exprendpos;
+      for (int i=3;i<code.size();i++){
+        if (code[i]=='(') depth++;
+        if (code[i]==')'){ 
+          depth--;
+          if (depth==0){
+            std::cout<<"expr is "<<expr<<std::endl;
+            e=exec(expr,n);
+            exprendpos=i;
+            break;
+          }
+        }
+        expr+=code[i];
+      }
+      if (!e || !e->asbool()) return nullptr;
+      std::string body;
+      int bracedepth=0;
+      bool started=false;
+      for (int i=exprendpos+1;i<code.size();i++){
+        if (!started){
+          if (code[i]=='{'){
+            started=true;
+            continue;
+          }
+          else continue;
+        }
+        if (code[i]=='{'){
+          bracedepth++;
+        }
+        else if (code[i]=='}'){
+          if (bracedepth==0){
+            exec(body,n);
+            return nullptr;
+          }
+          bracedepth--;
+        }
+        body+=code[i];
+      }
+    }
     std::string name;
     bool sheerName=true;
     for (int i=0;i<code.size();i++) {
        if (!std::isalpha(code[i]) && code[i] != '_'){ 
          sheerName=false;
          if (name.empty()) break;
+         if (code[i]=='{') break;
          if (code[i] =='(') {
            i++;
            std::string inGap;
@@ -195,6 +362,7 @@ BasicObj* exec(std::string code, Namespace& n){
            while (getline(ss,tmp,','))
               args.push_back(exec(tmp,n));
            BasicObj* a=exec(name,n);
+           if (!a) throw ValueError();
            try{
              return a->call(args);
            }
@@ -208,8 +376,9 @@ BasicObj* exec(std::string code, Namespace& n){
             for (int j=i+1;j<code.size();j++){
               value+=code[j];
             }
-            BasicObj* res=exec(value,n);\
-            delete n[name];
+            BasicObj* res=exec(value,n);
+            if (n.find(name)!=n.end())
+              delete n[name];
             n[name]=res;
             return res;
          }
@@ -244,13 +413,49 @@ BasicObj* exec(std::string code, Namespace& n){
     }
     bool hasOp=false;
     int gapDepth=0;
+    int compPos=-1;
+    std::string compOp;
     for (int i=0;i<code.size();i++){
       if (code[i]=='(') gapDepth++;
       if (code[i]==')') gapDepth--;
-      if ((code[i]=='+' || code[i]=='-') && gapDepth==0){
-        hasOp=true;
-        break;
+      if (gapDepth==0){
+        if (i+1<code.size() && code[i]=='=' && code[i+1]=='='){
+          compPos=i; compOp="=="; break;
+        }
+        if (i+1<code.size() && code[i]=='!' && code[i+1]=='='){
+          compPos=i; compOp="!="; break;
+        }
+        if (i+1<code.size() && code[i]=='<' && code[i+1]=='='){
+          compPos=i; compOp="<="; break;
+        }
+        if (i+1<code.size() && code[i]=='>' && code[i+1]=='='){
+          compPos=i; compOp=">="; break;
+        }
+        if (code[i]=='<' || code[i]=='>'){
+          compPos=i; compOp=std::string(1,code[i]); break;
+        }
+        if (code[i]=='+' || code[i]=='-'){
+          hasOp=true; break;
+        }
       }
+    }
+    if (compPos!=-1){
+      std::string left = code.substr(0, compPos);
+      std::string right = code.substr(compPos + compOp.size());
+      if (left.empty() || right.empty()) throw ValueError();
+      remBrackets(left);
+      remBrackets(right);
+      BasicObj* L = exec(left, n);
+      BasicObj* R = exec(right, n);
+      if (!L || !R) throw ValueError();
+      bool cres=false;
+      if (compOp=="==") cres = L->equal(R,false);
+      else if (compOp=="!=") cres = !L->equal(R,false);
+      else if (compOp==">") cres = L->greater(R,false);
+      else if (compOp=="<") cres = L->less(R,false);
+      else if (compOp==">=") cres = L->greater(R,false) || L->equal(R,false);
+      else if (compOp=="<=") cres = L->less(R,false) || L->equal(R,false);
+      return new IntObj(cres?1:0);
     }
     if (!hasOp){
       std::cout<<"Short "<<code<<std::endl;
@@ -278,10 +483,10 @@ BasicObj* exec(std::string code, Namespace& n){
             right=exec(acc,n);
             BasicObj* old=res;
             if (op=='*'){
-              res=res->mul(right);
+              res=res->mul(right,false);
             }
             else if(op=='/'){
-              res=res->div(right);
+              res=res->div(right,false);
             }
             delete old;
             side=false;
@@ -295,10 +500,10 @@ BasicObj* exec(std::string code, Namespace& n){
         right=exec(acc,n);
         BasicObj* old=res;
         if (op=='*'){
-          res=res->mul(right);
+          res=res->mul(right,false);
         }
         else if(op=='/'){
-          res=res->div(right);
+          res=res->div(right,false);
         }
         delete old;
         side=false;
@@ -326,10 +531,10 @@ BasicObj* exec(std::string code, Namespace& n){
         right=exec(acc,n);
         BasicObj* old=res;
         if (op=='+'){
-          res=res->add(right);
+          res=res->add(right,false);
         }
         if (op=='-'){
-          res=res->sub(right);
+          res=res->sub(right,false);
         }
         delete old;
       }
@@ -343,10 +548,10 @@ BasicObj* exec(std::string code, Namespace& n){
     right=exec(acc,n);
     BasicObj* old=res;
     if (op=='+'){
-      res=res->add(right);
+      res=res->add(right,false);
     }
     if (op=='-'){
-      res=res->sub(right);
+      res=res->sub(right,false);
     }
     delete old;
   }
@@ -359,8 +564,18 @@ BasicObj* exec(std::string code, Namespace& n){
 
 void doCode(std::string code, Namespace& n){
     std::string acc;
-    std::stringstream ss(code);
-    while (std::getline(ss, acc, ';')) {
+    int depth = 0;
+    for (auto i:code){
+      if (i=='{') depth++;
+      if (i=='}') depth--;
+      if (i==';' && depth==0){
+        exec(acc,n);
+        acc.clear();
+        continue;
+      }
+      acc+=i;
+    }
+    if (!acc.empty()){
       exec(acc,n);
     }
 }
