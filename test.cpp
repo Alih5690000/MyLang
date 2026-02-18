@@ -3,32 +3,28 @@
 
 int main(){
     Namespace n=CreateContext();
+    std::cout<<"is print in namespace "<<n.count("print")<<std::endl;
     doCode(R"(
+        print("Hello, World!");
         fn createMap(){
-            a=[];
+            a=list();
             for (i=0;i<10;i++){
-                print(i);
+                row=list();
                 for (j=0;j<10;j++){
-                    a.push_back(".");
+                    row.push_back(".");
                 };
+                a.push_back(row);
             };
             return(a);
         };
         fn showMap(m){
-            for (i=0;i<10;i++){
-                for (j=0;j<10;j++){
-                    print(m[i][j]);
-                };
-                print("\n");
-            };
+            print("Frist row: ", m[0]);
         };
         a=createMap();
-        x=0;y=0;
-        for(;;){
-            i=input();
-            print("infinite loop ",x," ",y);
-            showMap(a);
-        };
+        print("Created map a: ", a, " address is ", addr(a));
+        print(currentNamespace());
+        print("refcount of a: ", getRefcount(a));
+        showMap(a);
     )",n);
     return 0;
 }

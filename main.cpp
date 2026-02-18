@@ -10,22 +10,34 @@
 
 class NotAvailable:public std::exception{
   public:
+  std::string mes;
+  NotAvailable(const char* mes) {
+    this->mes=mes;
+  }
   const char* what() const noexcept override{
-    return "That function is not available at Object";
+    return mes.c_str();
   }
 };
 
 class ValueError:public std::exception{
   public:
+  std::string mes;
+  ValueError(const char* mes) {
+    this->mes=mes;
+  }
   const char* what() const noexcept override{
-    return "Value is invalid for that operation";
+    return mes.c_str();
   }
 };
 
 class SyntaxError:public std::exception{
   public:
+  std::string mes;
+  SyntaxError(const char* mes) {
+    this->mes=mes;
+  }
   const char* what() const noexcept override{
-    return "Invalid syntax";
+    return mes.c_str();
   }
 };
 
@@ -36,27 +48,27 @@ static std::vector<BasicObj*> __objs;
 class BasicObj{
     public:
     int refcount=1;
-    virtual BasicObj* add(BasicObj*,bool){throw NotAvailable();};
-    virtual BasicObj* sub(BasicObj*,bool){throw NotAvailable();};
-    virtual BasicObj* mul(BasicObj*,bool){throw NotAvailable();};
-    virtual BasicObj* div(BasicObj*,bool){throw NotAvailable();};
-    virtual void inc(){throw NotAvailable();};
-    virtual void dec(){throw NotAvailable();};
-    virtual std::string str(){throw NotAvailable();};
-    virtual bool greater(BasicObj*,bool){throw NotAvailable();};
-    virtual bool less(BasicObj*,bool){throw NotAvailable();};
-    virtual bool equal(BasicObj*,bool){throw NotAvailable();};
-    virtual bool asbool(){throw NotAvailable();};
-    virtual void free(){throw NotAvailable();};
+    virtual BasicObj* add(BasicObj*,bool){throw NotAvailable("That is Base class");};
+    virtual BasicObj* sub(BasicObj*,bool){throw NotAvailable("That is Base class");};
+    virtual BasicObj* mul(BasicObj*,bool){throw NotAvailable("That is Base class");};
+    virtual BasicObj* div(BasicObj*,bool){throw NotAvailable("That is Base class");};
+    virtual void inc(){throw NotAvailable("That is Base class");};
+    virtual void dec(){throw NotAvailable("That is Base class");};
+    virtual std::string str(){return "Object at "+std::to_string((size_t)this);};
+    virtual bool greater(BasicObj*,bool){throw NotAvailable("That is Base class");};
+    virtual bool less(BasicObj*,bool){throw NotAvailable("That is Base class");};
+    virtual bool equal(BasicObj*,bool){throw NotAvailable("That is Base class");};
+    virtual bool asbool(){throw NotAvailable("That is Base class");};
+    virtual void free(){throw NotAvailable("That is Base class");};
     virtual BasicObj* getattr(const std::string& s){
       auto it = attrs.find(s);
-      if (it==attrs.end()) throw ValueError();
+      if (it==attrs.end()) throw ValueError("Attribute not found");
       return it->second;
     };
-    virtual BasicObj* getitem(BasicObj* key){throw NotAvailable();};
-    virtual BasicObj* setitem(std::vector<BasicObj*>){throw NotAvailable();};
-    virtual BasicObj* call(std::vector<BasicObj*>){throw NotAvailable();};
-    virtual void setitem(BasicObj* key, BasicObj* value){throw NotAvailable();};
+    virtual BasicObj* getitem(BasicObj* key){throw NotAvailable("That is Base class");};
+    virtual BasicObj* setitem(std::vector<BasicObj*>){throw NotAvailable("That is Base class");};
+    virtual BasicObj* call(std::vector<BasicObj*>){throw NotAvailable("That is Base class");};
+    virtual void setitem(BasicObj* key, BasicObj* value){throw NotAvailable("That is Base class");};
     BasicObj(){
       __objs.push_back(this);
     }
@@ -78,13 +90,13 @@ public:
 
     BasicObj* add(BasicObj* other, bool) override {
         StringObject* o = dynamic_cast<StringObject*>(other);
-        if (!o) throw NotAvailable();
+        if (!o) throw NotAvailable("Cannot add non-string object to string");
         return new StringObject(value + o->value);
     }
 
     bool equal(BasicObj* other, bool) override {
         StringObject* o = dynamic_cast<StringObject*>(other);
-        if (!o) throw NotAvailable();
+        if (!o) throw NotAvailable("Cannot compare non-string object to string");
         return value == o->value;
     }
 
@@ -108,7 +120,7 @@ class IntObj:public BasicObj{
         if (!swapped)
           return b->add(this,true);
         else
-          throw ValueError();
+          throw ValueError("Cannot add non-integer object to integer");
       }
     }
     BasicObj* sub(BasicObj* b,bool swapped) override{
@@ -119,7 +131,7 @@ class IntObj:public BasicObj{
         if (!swapped)
           return b->sub(this,true);
         else
-          throw ValueError();
+          throw ValueError("Cannot subtract non-integer object from integer");
       }
     }
     BasicObj* div(BasicObj* b,bool swapped) override{
@@ -130,7 +142,7 @@ class IntObj:public BasicObj{
         if (!swapped)
           return b->div(this,true);
         else
-          throw ValueError();
+          throw ValueError("Cannot divide non-integer object by integer");
       }
     }
     BasicObj* mul(BasicObj* b,bool swapped) override{
@@ -141,7 +153,7 @@ class IntObj:public BasicObj{
         if (!swapped)
           return b->mul(this,true);
         else
-          throw ValueError();
+          throw ValueError("Cannot multiply non-integer object by integer");
       }
     }
     bool greater(BasicObj* b,bool swapped) override{
@@ -152,7 +164,7 @@ class IntObj:public BasicObj{
         if (!swapped)
           return b->greater(this,true);
         else
-          throw ValueError();
+          throw ValueError("Cannot compare non-integer object to integer");
       }
     }
     bool less(BasicObj* b,bool swapped) override{
@@ -163,7 +175,7 @@ class IntObj:public BasicObj{
         if (!swapped)
           return b->less(this,true);
         else
-          throw ValueError();
+          throw ValueError("Cannot compare non-integer object to integer");
       }
     }
     bool equal(BasicObj* b,bool swapped) override{
@@ -174,7 +186,7 @@ class IntObj:public BasicObj{
         if (!swapped)
           return b->equal(this,true);
         else
-          throw ValueError();
+          throw ValueError("Cannot compare non-integer object to integer");
       }
     }
     std::string str() override{
@@ -222,7 +234,7 @@ class FloatObj:public BasicObj{
         if (!swapped)
           return b->add(this,true);
         else
-          throw ValueError();
+          throw ValueError("Cannot add non-float object to float");
       }
     }
     BasicObj* sub(BasicObj* b,bool swapped) override{
@@ -236,7 +248,7 @@ class FloatObj:public BasicObj{
         if (!swapped)
           return b->sub(this,true);
         else
-          throw ValueError();
+          throw ValueError("Cannot subtract non-float object from float");
       }
     }
     BasicObj* div(BasicObj* b,bool swapped) override{
@@ -250,7 +262,7 @@ class FloatObj:public BasicObj{
         if (!swapped)
           return b->div(this,true);
         else
-          throw ValueError();
+          throw ValueError("Cannot divide non-float object by float");
       }
     }
     BasicObj* mul(BasicObj* b,bool swapped) override{
@@ -264,7 +276,7 @@ class FloatObj:public BasicObj{
         if (!swapped)
           return b->mul(this,true);
         else
-          throw ValueError();
+          throw ValueError("Cannot multiply non-float object by float");
       }
     }
     bool greater(BasicObj* b,bool swapped) override{
@@ -278,7 +290,7 @@ class FloatObj:public BasicObj{
         if (!swapped)
           return b->greater(this,true);
         else
-          throw ValueError();
+          throw ValueError("Cannot compare non-float object to float");
       }
     }
     bool less(BasicObj* b,bool swapped) override{
@@ -292,7 +304,7 @@ class FloatObj:public BasicObj{
         if (!swapped)
           return b->less(this,true);
         else
-          throw ValueError();
+          throw ValueError("Cannot compare non-float object to float");
       }
     }
     bool equal(BasicObj* b,bool swapped) override{
@@ -306,7 +318,7 @@ class FloatObj:public BasicObj{
         if (!swapped)
           return b->equal(this,true);
         else
-          throw ValueError();
+          throw ValueError("Cannot compare non-float object to float");
       }
     }
     std::string str() override{
@@ -331,19 +343,28 @@ class FunctionObject:public BasicObj{
     public:
     std::vector<std::string> argNames;
     std::string code;
-    FunctionObject(std::vector<std::string> argNames,std::string code){
+    Namespace* context;
+    FunctionObject(std::vector<std::string> argNames,std::string code, Namespace* context){
       this->argNames=argNames;
       this->code=code;
+      this->context=context;
     }
     BasicObj* call(std::vector<BasicObj*> args) override{
+      std::cout<<"Called function with args "<<argNames.size()<<" "<<args.size()<<std::endl;
       if (args.size()!=argNames.size()){
-        throw ValueError();
+        throw ValueError("Function called with wrong number of arguments");
       }
-      Namespace n;
+      Namespace localNamespace = *context;
+      std::cout<<"Local namespace: "<<std::endl;
+      for (auto& pair : localNamespace) {
+        std::cout<<pair.first<<std::flush<<" "<<pair.second->str()<<std::endl;
+      }
+      std::cout<<"end"<<std::endl;
+      std::cout<<std::endl;
       for (int i=0;i<args.size();i++){
-        n[argNames[i]]=args[i];
+        localNamespace[argNames[i]]=args[i];
       }
-      return doCode(code,n);
+      return doCode(code,localNamespace);
     }
     std::string str() override{
       return "<FunctionObject>";
@@ -388,7 +409,7 @@ public:
             std::vector<BasicObj*> args = { this, other };
             return func->call(args);
         }
-        throw NotAvailable();
+        throw NotAvailable("Cannot add non-object to object");
     }
 
     BasicObj* sub(BasicObj* other, bool swapped) override {
@@ -397,7 +418,7 @@ public:
             std::vector<BasicObj*> args = { this, other };
             return func->call(args);
         }
-        throw NotAvailable();
+        throw NotAvailable("Cannot subtract non-object from object");
     }
 
     BasicObj* mul(BasicObj* other, bool swapped) override {
@@ -406,7 +427,7 @@ public:
             std::vector<BasicObj*> args = { this, other };
             return func->call(args);
         }
-        throw NotAvailable();
+        throw NotAvailable("Cannot multiply non-object by object");
     }
 
     BasicObj* div(BasicObj* other, bool swapped) override {
@@ -415,7 +436,7 @@ public:
             std::vector<BasicObj*> args = { this, other };
             return func->call(args);
         }
-        throw NotAvailable();
+        throw NotAvailable("Cannot divide non-object by object");
     }
 
     bool equal(BasicObj* other, bool swapped) override {
@@ -425,7 +446,7 @@ public:
             auto* res = func->call(args);
             return res->asbool();
         }
-        throw NotAvailable();
+        throw NotAvailable("Cannot compare non-object to object");
     }
 
     bool asbool() override {
@@ -454,7 +475,7 @@ public:
         else if (klass->attrs.count(name)) {
             return klass->attrs[name];
         }
-        throw ValueError();
+        throw ValueError("Attribute not found");
     }
 };
 
@@ -471,29 +492,31 @@ class ListObject:public BasicObj{
   public:
   std::vector<BasicObj*> items;
   ListObject(const std::vector<BasicObj*>& items):items(items){
-    attrs["append"] = new FunctionNative([this](std::vector<BasicObj*> args) {
+    auto appendFunc = new FunctionNative([this](std::vector<BasicObj*> args) {
       this->items.push_back(args[0]);
       return nullptr;
     });
+    attrs["append"] = appendFunc;
+    attrs["push_back"] = appendFunc;
   }
   BasicObj* getitem(BasicObj* key) override{
     if (auto i=dynamic_cast<IntObj*>(key)){
-      if (i->a<0 || i->a>=items.size()) throw ValueError();
+      if (i->a<0 || i->a>=items.size()) throw ValueError("Index out of bounds");
       return items[i->a];
     }
     else{
-      throw ValueError();
+      throw ValueError("Key is not an integer");
     }
   }
   void setitem(BasicObj* key, BasicObj* value) override{
     if (auto i=dynamic_cast<IntObj*>(key)){
-      if (i->a<0 || i->a>=items.size()) throw ValueError();
+      if (i->a<0 || i->a>=items.size()) throw ValueError("Index out of bounds");
       BasicObj* old = items[i->a];
       items[i->a] = value;
       if (old && old!=value) old->refcount--;
     }
     else{
-      throw ValueError();
+      throw ValueError("Key is not an integer");
     }
   }
   std::string str() override{
@@ -587,7 +610,10 @@ BasicObj* exec(std::string code, Namespace& n){
       if (!tmp.empty()) {
         items.push_back(exec(tmp, n));
       }
-      return new ListObject(items);
+      std::cout<<"Items size: "<<items.size()<<std::endl;
+      BasicObj* res=new ListObject(items);
+      std::cout<<"Res address "<<res<<std::flush<<std::endl;
+      return res;
     }
 
     if (code.empty()) return nullptr;
@@ -660,13 +686,13 @@ BasicObj* exec(std::string code, Namespace& n){
         exec(tmp,n);
       }
       else{
-        throw SyntaxError();
+        throw SyntaxError("Invalid for loop syntax");
       }
       if (getline(ss,tmp,';')){
         cond=tmp;
       }
       else{
-        throw SyntaxError();
+        throw SyntaxError("Invalid for loop syntax");
       }
       if (!getline(ss,tmp,';')){
         counter="";
@@ -719,7 +745,7 @@ BasicObj* exec(std::string code, Namespace& n){
           for (; i<code.size() && code[i]!=')'; ++i){
             name+=code[i];
           }
-          if (i>=code.size() || code[i]!=')') throw SyntaxError();
+          if (i>=code.size() || code[i]!=')') throw SyntaxError("Invalid class syntax");
           i++;
         }
         else{
@@ -727,7 +753,7 @@ BasicObj* exec(std::string code, Namespace& n){
             name+=code[i];
           }
         }
-        if (name.empty()) throw SyntaxError();
+        if (name.empty()) throw SyntaxError("Invalid class name");
       std::string body;
       int bracedepth=0;
       bool started=false;
@@ -762,18 +788,18 @@ BasicObj* exec(std::string code, Namespace& n){
       for (; i<code.size() && (std::isalnum((unsigned char)code[i]) || code[i]=='_'); ++i){
         name+=code[i];
       }
-      if (name.empty()) throw SyntaxError();
+      if (name.empty()) throw SyntaxError("Invalid function name");
       
       while (i<code.size() && (code[i]==' ' || code[i]=='\t' || code[i]=='\n')) i++;
       
-      if (i>=code.size() || code[i]!='(') throw SyntaxError();
+      if (i>=code.size() || code[i]!='(') throw SyntaxError("Invalid function syntax");
       i++;
       
       std::string argStr;
       for (; i<code.size() && code[i]!=')'; ++i){
         argStr+=code[i];
       }
-      if (i>=code.size() || code[i]!=')') throw SyntaxError();
+      if (i>=code.size() || code[i]!=')') throw SyntaxError("Invalid function syntax");
       i++;
       
       std::vector<std::string> argNames;
@@ -808,7 +834,7 @@ BasicObj* exec(std::string code, Namespace& n){
         }
         body+=code[i];
       }
-      FunctionObject* func = new FunctionObject(argNames, body);
+      FunctionObject* func = new FunctionObject(argNames, body, &n);
       std::cout<<"Defined function "<<name<<" with args "<<argStr<<std::endl;
       n[name]=func;
       return func;
@@ -851,11 +877,11 @@ BasicObj* exec(std::string code, Namespace& n){
              args.push_back(exec(tmp, n));
            }
           if (name=="return"){
-            if (args.size()!=1) throw SyntaxError();
+            if (args.size()!=1) throw SyntaxError("Return statement must have exactly one argument");
             return args[0];
           }
            BasicObj* a=exec(name,n);
-           if (!a) throw ValueError();
+           if (!a) throw ValueError("Function not found");
            try{
              return a->call(args);
            }
@@ -883,10 +909,11 @@ BasicObj* exec(std::string code, Namespace& n){
             }
              inGap+=code[j];
            }
+
            BasicObj* a=exec(name,n);
-           if (!a) throw ValueError();
+           if (!a) throw ValueError("Indexing non-existent object");
            BasicObj* key=exec(inGap,n);
-           if (!key) throw ValueError();
+           if (!key) throw ValueError("Key is not an object");
            
            BasicObj* indexed = a->getitem(key);
            
@@ -904,6 +931,15 @@ BasicObj* exec(std::string code, Namespace& n){
              }
              return res;
            }
+           if (i+1<code.size() && code[i+1]=='['){
+             std::string remaining;
+             for (int j=i+1;j<code.size();j++){
+               remaining+=code[j];
+             }
+             Namespace tempns = n;
+             tempns["__indexed_result__"] = indexed;
+             return exec("__indexed_result__" + remaining, tempns);
+           }
            return indexed;
          }
          else if(code[i]=='='){
@@ -913,6 +949,7 @@ BasicObj* exec(std::string code, Namespace& n){
               value+=code[j];
             }
             BasicObj* res=exec(value,n);
+
             BasicObj* old=n[name];
             n[name]=res;
             if (old && old!=res) old->refcount--;
@@ -936,7 +973,7 @@ BasicObj* exec(std::string code, Namespace& n){
             attr+=code[j];
           }
           BasicObj* obj=exec(name,n);
-          if (!obj) throw ValueError();
+          if (!obj) throw ValueError("Object not found");
           if (j<code.size() && code[j]=='='){
             std::string value;
             for (int k=j+1;k<code.size();k++) value+=code[k];
@@ -996,7 +1033,7 @@ BasicObj* exec(std::string code, Namespace& n){
         return n[name];
       }
       else{
-        throw ValueError();
+        throw ValueError("Variable not defined");
       }
     }
     bool isInt=true;
@@ -1052,12 +1089,12 @@ BasicObj* exec(std::string code, Namespace& n){
     if (compPos!=-1){
       std::string left = code.substr(0, compPos);
       std::string right = code.substr(compPos + compOp.size());
-      if (left.empty() || right.empty()) throw ValueError();
+      if (left.empty() || right.empty()) throw ValueError("Comparison operands are empty");
       remBrackets(left);
       remBrackets(right);
       BasicObj* L = exec(left, n);
       BasicObj* R = exec(right, n);
-      if (!L || !R) throw ValueError();
+      if (!L || !R) throw ValueError("Comparison operands are not objects");
       bool cres=false;
       if (compOp=="==") cres = L->equal(R,false);
       else if (compOp=="!=") cres = !L->equal(R,false);
@@ -1210,10 +1247,11 @@ Namespace CreateContext(){
   n["true"]=new BoolObj(true);
   n["false"]=new BoolObj(false);
   n["IntFromString"]=new FunctionNative([](std::vector<BasicObj*> args){
-    if (args.size()!=1) throw ValueError();
+    if (args.size()!=1) throw ValueError("IntFromString expects exactly one argument");
     return new IntObj(std::stoi(args[0]->str()));
   });
   n["print"]=new FunctionNative([](std::vector<BasicObj*> args){
+    std::cout<<"Called print with args: ";
     for (auto i:args){
       if (i) std::cout<<i->str(); else std::cout<<"<null>";
     }
@@ -1221,7 +1259,7 @@ Namespace CreateContext(){
     return nullptr;
   });
   n["input"]=new FunctionNative([](std::vector<BasicObj*> args){
-    if (args.size()>1) throw ValueError();
+    if (args.size()>1) throw ValueError("Input function expects at most one argument");
     std::string prompt;
     if (args.size()==1) prompt=args[0]->str();
     std::cout<<prompt;
@@ -1231,6 +1269,32 @@ Namespace CreateContext(){
     std::cin>>line;
 
     return new StringObject(line);
+  });
+  n["list"]=new FunctionNative([](std::vector<BasicObj*> args){
+    BasicObj* res=new ListObject(args);
+    std::cout<<"Res is "<<res<<std::endl;
+    return new ListObject(args);
+  });
+  n["flushOut"]=new FunctionNative([](std::vector<BasicObj*> args){
+    std::cout.flush();
+    return nullptr;
+  });
+  n["currentNamespace"]=new FunctionNative([&n](std::vector<BasicObj*> args){
+    ListObject* lst = new ListObject({});
+    for (auto& pair : n) {      
+      lst->items.push_back(new StringObject(pair.first));
+    }
+    return lst;
+  });
+  n["addr"]=new FunctionNative([](std::vector<BasicObj*> args){
+    if (args.size()!=1) throw ValueError("addr expects exactly one argument");
+    std::stringstream ss;
+    ss<<args[0];
+    return new StringObject(ss.str());
+  });
+  n["getRefcount"]=new FunctionNative([](std::vector<BasicObj*> args){
+    if (args.size()!=1) throw ValueError("getRefcount expects exactly one argument");
+    return new IntObj(args[0]->refcount);
   });
   return n;
 }
