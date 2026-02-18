@@ -6,6 +6,7 @@
 #include <exception>
 #include <sstream>
 #include <cctype>
+#include <functional>
 
 class NotAvailable:public std::exception{
   public:
@@ -45,6 +46,12 @@ class BasicObj{
     virtual bool equal(BasicObj*,bool){throw NotAvailable();};
     virtual bool asbool(){throw NotAvailable();};
     virtual void free(){throw NotAvailable();};
+    virtual BasicObj* getattr(const std::string& s){
+      auto it = attrs.find(s);
+      if (it==attrs.end()) throw ValueError();
+      return it->second;
+    };
+    virtual BasicObj* getitem(BasicObj* key){throw NotAvailable();};
     virtual BasicObj* call(std::vector<BasicObj*>){throw NotAvailable();};
     BasicObj(){
       __objs.push_back(this);
@@ -301,6 +308,7 @@ class FloatObj:public BasicObj{
     ~FloatObj() override = default;
 };
 
+BasicObj* doCode(std::string code, Namespace& n);
 BasicObj* exec(std::string code, Namespace& n);
 
 class FunctionObject:public BasicObj{
@@ -312,6 +320,7 @@ class FunctionObject:public BasicObj{
       this->code=code;
     }
     BasicObj* call(std::vector<BasicObj*> args) override{
+      std::cout<<"FunctionObject::call invoked with args "<<args.size()<<std::endl;
       if (args.size()!=argNames.size()){
         throw ValueError();
       }
@@ -319,11 +328,26 @@ class FunctionObject:public BasicObj{
       for (int i=0;i<args.size();i++){
         n[argNames[i]]=args[i];
       }
-      return exec(code,n);
+      return doCode(code,n);
     }
 };
 
 class ClassObject;
+
+BasicObj* InstanceObj(ClassObject* cls, std::vector<BasicObj*> args);
+
+class ClassObject:public BasicObj{
+  public:
+  std::map<std::string,BasicObj*> attrs;
+  ClassObject(const std::string& a){
+      Namespace cls;
+      doCode(a,cls);
+      attrs=cls;
+  }
+  BasicObj* call(std::vector<BasicObj*> args){
+    return InstanceObj(this,args);
+  }
+};
 
 class InstanceObject : public BasicObj {
 public:
@@ -334,7 +358,7 @@ public:
 
         if (klass->attrs.count("__constructor__")) {
             auto* ctor = dynamic_cast<FunctionObject*>(klass->attrs["__constructor__"]);
-            std::vector<BasicObj*> callArgs = { this }; // self as first argument
+            std::vector<BasicObj*> callArgs = { this };
             callArgs.insert(callArgs.end(), args.begin(), args.end());
             ctor->call(callArgs);
         }
@@ -405,20 +429,50 @@ public:
         }
         return "<InstanceObject>";
     }
+    BasicObj* getattr(const std::string& name) {
+        if (attrs.count(name)) {
+            return attrs[name];
+        }
+        else if (klass->attrs.count(name)) {
+            return klass->attrs[name];
+        }
+        throw ValueError();
+    }
 };
 
-
-class ClassObject:public BasicObject{
+class FunctionNative:public BasicObj{
   public:
-  ClassObject(const std::string& a){
-      Namespace cls;
-      doCode(a,cls);
-      attrs=cls;
-  }
-  BasicObject* call(std::vector<BasicObj*> args){
-    return new InstanceObject(this,args);
+  std::function<BasicObj*(std::vector<BasicObj*>)> func;
+  FunctionNative(std::function<BasicObj*(std::vector<BasicObj*>)> f):func(f){}
+  BasicObj* call(std::vector<BasicObj*> args) override{
+    return func(args);
   }
 };
+
+class ListObject:public BasicObj{
+  public:
+  std::vector<BasicObj*> items;
+  ListObject(const std::vector<BasicObj*>& items):items(items){
+    attrs["append"] = new FunctionNative([this](std::vector<BasicObj*> args) {
+      this->items.push_back(args[0]);
+      return nullptr;
+    });
+  }
+  BasicObj* getitem(BasicObj* key) override{
+    if (auto i=dynamic_cast<IntObj*>(key)){
+      if (i->a<0 || i->a>=items.size()) throw ValueError();
+      return items[i->a];
+    }
+    else{
+      throw ValueError();
+    }
+  }
+
+};
+
+BasicObj* InstanceObj(ClassObject* cls, std::vector<BasicObj*> args) {
+    return new InstanceObject(cls, args);
+}
 
 void remBrackets(std::string& code){
   if (code[0]=='(' && code[code.size()-1]==')'){
@@ -441,9 +495,29 @@ BasicObj* exec(std::string code, Namespace& n){
       }
     }
     if (code[0]=='"' && code.back()=='"'){
-      code = code.substr(1, code.size()-2);
-      return new StringObject(code);
+      std::string raw = code.substr(1, code.size()-2);
+      std::string unescaped;
+      for (size_t i = 0; i < raw.size(); ++i) {
+        if (raw[i] == '\\' && i + 1 < raw.size()) {
+          ++i;
+          char c = raw[i];
+          switch (c) {
+            case 'n': unescaped.push_back('\n'); break;
+            case 't': unescaped.push_back('\t'); break;
+            case 'r': unescaped.push_back('\r'); break;
+            case '\\': unescaped.push_back('\\'); break;
+            case '"': unescaped.push_back('"'); break;
+            case '\'': unescaped.push_back('\''); break;
+            case '0': unescaped.push_back('\0'); break;
+            default: unescaped.push_back(c); break;
+          }
+        } else {
+          unescaped.push_back(raw[i]);
+        }
+      }
+      return new StringObject(unescaped);
     }
+
     if (code.empty()) return nullptr;
     if (!code.empty() && code.back()==';') code.pop_back();
     if (code.empty()) return nullptr;
@@ -458,7 +532,6 @@ BasicObj* exec(std::string code, Namespace& n){
         if (code[i]==')'){ 
           depth--;
           if (depth==0){
-            std::cout<<"expr is "<<expr<<std::endl;
             e=exec(expr,n);
             exprendpos=i;
             break;
@@ -493,7 +566,6 @@ BasicObj* exec(std::string code, Namespace& n){
       }
     }
     else if (code.size()>=3 && code[0]=='f' && code[1]=='o' && code[2]=='r'){
-      std::cout<<"for came "<<code<<std::endl;
       std::string expr;
       int depth=1;
       int exprendpos;
@@ -502,7 +574,6 @@ BasicObj* exec(std::string code, Namespace& n){
         if (code[i]==')'){ 
           depth--;
           if (depth==0){
-            std::cout<<"expr is "<<expr<<std::endl;
             exprendpos=i;
             break;
           }
@@ -515,21 +586,18 @@ BasicObj* exec(std::string code, Namespace& n){
       std::stringstream ss(expr);
       if (getline(ss,tmp,';')){
         exec(tmp,n);
-        std::cout<<"Init is "<<tmp<<std::endl;
       }
       else{
         throw SyntaxError();
       }
       if (getline(ss,tmp,';')){
         cond=tmp;
-        std::cout<<"Cond is "<<tmp<<std::endl;
       }
       else{
         throw SyntaxError();
       }
       if (getline(ss,tmp,';')){
         counter=tmp;
-        std::cout<<"Counter is "<<tmp<<std::endl;
       }
       else{
         throw SyntaxError();
@@ -557,7 +625,6 @@ BasicObj* exec(std::string code, Namespace& n){
         }
         body+=code[i];
       }
-      std::cout<<"Body is "<<body<<std::endl;
       int i=0;
       for(;;){
         BasicObj* condObj = exec(cond, n);
@@ -569,31 +636,155 @@ BasicObj* exec(std::string code, Namespace& n){
       }
       return nullptr;
     }
+    else if (code.size()>=5 && code.substr(0,5)=="class"){
+      std::string name;
+      int i=5;
+        if (i<code.size() && code[i]=='('){
+          i++;
+          for (; i<code.size() && code[i]!=')'; ++i){
+            name+=code[i];
+          }
+          if (i>=code.size() || code[i]!=')') throw SyntaxError();
+          i++;
+        }
+        else{
+          for (; i<code.size() && (std::isalnum((unsigned char)code[i]) || code[i]=='_'); ++i){
+            name+=code[i];
+          }
+        }
+        if (name.empty()) throw SyntaxError();
+      std::string body;
+      int bracedepth=0;
+      bool started=false;
+      for (;i<code.size();i++){
+        if (!started){
+          if (code[i]=='{'){
+            started=true;
+            continue;
+          }
+          else continue;
+        }
+        if (code[i]=='{'){
+          bracedepth++;
+        }
+        else if (code[i]=='}'){
+          if (bracedepth==0){
+            break;
+          }
+          bracedepth--;
+          continue;
+        }
+        body+=code[i];
+      }
+      ClassObject* cls = new ClassObject(body);
+      n[name]=cls;
+      return cls;
+    }
+    else if (code.size()>=2 && code.substr(0,2)=="fn"){
+      std::string name;
+      int i=2;
+      
+      if (i>=code.size() || code[i]!='(') throw SyntaxError();
+      i++;
+      
+      for (; i<code.size() && (std::isalnum((unsigned char)code[i]) || code[i]=='_'); ++i){
+        name+=code[i];
+      }
+      if (name.empty()) throw SyntaxError();
+      
+      if (i>=code.size() || code[i]!='(') throw SyntaxError();
+      i++;
+      
+      std::string argStr;
+      for (; i<code.size() && code[i]!=')'; ++i){
+        argStr+=code[i];
+      }
+      if (i>=code.size() || code[i]!=')') throw SyntaxError();
+      i++;
+      
+      if (i>=code.size() || code[i]!=')') throw SyntaxError();
+      i++;
+      
+      std::vector<std::string> argNames;
+      std::string tmp;
+      std::stringstream ss(argStr);
+      while (getline(ss,tmp,',')){
+        argNames.push_back(tmp);
+      }
+      std::string body;
+      int bracedepth=0;
+      bool started=false;
+      for (;i<code.size();i++){
+        if (!started){
+          if (code[i]=='{'){
+            started=true;
+            continue;
+          }
+          else continue;
+        }
+        if (code[i]=='{'){
+          bracedepth++;
+        }
+        else if (code[i]=='}'){
+          if (bracedepth==0){
+            break;
+          }
+          bracedepth--;
+          continue;
+        }
+        body+=code[i];
+      }
+      FunctionObject* func = new FunctionObject(argNames, body);
+      n[name]=func;
+      return func;
+    }
     std::string name;
     bool sheerName=true;
     for (int i=0;i<code.size();i++) {
-       if (!std::isalpha(code[i]) && code[i] != '_'){ 
+       if (!std::isalpha(code[i]) && code[i] != '_' || code[i]=='"'){ 
          sheerName=false;
          if (name.empty()) break;
          if (code[i]=='{') break;
          if (code[i] =='(') {
            i++;
            std::string inGap;
+           bool inQuote=false;
            for (int j=i;j<code.size();j++){
-             if (code[j] ==')') break;
+            if (code[j]=='"') inQuote=!inQuote;
+             if (code[j] ==')' && !inQuote) break;
              inGap+=code[j];
            }
            std::vector<BasicObj*> args;
            std::string tmp;
-           std::stringstream ss(inGap);
-           while (getline(ss,tmp,','))
-              args.push_back(exec(tmp,n));
+           
+           inQuote = false;
+           for (size_t k = 0; k < inGap.size(); k++) {
+             if (inGap[k] == '"') {
+               inQuote = !inQuote;
+             }
+             if (inGap[k] == ',' && !inQuote) {
+               args.push_back(exec(tmp, n));
+               tmp.clear();
+             } else {
+               tmp += inGap[k];
+             }
+           }
+           if (!tmp.empty()) {
+             args.push_back(exec(tmp, n));
+           }
+           
            if (name=="print"){
             for (auto i:args){
-              std::cout<<i->str();
+              if (i) std::cout<<i->str(); else std::cout<<"<null>";
             }
+            std::cout<<std::endl;
             return nullptr;
-           }
+          }
+          if (name=="return"){
+            if (args.size()!=1) throw SyntaxError();
+            return args[0];
+          }
+           
            BasicObj* a=exec(name,n);
            if (!a) throw ValueError();
            try{
@@ -604,6 +795,21 @@ BasicObj* exec(std::string code, Namespace& n){
             throw;
            }
          } 
+         else if (code[i]=='['){
+          i++;
+          std::string inGap;
+          bool inQuote=false;
+          for (int j=i;j<code.size();j++){
+            if (code[j]=='"') inQuote=!inQuote;
+             if (code[j] ==']' && !inQuote) break;
+             inGap+=code[j];
+           }
+           BasicObj* a=exec(name,n);
+           if (!a) throw ValueError();
+           BasicObj* key=exec(inGap,n);
+           if (!key) throw ValueError();
+           return a->getitem(key);
+         }
          else if(code[i]=='='){
             std::string value;
             for (int j=i+1;j<code.size();j++){
@@ -613,8 +819,68 @@ BasicObj* exec(std::string code, Namespace& n){
             BasicObj* old=n[name];
             n[name]=res;
             if (old && old!=res) old->refcount--;
-            std::cout<<"After asigning "<<name<<" is "<<n[name]->str()<<std::endl;
             return res;
+         }
+         else if(code[i]=='.'){
+          std::string attr;
+          int j;
+          for (j=i+1;j<code.size();j++){
+            if (code[j]=='='|| code[j]==';' || code[j]=='(') break;
+            attr+=code[j];
+          }
+          BasicObj* obj=exec(name,n);
+          if (!obj) throw ValueError();
+          if (j<code.size() && code[j]=='='){
+            std::string value;
+            for (int k=j+1;k<code.size();k++) value+=code[k];
+            BasicObj* res = exec(value,n);
+            BasicObj* old = nullptr;
+            if (obj->attrs.find(attr)!=obj->attrs.end()) old = obj->attrs[attr];
+            obj->attrs[attr]=res;
+            if (old && old!=res) old->refcount--;
+            return res;
+          }
+          std::cout<<"Accessing attribute "<<attr<<" of object "<<name<<std::endl;
+          BasicObj* attr_obj = obj->getattr(attr);
+          
+          if (j<code.size() && code[j]=='('){
+            int k=j+1;
+            std::string inGap;
+            bool inQuote=false;
+            int parenDepth=1;
+            for (;k<code.size();k++){
+              if (code[k]=='"') inQuote=!inQuote;
+              if (!inQuote && code[k]=='(') parenDepth++;
+              if (!inQuote && code[k]==')') {
+                parenDepth--;
+                if (parenDepth==0) break;
+              }
+              inGap+=code[k];
+            }
+            std::vector<BasicObj*> args;
+            if (!inGap.empty()){
+              std::istringstream iss(inGap);
+              std::string tmp;
+              bool inQuote=false;
+              int depth=0;
+              for (int l=0;l<inGap.size();l++){
+                if (inGap[l]=='"') inQuote=!inQuote;
+                if (!inQuote && inGap[l]=='(') depth++;
+                if (!inQuote && inGap[l]==')') depth--;
+                if (!inQuote && inGap[l]==',' && depth==0){
+                  args.push_back(exec(tmp,n));
+                  tmp="";
+                  continue;
+                }
+                tmp+=inGap[l];
+              }
+              if (!tmp.empty()) {
+                args.push_back(exec(tmp, n));
+              }
+            }
+            return attr_obj->call(args);
+          }
+          return attr_obj;
          }
        } 
        name+=code[i];
@@ -800,32 +1066,35 @@ BasicObj* exec(std::string code, Namespace& n){
     }
 }
 
-void doCode(std::string code, Namespace& n){
+BasicObj* doCode(std::string code, Namespace& n){
     std::string acc;
     int depth = 0;
     int depth2=0;
+    BasicObj* ret;
     for (auto i:code){
       if (i=='{') depth++;
       if (i=='}') depth--;
       if (i=='(') depth2++;
       if (i==')') depth2--;
       if (i==';' && depth==0 && depth2==0){
-        exec(acc,n);
+        ret=exec(acc,n);
         acc.clear();
         continue;
       }
       acc+=i;
     }
     if (!acc.empty()){
-      exec(acc,n);
+      ret=exec(acc,n);
     }
+    return ret;
 }
 
 void __clean(){
-  for (int i=__objs.size()-1;i>=0;i--){
-    if (__objs[i] ->refcount<=0){
+  for (int i=(int)__objs.size()-1;i>=0;i--){
+    if (__objs[i]->refcount<=0){
+      BasicObj* obj = __objs[i];
+      delete obj;
       __objs.erase(__objs.begin()+i);
-      delete __objs[i];
-    } 
+    }
   }
 }
