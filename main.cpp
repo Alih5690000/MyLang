@@ -8,6 +8,8 @@
 #include <cctype>
 #include <functional>
 
+class BasicObj;
+
 class NotAvailable:public std::exception{
   public:
   std::string mes;
@@ -38,6 +40,14 @@ class SyntaxError:public std::exception{
   }
   const char* what() const noexcept override{
     return mes.c_str();
+  }
+};
+
+class ReturnSig{
+  public:
+  BasicObj* val;
+  ReturnSig(BasicObj* val) {
+    this->val=val;
   }
 };
 
@@ -345,6 +355,7 @@ class FunctionObject:public BasicObj{
     std::string code;
     Namespace* context;
     FunctionObject(std::vector<std::string> argNames,std::string code, Namespace* context){
+      std::cout<<"Function body is "<<code<<std::endl;
       this->argNames=argNames;
       this->code=code;
       this->context=context;
@@ -364,11 +375,25 @@ class FunctionObject:public BasicObj{
       for (int i=0;i<args.size();i++){
         localNamespace[argNames[i]]=args[i];
       }
-      return doCode(code,localNamespace);
+      try{
+        doCode(code,localNamespace);
+        throw SyntaxError("Function must have a return statement (can return null with 'return null')");
+      }
+      catch (const ReturnSig& sig){
+        std::cout<<"Returning from function with value "<<sig.val->str()<<std::endl;
+        return sig.val;
+      }
     }
     std::string str() override{
       return "<FunctionObject>";
     }
+};
+
+class NullObject:public BasicObj{
+  public:
+  std::string str() override{
+    return "null";
+  }
 };
 
 class ClassObject;
@@ -493,6 +518,7 @@ class ListObject:public BasicObj{
   std::vector<BasicObj*> items;
   ListObject(const std::vector<BasicObj*>& items):items(items){
     auto appendFunc = new FunctionNative([this](std::vector<BasicObj*> args) {
+      std::cout<<"Pushed back now list is "<<this->str()<<std::endl;
       this->items.push_back(args[0]);
       return nullptr;
     });
@@ -794,6 +820,8 @@ BasicObj* exec(std::string code, Namespace& n){
       
       if (i>=code.size() || code[i]!='(') throw SyntaxError("Invalid function syntax");
       i++;
+
+      std::cout<<"Parsing function "<<name<<std::endl;
       
       std::string argStr;
       for (; i<code.size() && code[i]!=')'; ++i){
@@ -878,7 +906,8 @@ BasicObj* exec(std::string code, Namespace& n){
            }
           if (name=="return"){
             if (args.size()!=1) throw SyntaxError("Return statement must have exactly one argument");
-            return args[0];
+            std::cout<<"Returning "<<tmp<<std::endl;
+            throw ReturnSig(args[0]);
           }
            BasicObj* a=exec(name,n);
            if (!a) throw ValueError("Function not found");
@@ -1270,10 +1299,11 @@ Namespace CreateContext(){
 
     return new StringObject(line);
   });
+  n["null"]=new NullObject();
   n["list"]=new FunctionNative([](std::vector<BasicObj*> args){
     BasicObj* res=new ListObject(args);
     std::cout<<"Res is "<<res<<std::endl;
-    return new ListObject(args);
+    return res;
   });
   n["flushOut"]=new FunctionNative([](std::vector<BasicObj*> args){
     std::cout.flush();

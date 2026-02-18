@@ -8,22 +8,21 @@ int main(){
         print("Hello, World!");
         fn createMap(){
             a=list();
-            for (i=0;i<10;i++){
+            for (i=0;i<10;i=i+1){
                 row=list();
-                for (j=0;j<10;j++){
+                for (j=0;j<10;j=j+1){
                     row.push_back(".");
-                };
+                }
+                print("row ", i, ": ", row);
                 a.push_back(row);
-            };
+            }
             return(a);
         };
         fn showMap(m){
-            print("Frist row: ", m[0]);
+            print(m);
+            return (null);
         };
         a=createMap();
-        print("Created map a: ", a, " address is ", addr(a));
-        print(currentNamespace());
-        print("refcount of a: ", getRefcount(a));
         showMap(a);
     )",n);
     return 0;
