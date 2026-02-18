@@ -2,8 +2,7 @@
 #include "main.cpp"
 
 int main(){
-    Namespace n=Namespace();
-    doCode("print(input());",n);
+    Namespace n=CreateContext();
     doCode(R"(
         fn createMap(){
             a=[];
@@ -14,12 +13,21 @@ int main(){
                 };
             };
             return(a);
-        }
+        };
+        fn showMap(m){
+            for (i=0;i<10;i++){
+                for (j=0;j<10;j++){
+                    print(m[i][j]);
+                };
+                print("\n");
+            };
+        };
         a=createMap();
         x=0;y=0;
         for(;;){
-            print("infinite loop ",x," ",y);
             i=input();
+            print("infinite loop ",x," ",y);
+            showMap(a);
         };
     )",n);
     return 0;

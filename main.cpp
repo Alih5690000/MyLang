@@ -40,6 +40,8 @@ class BasicObj{
     virtual BasicObj* sub(BasicObj*,bool){throw NotAvailable();};
     virtual BasicObj* mul(BasicObj*,bool){throw NotAvailable();};
     virtual BasicObj* div(BasicObj*,bool){throw NotAvailable();};
+    virtual void inc(){throw NotAvailable();};
+    virtual void dec(){throw NotAvailable();};
     virtual std::string str(){throw NotAvailable();};
     virtual bool greater(BasicObj*,bool){throw NotAvailable();};
     virtual bool less(BasicObj*,bool){throw NotAvailable();};
@@ -52,7 +54,9 @@ class BasicObj{
       return it->second;
     };
     virtual BasicObj* getitem(BasicObj* key){throw NotAvailable();};
+    virtual BasicObj* setitem(std::vector<BasicObj*>){throw NotAvailable();};
     virtual BasicObj* call(std::vector<BasicObj*>){throw NotAvailable();};
+    virtual void setitem(BasicObj* key, BasicObj* value){throw NotAvailable();};
     BasicObj(){
       __objs.push_back(this);
     }
@@ -178,6 +182,12 @@ class IntObj:public BasicObj{
     }
     bool asbool() override{
       return a;
+    }
+    void inc() override{
+      a++;
+    }
+    void dec() override{
+      a--;
     }
     ~IntObj() override = default;
 };
@@ -305,6 +315,12 @@ class FloatObj:public BasicObj{
     bool asbool() override{
       return a;
     }
+    void inc() override{
+      a++;
+    }
+    void dec() override{
+      a--;
+    }
     ~FloatObj() override = default;
 };
 
@@ -320,7 +336,6 @@ class FunctionObject:public BasicObj{
       this->code=code;
     }
     BasicObj* call(std::vector<BasicObj*> args) override{
-      std::cout<<"FunctionObject::call invoked with args "<<args.size()<<std::endl;
       if (args.size()!=argNames.size()){
         throw ValueError();
       }
@@ -329,6 +344,9 @@ class FunctionObject:public BasicObj{
         n[argNames[i]]=args[i];
       }
       return doCode(code,n);
+    }
+    std::string str() override{
+      return "<FunctionObject>";
     }
 };
 
@@ -467,6 +485,27 @@ class ListObject:public BasicObj{
       throw ValueError();
     }
   }
+  void setitem(BasicObj* key, BasicObj* value) override{
+    if (auto i=dynamic_cast<IntObj*>(key)){
+      if (i->a<0 || i->a>=items.size()) throw ValueError();
+      BasicObj* old = items[i->a];
+      items[i->a] = value;
+      if (old && old!=value) old->refcount--;
+    }
+    else{
+      throw ValueError();
+    }
+  }
+  std::string str() override{
+    std::string result = "[";
+    for (size_t i=0; i<items.size(); i++){
+      if (i>0) result += ", ";
+      if (items[i]) result += items[i]->str();
+      else result += "<null>";
+    }
+    result += "]";
+    return result;
+  }
 
 };
 
@@ -519,9 +558,7 @@ BasicObj* exec(std::string code, Namespace& n){
     }
 
     if (code.size() >= 2 && code[0] == '[' && code.back() == ']') {
-      std::cout<<"List code: "<<code<<std::endl;
       if (code.size() == 2){ 
-        std::cout<<"Empty list"<<std::endl;
         return new ListObject({});
       }
       std::vector<BasicObj*> items;
@@ -632,7 +669,6 @@ BasicObj* exec(std::string code, Namespace& n){
         throw SyntaxError();
       }
       if (!getline(ss,tmp,';')){
-        // For infinite loops like for(;;), there's no counter
         counter="";
       }
       else{
@@ -669,7 +705,7 @@ BasicObj* exec(std::string code, Namespace& n){
           if (!condObj) break;
           if (!condObj->asbool()) break;
         }
-        exec(body,n);
+        doCode(body,n);
         exec(counter,n);
         i++;
       }
@@ -723,13 +759,11 @@ BasicObj* exec(std::string code, Namespace& n){
       std::string name;
       int i=2;
       
-      // Collect function name
       for (; i<code.size() && (std::isalnum((unsigned char)code[i]) || code[i]=='_'); ++i){
         name+=code[i];
       }
       if (name.empty()) throw SyntaxError();
       
-      // Skip whitespace
       while (i<code.size() && (code[i]==' ' || code[i]=='\t' || code[i]=='\n')) i++;
       
       if (i>=code.size() || code[i]!='(') throw SyntaxError();
@@ -775,6 +809,7 @@ BasicObj* exec(std::string code, Namespace& n){
         body+=code[i];
       }
       FunctionObject* func = new FunctionObject(argNames, body);
+      std::cout<<"Defined function "<<name<<" with args "<<argStr<<std::endl;
       n[name]=func;
       return func;
     }
@@ -815,32 +850,9 @@ BasicObj* exec(std::string code, Namespace& n){
            if (!tmp.empty()) {
              args.push_back(exec(tmp, n));
            }
-           
-           if (name=="print"){
-            for (auto i:args){
-              if (i) std::cout<<i->str(); else std::cout<<"<null>";
-            }
-            std::cout<<std::endl;
-            return nullptr;
-          }
           if (name=="return"){
             if (args.size()!=1) throw SyntaxError();
             return args[0];
-          }
-          if (name=="input"){
-            std::cout<<"Input called"<<std::endl;
-            if (args.size()>1) throw SyntaxError();
-            std::string prompt;
-            if (args.size()==1){
-              prompt=args[0]->str();
-            }
-            std::cout<<prompt;
-            std::cout.flush();
-            std::string line;
-            if (!std::getline(std::cin,line)){
-              throw ValueError();
-            }
-            return new StringObject(line);
           }
            BasicObj* a=exec(name,n);
            if (!a) throw ValueError();
@@ -856,20 +868,48 @@ BasicObj* exec(std::string code, Namespace& n){
           i++;
           std::string inGap;
           bool inQuote=false;
+          int bracketDepth=1;
           for (int j=i;j<code.size();j++){
             if (code[j]=='"') inQuote=!inQuote;
-             if (code[j] ==']' && !inQuote) break;
+            if (!inQuote){
+              if (code[j]=='[') bracketDepth++;
+              if (code[j]==']') {
+                bracketDepth--;
+                if (bracketDepth==0) {
+                  i=j;
+                  break;
+                }
+              }
+            }
              inGap+=code[j];
            }
            BasicObj* a=exec(name,n);
            if (!a) throw ValueError();
            BasicObj* key=exec(inGap,n);
            if (!key) throw ValueError();
-           return a->getitem(key);
+           
+           BasicObj* indexed = a->getitem(key);
+           
+           if (i+1<code.size() && code[i+1]=='='){
+             i++; 
+             std::string value;
+             for (int j=i+1;j<code.size();j++){
+               value+=code[j];
+             }
+             BasicObj* res=exec(value,n);
+             try {
+               a->setitem(key, res);
+             } catch (...) {
+               throw;
+             }
+             return res;
+           }
+           return indexed;
          }
          else if(code[i]=='='){
             std::string value;
             for (int j=i+1;j<code.size();j++){
+              if (code[j]==';') break;
               value+=code[j];
             }
             BasicObj* res=exec(value,n);
@@ -877,6 +917,16 @@ BasicObj* exec(std::string code, Namespace& n){
             n[name]=res;
             if (old && old!=res) old->refcount--;
             return res;
+         }
+         else if(i+1<code.size() && code[i]=='+' && code[i+1]=='+'){
+            BasicObj* val=n[name];
+            val->inc();
+            return val;
+         }
+         else if(i+1<code.size() && code[i]=='-' && code[i+1]=='-'){
+            BasicObj* val=n[name];
+            val->dec();
+            return val;
          }
          else if(code[i]=='.'){
           std::string attr;
@@ -897,7 +947,6 @@ BasicObj* exec(std::string code, Namespace& n){
             if (old && old!=res) old->refcount--;
             return res;
           }
-          std::cout<<"Accessing attribute "<<attr<<" of object "<<name<<std::endl;
           BasicObj* attr_obj = obj->getattr(attr);
           
           if (j<code.size() && code[j]=='('){
@@ -1163,6 +1212,25 @@ Namespace CreateContext(){
   n["IntFromString"]=new FunctionNative([](std::vector<BasicObj*> args){
     if (args.size()!=1) throw ValueError();
     return new IntObj(std::stoi(args[0]->str()));
+  });
+  n["print"]=new FunctionNative([](std::vector<BasicObj*> args){
+    for (auto i:args){
+      if (i) std::cout<<i->str(); else std::cout<<"<null>";
+    }
+    std::cout<<std::endl;
+    return nullptr;
+  });
+  n["input"]=new FunctionNative([](std::vector<BasicObj*> args){
+    if (args.size()>1) throw ValueError();
+    std::string prompt;
+    if (args.size()==1) prompt=args[0]->str();
+    std::cout<<prompt;
+    std::cout.flush();
+
+    std::string line;
+    std::cin>>line;
+
+    return new StringObject(line);
   });
   return n;
 }
