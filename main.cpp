@@ -518,6 +518,41 @@ BasicObj* exec(std::string code, Namespace& n){
       return new StringObject(unescaped);
     }
 
+    if (code.size() >= 2 && code[0] == '[' && code.back() == ']') {
+      std::cout<<"List code: "<<code<<std::endl;
+      if (code.size() == 2){ 
+        std::cout<<"Empty list"<<std::endl;
+        return new ListObject({});
+      }
+      std::vector<BasicObj*> items;
+      std::string inner = code.substr(1, code.size() - 2);
+      std::string tmp;
+      bool inQuote = false;
+      int depth = 0;
+      for (size_t i = 0; i < inner.size(); ++i) {
+        char c = inner[i];
+        if (c == '"') {
+          inQuote = !inQuote;
+        }
+        if (!inQuote) {
+          if (c == '[') depth++;
+          else if (c == ']') depth--;
+          if (c == ',' && depth == 0) {
+            if (!tmp.empty()) {
+              items.push_back(exec(tmp, n));
+            }
+            tmp.clear();
+            continue;
+          }
+        }
+        tmp += c;
+      }
+      if (!tmp.empty()) {
+        items.push_back(exec(tmp, n));
+      }
+      return new ListObject(items);
+    }
+
     if (code.empty()) return nullptr;
     if (!code.empty() && code.back()==';') code.pop_back();
     if (code.empty()) return nullptr;
@@ -596,11 +631,12 @@ BasicObj* exec(std::string code, Namespace& n){
       else{
         throw SyntaxError();
       }
-      if (getline(ss,tmp,';')){
-        counter=tmp;
+      if (!getline(ss,tmp,';')){
+        // For infinite loops like for(;;), there's no counter
+        counter="";
       }
       else{
-        throw SyntaxError();
+        counter=tmp;
       }
       std::string body;
       int bracedepth=0;
@@ -627,9 +663,12 @@ BasicObj* exec(std::string code, Namespace& n){
       }
       int i=0;
       for(;;){
-        BasicObj* condObj = exec(cond, n);
-        if (!condObj) break;
-        if (!condObj->asbool()) break;
+        BasicObj* condObj = nullptr;
+        if (!cond.empty()){
+          condObj = exec(cond, n);
+          if (!condObj) break;
+          if (!condObj->asbool()) break;
+        }
         exec(body,n);
         exec(counter,n);
         i++;
@@ -684,13 +723,14 @@ BasicObj* exec(std::string code, Namespace& n){
       std::string name;
       int i=2;
       
-      if (i>=code.size() || code[i]!='(') throw SyntaxError();
-      i++;
-      
+      // Collect function name
       for (; i<code.size() && (std::isalnum((unsigned char)code[i]) || code[i]=='_'); ++i){
         name+=code[i];
       }
       if (name.empty()) throw SyntaxError();
+      
+      // Skip whitespace
+      while (i<code.size() && (code[i]==' ' || code[i]=='\t' || code[i]=='\n')) i++;
       
       if (i>=code.size() || code[i]!='(') throw SyntaxError();
       i++;
@@ -702,15 +742,15 @@ BasicObj* exec(std::string code, Namespace& n){
       if (i>=code.size() || code[i]!=')') throw SyntaxError();
       i++;
       
-      if (i>=code.size() || code[i]!=')') throw SyntaxError();
-      i++;
-      
       std::vector<std::string> argNames;
       std::string tmp;
-      std::stringstream ss(argStr);
-      while (getline(ss,tmp,',')){
-        argNames.push_back(tmp);
+      if (!argStr.empty()){
+        std::stringstream ss(argStr);
+        while (getline(ss,tmp,',')){
+          argNames.push_back(tmp);
+        }
       }
+
       std::string body;
       int bracedepth=0;
       bool started=false;
@@ -748,10 +788,13 @@ BasicObj* exec(std::string code, Namespace& n){
          if (code[i] =='(') {
            i++;
            std::string inGap;
+           int gapDepth=1;
            bool inQuote=false;
            for (int j=i;j<code.size();j++){
             if (code[j]=='"') inQuote=!inQuote;
-             if (code[j] ==')' && !inQuote) break;
+            if (!inQuote && code[j]=='(') gapDepth++;
+            if (!inQuote && code[j]==')') gapDepth--;
+            if (code[j] ==')' && !inQuote && gapDepth==0) break;
              inGap+=code[j];
            }
            std::vector<BasicObj*> args;
@@ -784,7 +827,21 @@ BasicObj* exec(std::string code, Namespace& n){
             if (args.size()!=1) throw SyntaxError();
             return args[0];
           }
-           
+          if (name=="input"){
+            std::cout<<"Input called"<<std::endl;
+            if (args.size()>1) throw SyntaxError();
+            std::string prompt;
+            if (args.size()==1){
+              prompt=args[0]->str();
+            }
+            std::cout<<prompt;
+            std::cout.flush();
+            std::string line;
+            if (!std::getline(std::cin,line)){
+              throw ValueError();
+            }
+            return new StringObject(line);
+          }
            BasicObj* a=exec(name,n);
            if (!a) throw ValueError();
            try{
@@ -1097,4 +1154,15 @@ void __clean(){
       __objs.erase(__objs.begin()+i);
     }
   }
+}
+
+Namespace CreateContext(){
+  Namespace n;
+  n["true"]=new BoolObj(true);
+  n["false"]=new BoolObj(false);
+  n["IntFromString"]=new FunctionNative([](std::vector<BasicObj*> args){
+    if (args.size()!=1) throw ValueError();
+    return new IntObj(std::stoi(args[0]->str()));
+  });
+  return n;
 }
