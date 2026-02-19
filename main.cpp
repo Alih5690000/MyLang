@@ -58,27 +58,28 @@ static std::vector<BasicObj*> __objs;
 class BasicObj{
     public:
     int refcount=1;
-    virtual BasicObj* add(BasicObj*,bool){throw NotAvailable("That is Base class");};
-    virtual BasicObj* sub(BasicObj*,bool){throw NotAvailable("That is Base class");};
-    virtual BasicObj* mul(BasicObj*,bool){throw NotAvailable("That is Base class");};
-    virtual BasicObj* div(BasicObj*,bool){throw NotAvailable("That is Base class");};
-    virtual void inc(){throw NotAvailable("That is Base class");};
-    virtual void dec(){throw NotAvailable("That is Base class");};
+    virtual BasicObj* add(BasicObj*,bool){throw NotAvailable("That is Base class (add)");};
+    virtual BasicObj* sub(BasicObj*,bool){throw NotAvailable("That is Base class (sub)");};
+    virtual BasicObj* mul(BasicObj*,bool){throw NotAvailable("That is Base class (mul)");};
+    virtual BasicObj* div(BasicObj*,bool){throw NotAvailable("That is Base class (div)");};
+    virtual void inc(){throw NotAvailable("That is Base class (inc)");};
+    virtual void dec(){throw NotAvailable("That is Base class (dec)");};
     virtual std::string str(){return "Object at "+std::to_string((size_t)this);};
-    virtual bool greater(BasicObj*,bool){throw NotAvailable("That is Base class");};
-    virtual bool less(BasicObj*,bool){throw NotAvailable("That is Base class");};
-    virtual bool equal(BasicObj*,bool){throw NotAvailable("That is Base class");};
-    virtual bool asbool(){throw NotAvailable("That is Base class");};
-    virtual void free(){throw NotAvailable("That is Base class");};
+    virtual bool greater(BasicObj*,bool){throw NotAvailable("That is Base class (greater)");};
+    virtual bool less(BasicObj*,bool){throw NotAvailable("That is Base class (less)");};
+    virtual bool equal(BasicObj*,bool){throw NotAvailable("That is Base class (equal)");};
+    virtual bool asbool(){throw NotAvailable("That is Base class (asbool)");};
+    virtual void free(){throw NotAvailable("That is Base class (free)");};
     virtual BasicObj* getattr(const std::string& s){
       auto it = attrs.find(s);
       if (it==attrs.end()) throw ValueError("Attribute not found");
       return it->second;
     };
-    virtual BasicObj* getitem(BasicObj* key){throw NotAvailable("That is Base class");};
-    virtual BasicObj* setitem(std::vector<BasicObj*>){throw NotAvailable("That is Base class");};
-    virtual BasicObj* call(std::vector<BasicObj*>){throw NotAvailable("That is Base class");};
-    virtual void setitem(BasicObj* key, BasicObj* value){throw NotAvailable("That is Base class");};
+    virtual BasicObj* getitem(BasicObj* key){throw NotAvailable("That is Base class (getitem)");};
+    virtual BasicObj* setitem(std::vector<BasicObj*>){throw NotAvailable("That is Base class (setitem)");};
+    virtual BasicObj* call(std::vector<BasicObj*>){throw NotAvailable("That is Base class (call)");};
+    virtual void setitem(BasicObj* key, BasicObj* value){throw NotAvailable("That is Base class (setitem)");};
+    virtual BasicObj* clone(){throw NotAvailable("That is Base class (clone)");};
     BasicObj(){
       __objs.push_back(this);
     }
@@ -112,6 +113,9 @@ public:
 
     bool asbool() override {
         return !value.empty();
+    }
+    BasicObj* clone() override{
+        return new StringObject(value);
     }
     ~StringObject() override = default;
 };
@@ -211,6 +215,9 @@ class IntObj:public BasicObj{
     void dec() override{
       a--;
     }
+    BasicObj* clone() override{
+        return new IntObj(a);
+    }
     ~IntObj() override = default;
 };
 
@@ -223,6 +230,9 @@ class BoolObj:public BasicObj{
   }
   std::string str() override{
     return a?"true":"false";
+  }
+  BasicObj* clone() override{
+    return new BoolObj(a);
   }
   ~BoolObj() override = default;
 };
@@ -343,6 +353,9 @@ class FloatObj:public BasicObj{
     void dec() override{
       a--;
     }
+    BasicObj* clone() override{
+        return new FloatObj(a);
+    }
     ~FloatObj() override = default;
 };
 
@@ -355,22 +368,15 @@ class FunctionObject:public BasicObj{
     std::string code;
     Namespace* context;
     FunctionObject(std::vector<std::string> argNames,std::string code, Namespace* context){
-      std::cout<<"Function body is "<<code<<std::endl;
       this->argNames=argNames;
       this->code=code;
       this->context=context;
     }
     BasicObj* call(std::vector<BasicObj*> args) override{
-      std::cout<<"Called function with args "<<argNames.size()<<" "<<args.size()<<std::endl;
       if (args.size()!=argNames.size()){
         throw ValueError("Function called with wrong number of arguments");
       }
       Namespace localNamespace = *context;
-      std::cout<<"Local namespace: "<<std::endl;
-      for (auto& pair : localNamespace) {
-        std::cout<<pair.first<<std::flush<<" "<<pair.second->str()<<std::endl;
-      }
-      std::cout<<"end"<<std::endl;
       std::cout<<std::endl;
       for (int i=0;i<args.size();i++){
         localNamespace[argNames[i]]=args[i];
@@ -380,19 +386,28 @@ class FunctionObject:public BasicObj{
         throw SyntaxError("Function must have a return statement (can return null with 'return null')");
       }
       catch (const ReturnSig& sig){
-        std::cout<<"Returning from function with value "<<sig.val->str()<<std::endl;
         return sig.val;
       }
     }
     std::string str() override{
       return "<FunctionObject>";
     }
+    BasicObj* clone() override{
+      return new FunctionObject(argNames, code, context);
+    }
+     ~FunctionObject() override = default;
 };
 
 class NullObject:public BasicObj{
   public:
   std::string str() override{
     return "null";
+  }
+  bool asbool() override{
+    return false;
+  }
+  BasicObj* clone() override{
+    return new NullObject();
   }
 };
 
@@ -403,13 +418,21 @@ BasicObj* InstanceObj(ClassObject* cls, std::vector<BasicObj*> args);
 class ClassObject:public BasicObj{
   public:
   std::map<std::string,BasicObj*> attrs;
+  std::string a;
   ClassObject(const std::string& a){
       Namespace cls;
       doCode(a,cls);
       attrs=cls;
+      this->a=a;
   }
   BasicObj* call(std::vector<BasicObj*> args){
     return InstanceObj(this,args);
+  }
+  std::string str() override{
+    return "<ClassObject>";
+  }
+  BasicObj* clone() override{
+    return new ClassObject(a);
   }
 };
 
@@ -417,8 +440,10 @@ class InstanceObject : public BasicObj {
 public:
     ClassObject* klass;
 
+    std::vector<BasicObj*> args;
     InstanceObject(ClassObject* cls, std::vector<BasicObj*> args = {}) {
         klass = cls;
+        this->args = args;
 
         if (klass->attrs.count("__constructor__")) {
             auto* ctor = dynamic_cast<FunctionObject*>(klass->attrs["__constructor__"]);
@@ -502,6 +527,15 @@ public:
         }
         throw ValueError("Attribute not found");
     }
+    void setitem(BasicObj* key, BasicObj* value) override{
+        std::string attrName = key->str();
+        attrs[attrName] = value;
+    }
+    BasicObj* clone() override{
+        return new InstanceObject(klass, args);
+    }
+    ~InstanceObject() override = default;
+
 };
 
 class FunctionNative:public BasicObj{
@@ -511,6 +545,13 @@ class FunctionNative:public BasicObj{
   BasicObj* call(std::vector<BasicObj*> args) override{
     return func(args);
   }
+    std::string str() override{
+      return "<NativeFunction>";
+    }
+    BasicObj* clone() override{
+      return new FunctionNative(func);
+    }
+     ~FunctionNative() override = default;
 };
 
 class ListObject:public BasicObj{
@@ -518,12 +559,14 @@ class ListObject:public BasicObj{
   std::vector<BasicObj*> items;
   ListObject(const std::vector<BasicObj*>& items):items(items){
     auto appendFunc = new FunctionNative([this](std::vector<BasicObj*> args) {
-      std::cout<<"Pushed back now list is "<<this->str()<<std::endl;
-      this->items.push_back(args[0]);
+      this->items.push_back(args[0]->clone());
       return nullptr;
     });
     attrs["append"] = appendFunc;
     attrs["push_back"] = appendFunc;
+    attrs["size"]=new FunctionNative([this](std::vector<BasicObj*> args){
+      return new IntObj(this->items.size());
+    });
   }
   BasicObj* getitem(BasicObj* key) override{
     if (auto i=dynamic_cast<IntObj*>(key)){
@@ -555,7 +598,9 @@ class ListObject:public BasicObj{
     result += "]";
     return result;
   }
-
+  BasicObj* clone() override{
+    return new ListObject(items);
+  }
 };
 
 BasicObj* InstanceObj(ClassObject* cls, std::vector<BasicObj*> args) {
@@ -821,8 +866,6 @@ BasicObj* exec(std::string code, Namespace& n){
       if (i>=code.size() || code[i]!='(') throw SyntaxError("Invalid function syntax");
       i++;
 
-      std::cout<<"Parsing function "<<name<<std::endl;
-      
       std::string argStr;
       for (; i<code.size() && code[i]!=')'; ++i){
         argStr+=code[i];
@@ -858,14 +901,115 @@ BasicObj* exec(std::string code, Namespace& n){
             break;
           }
           bracedepth--;
-          continue;
         }
         body+=code[i];
       }
       FunctionObject* func = new FunctionObject(argNames, body, &n);
-      std::cout<<"Defined function "<<name<<" with args "<<argStr<<std::endl;
       n[name]=func;
       return func;
+    }
+    bool hasOp=false;
+    bool hasMul=false;
+    int gapDepth=0;
+    int compPos=-1;
+    std::string compOp;
+    for (int i=0;i<code.size();i++){
+      if (code[i]=='(') gapDepth++;
+      if (code[i]==')') gapDepth--;
+      if (gapDepth==0){
+        if (i+1<code.size() && code[i]=='=' && code[i+1]=='='){
+          compPos=i; compOp="=="; break;
+        }
+        if (i+1<code.size() && code[i]=='!' && code[i+1]=='='){
+          compPos=i; compOp="!="; break;
+        }
+        if (i+1<code.size() && code[i]=='<' && code[i+1]=='='){
+          compPos=i; compOp="<="; break;
+        }
+        if (i+1<code.size() && code[i]=='>' && code[i+1]=='='){
+          compPos=i; compOp=">="; break;
+        }
+        if (code[i]=='<' || code[i]=='>'){
+          compPos=i; compOp=std::string(1,code[i]); break;
+        }
+        if (code[i]=='*' || code[i]=='/'){
+          hasMul=true;
+        }
+        if (code[i]=='+' || code[i]=='-'){
+          hasOp=true; break;
+        }
+      }
+    }
+    if (compPos!=-1){
+      std::string left = code.substr(0, compPos);
+      std::string right = code.substr(compPos + compOp.size());
+      if (left.empty() || right.empty()) throw ValueError("Comparison operands are empty");
+      remBrackets(left);
+      remBrackets(right);
+      BasicObj* L = exec(left, n);
+      BasicObj* R = exec(right, n);
+      if (!L || !R) throw ValueError("Comparison operands are not objects");
+      bool cres=false;
+      if (compOp=="==") cres = L->equal(R,false);
+      else if (compOp=="!=") cres = !L->equal(R,false);
+      else if (compOp==">") cres = L->greater(R,false);
+      else if (compOp=="<") cres = L->less(R,false);
+      else if (compOp==">=") cres = L->greater(R,false) || L->equal(R,false);
+      else if (compOp=="<=") cres = L->less(R,false) || L->equal(R,false);
+      return new IntObj(cres?1:0);
+    }
+    if (!hasOp && hasMul){
+      std::cout<<"Short "<<code<<std::endl;
+      BasicObj* res=nullptr;
+      BasicObj *left,*right;
+      bool side=false;
+      char op;
+      std::string acc;
+      int gapDepth=0;
+      for (auto i:code){
+        if (i=='(') gapDepth++;
+        if (i==')') gapDepth--;
+        if ((i=='*' || i=='/') && gapDepth==0){
+          if (!side){
+            remBrackets(acc);
+            left=exec(acc,n);
+            if (!res) res=left;
+            op=i;
+            side=true;
+            acc="";
+            continue;
+          }
+          else{
+            remBrackets(acc);
+            right=exec(acc,n);
+            BasicObj* old=res;
+            if (op=='*'){
+              res=res->mul(right,false);
+            }
+            else if(op=='/'){
+              res=res->div(right,false);
+            }
+            delete old;
+            side=false;
+          }
+          continue;
+          acc="";
+        }
+        acc+=i;
+      }
+      if (!acc.empty()){
+        right=exec(acc,n);
+        BasicObj* old=res;
+        if (op=='*'){
+          res=res->mul(right,false);
+        }
+        else if(op=='/'){
+          res=res->div(right,false);
+        }
+        delete old;
+        side=false;
+      }
+      return res;
     }
     std::string name;
     bool sheerName=true;
@@ -1083,109 +1227,6 @@ BasicObj* exec(std::string code, Namespace& n){
     else if (isInt){
       return new IntObj(std::stoi(code));
     }
-    bool hasOp=false;
-    bool hasMul=false;
-    int gapDepth=0;
-    int compPos=-1;
-    std::string compOp;
-    for (int i=0;i<code.size();i++){
-      if (code[i]=='(') gapDepth++;
-      if (code[i]==')') gapDepth--;
-      if (gapDepth==0){
-        if (i+1<code.size() && code[i]=='=' && code[i+1]=='='){
-          compPos=i; compOp="=="; break;
-        }
-        if (i+1<code.size() && code[i]=='!' && code[i+1]=='='){
-          compPos=i; compOp="!="; break;
-        }
-        if (i+1<code.size() && code[i]=='<' && code[i+1]=='='){
-          compPos=i; compOp="<="; break;
-        }
-        if (i+1<code.size() && code[i]=='>' && code[i+1]=='='){
-          compPos=i; compOp=">="; break;
-        }
-        if (code[i]=='<' || code[i]=='>'){
-          compPos=i; compOp=std::string(1,code[i]); break;
-        }
-        if (code[i]=='*' || code[i]=='/'){
-          hasMul=true;
-        }
-        if (code[i]=='+' || code[i]=='-'){
-          hasOp=true; break;
-        }
-      }
-    }
-    if (compPos!=-1){
-      std::string left = code.substr(0, compPos);
-      std::string right = code.substr(compPos + compOp.size());
-      if (left.empty() || right.empty()) throw ValueError("Comparison operands are empty");
-      remBrackets(left);
-      remBrackets(right);
-      BasicObj* L = exec(left, n);
-      BasicObj* R = exec(right, n);
-      if (!L || !R) throw ValueError("Comparison operands are not objects");
-      bool cres=false;
-      if (compOp=="==") cres = L->equal(R,false);
-      else if (compOp=="!=") cres = !L->equal(R,false);
-      else if (compOp==">") cres = L->greater(R,false);
-      else if (compOp=="<") cres = L->less(R,false);
-      else if (compOp==">=") cres = L->greater(R,false) || L->equal(R,false);
-      else if (compOp=="<=") cres = L->less(R,false) || L->equal(R,false);
-      return new IntObj(cres?1:0);
-    }
-    if (!hasOp && hasMul){
-      std::cout<<"Short "<<code<<std::endl;
-      BasicObj* res=nullptr;
-      BasicObj *left,*right;
-      bool side=false;
-      char op;
-      std::string acc;
-      int gapDepth=0;
-      for (auto i:code){
-        if (i=='(') gapDepth++;
-        if (i==')') gapDepth--;
-        if ((i=='*' || i=='/') && gapDepth==0){
-          if (!side){
-            remBrackets(acc);
-            left=exec(acc,n);
-            if (!res) res=left;
-            op=i;
-            side=true;
-            acc="";
-            continue;
-          }
-          else{
-            remBrackets(acc);
-            right=exec(acc,n);
-            BasicObj* old=res;
-            if (op=='*'){
-              res=res->mul(right,false);
-            }
-            else if(op=='/'){
-              res=res->div(right,false);
-            }
-            delete old;
-            side=false;
-          }
-          continue;
-          acc="";
-        }
-        acc+=i;
-      }
-      if (!acc.empty()){
-        right=exec(acc,n);
-        BasicObj* old=res;
-        if (op=='*'){
-          res=res->mul(right,false);
-        }
-        else if(op=='/'){
-          res=res->div(right,false);
-        }
-        delete old;
-        side=false;
-      }
-      return res;
-    }
   BasicObj* res=nullptr;
   BasicObj* right;
   std::string acc;
@@ -1280,11 +1321,9 @@ Namespace CreateContext(){
     return new IntObj(std::stoi(args[0]->str()));
   });
   n["print"]=new FunctionNative([](std::vector<BasicObj*> args){
-    std::cout<<"Called print with args: ";
     for (auto i:args){
       if (i) std::cout<<i->str(); else std::cout<<"<null>";
     }
-    std::cout<<std::endl;
     return nullptr;
   });
   n["input"]=new FunctionNative([](std::vector<BasicObj*> args){
