@@ -29,7 +29,8 @@ int main(){
             return(null);
         };
         a=createMap();
-        showMap(a);
+        print(a);
+        //showMap(a);
     )",n);
     return 0;
 }

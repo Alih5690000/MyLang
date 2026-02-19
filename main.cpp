@@ -599,6 +599,7 @@ class ListObject:public BasicObj{
     return result;
   }
   BasicObj* clone() override{
+    std::cout<<"Cloned list"<<std::endl;
     return new ListObject(items);
   }
 };
@@ -613,8 +614,12 @@ void remBrackets(std::string& code){
   }
 }
 
+int __count=0;
+
 BasicObj* exec(std::string code, Namespace& n){
-  //std::cout<<"source "<<code<<std::endl;
+  std::cout<<"source "<<code<<std::endl;
+  __count++;
+  //if (__count>5) return nullptr;
     try{
     bool quoted=false;
     for (int i=0;i<code.size();i++){
@@ -626,6 +631,9 @@ BasicObj* exec(std::string code, Namespace& n){
         code.erase(code.begin()+i);
         i--;
       }
+    }
+    if (code.substr(0,2)=="//"){
+      return nullptr;
     }
     if (code[0]=='"' && code.back()=='"'){
       std::string raw = code.substr(1, code.size()-2);
@@ -652,6 +660,7 @@ BasicObj* exec(std::string code, Namespace& n){
     }
 
     if (code.size() >= 2 && code[0] == '[' && code.back() == ']') {
+      std::cout<<"Parsing array "<<code<<std::endl;
       if (code.size() == 2){ 
         return new ListObject({});
       }
@@ -1022,12 +1031,19 @@ BasicObj* exec(std::string code, Namespace& n){
            i++;
            std::string inGap;
            int gapDepth=1;
+           int squeareDepth=0;
            bool inQuote=false;
            for (int j=i;j<code.size();j++){
+            std::cout<<"Parsing symbol "<<code[j]
+            <<" in function call, gapDepth "
+            <<gapDepth<<" squareDepth "<<squeareDepth
+            <<" inQuote "<<inQuote<<std::endl;
             if (code[j]=='"') inQuote=!inQuote;
             if (!inQuote && code[j]=='(') gapDepth++;
             if (!inQuote && code[j]==')') gapDepth--;
-            if (code[j] ==')' && !inQuote && gapDepth==0) break;
+            if (!inQuote && code[j]=='[') squeareDepth++;
+            if (!inQuote && code[j]==']') squeareDepth--;
+            if (code[j] ==')' && !inQuote && gapDepth==0 && squeareDepth==0) break;
              inGap+=code[j];
            }
            std::vector<BasicObj*> args;
@@ -1179,11 +1195,14 @@ BasicObj* exec(std::string code, Namespace& n){
               std::string tmp;
               bool inQuote=false;
               int depth=0;
+              int squareDepth=0;
               for (int l=0;l<inGap.size();l++){
                 if (inGap[l]=='"') inQuote=!inQuote;
                 if (!inQuote && inGap[l]=='(') depth++;
                 if (!inQuote && inGap[l]==')') depth--;
-                if (!inQuote && inGap[l]==',' && depth==0){
+                if (!inQuote && inGap[l]=='[') squareDepth++;
+                if (!inQuote && inGap[l]==']') squareDepth--;
+                if (!inQuote && inGap[l]==',' && depth==0 && squareDepth==0){
                   args.push_back(exec(tmp,n));
                   tmp="";
                   continue;
@@ -1194,6 +1213,9 @@ BasicObj* exec(std::string code, Namespace& n){
                 args.push_back(exec(tmp, n));
               }
             }
+            std::cout<<"Calling attribute "
+            <<attr<<" of object "<<obj->str()
+            <<" with args "<<inGap<<std::endl;
             return attr_obj->call(args);
           }
           return attr_obj;
