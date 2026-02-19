@@ -13,7 +13,7 @@ int main(){
                 row=list();
                 for (j=0;j<10;j++){
                     row.push_back(".");
-                }  
+                };
                 a.push_back(row);
             };
             return(a);
@@ -22,15 +22,25 @@ int main(){
             for (i=0;i<m.size();i++){
                 row=m[i];
                 for (j=0;j<row.size();j++){
-                    print(row[j]);
-                }
+                    print(row[j]," ");
+                };
                 print("\n");
             };
+            println();
             return(null);
         };
+        class Player{
+            fn __constructor__(self,x,y){
+                self.x=x;
+                self.y=y;
+                return(null);
+            };
+        };
+        plr=Player(5,5);
+        print("after creation");
         a=createMap();
-        print(a);
-        //showMap(a);
+        a[plr.x][plr.y]="P";
+        showMap(a);
     )",n);
     return 0;
 }

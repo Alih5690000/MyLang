@@ -88,6 +88,7 @@ class BasicObj{
 };
 
 typedef std::map<std::string,BasicObj*> Namespace;
+Namespace CreateContext();
 
 class StringObject : public BasicObj {
 public:
@@ -366,20 +367,21 @@ class FunctionObject:public BasicObj{
     public:
     std::vector<std::string> argNames;
     std::string code;
-    Namespace* context;
+    Namespace context;
     FunctionObject(std::vector<std::string> argNames,std::string code, Namespace* context){
       this->argNames=argNames;
       this->code=code;
-      this->context=context;
+      this->context=*context;
     }
     BasicObj* call(std::vector<BasicObj*> args) override{
       if (args.size()!=argNames.size()){
         throw ValueError("Function called with wrong number of arguments");
       }
-      Namespace localNamespace = *context;
+      Namespace localNamespace = context;
       for (int i=0;i<args.size();i++){
         localNamespace[argNames[i]]=args[i];
       }
+
       try{
         doCode(code,localNamespace);
         throw SyntaxError("Function must have a return statement (can return null with 'return null')");
@@ -387,12 +389,15 @@ class FunctionObject:public BasicObj{
       catch (const ReturnSig& sig){
         return sig.val;
       }
+      catch(...){
+        throw;
+      }
     }
     std::string str() override{
       return "<FunctionObject>";
     }
     BasicObj* clone() override{
-      return new FunctionObject(argNames, code, context);
+      return new FunctionObject(argNames, code, &context);
     }
      ~FunctionObject() override = default;
 };
@@ -418,11 +423,13 @@ class ClassObject:public BasicObj{
   public:
   std::map<std::string,BasicObj*> attrs;
   std::string a;
-  ClassObject(const std::string& a){
-      Namespace cls;
+  Namespace* context;
+  ClassObject(const std::string& a, Namespace* context){
+      Namespace cls=*context;
       doCode(a,cls);
       attrs=cls;
       this->a=a;
+      this->context=context;
   }
   BasicObj* call(std::vector<BasicObj*> args){
     return InstanceObj(this,args);
@@ -431,7 +438,7 @@ class ClassObject:public BasicObj{
     return "<ClassObject>";
   }
   BasicObj* clone() override{
-    return new ClassObject(a);
+    return new ClassObject(a,context);
   }
 };
 
@@ -440,14 +447,17 @@ public:
     ClassObject* klass;
 
     std::vector<BasicObj*> args;
-    InstanceObject(ClassObject* cls, std::vector<BasicObj*> args = {}) {
+    InstanceObject(ClassObject* cls, std::vector<BasicObj*> args = {}, Namespace* context = nullptr) {
         klass = cls;
         this->args = args;
 
         if (klass->attrs.count("__constructor__")) {
             auto* ctor = dynamic_cast<FunctionObject*>(klass->attrs["__constructor__"]);
+            if (!ctor) throw ValueError("__constructor__ is not a function");
             std::vector<BasicObj*> callArgs = { this };
-            callArgs.insert(callArgs.end(), args.begin(), args.end());
+            for (auto* arg : args){ 
+              callArgs.push_back(arg);
+            }
             ctor->call(callArgs);
         }
     }
@@ -531,7 +541,9 @@ public:
         attrs[attrName] = value;
     }
     BasicObj* clone() override{
-        return new InstanceObject(klass, args);
+        std::vector<BasicObj*> newArgs;
+        for(auto* a : args) newArgs.push_back(a->clone());
+        return new InstanceObject(klass, newArgs);
     }
     ~InstanceObject() override = default;
 
@@ -850,7 +862,7 @@ BasicObj* exec(std::string code, Namespace& n){
         }
         body+=code[i];
       }
-      ClassObject* cls = new ClassObject(body);
+      ClassObject* cls = new ClassObject(body,&n);
       n[name]=cls;
       return cls;
     }
@@ -1220,7 +1232,7 @@ BasicObj* exec(std::string code, Namespace& n){
         return n[name];
       }
       else{
-        throw ValueError("Variable not defined");
+        throw ValueError(("Variable " + name + " not defined").c_str());
       }
     }
     bool isInt=true;
@@ -1351,6 +1363,13 @@ Namespace CreateContext(){
     std::cin>>line;
 
     return new StringObject(line);
+  });
+  n["println"]=new FunctionNative([](std::vector<BasicObj*> args){
+    for (auto i:args){
+      if (i) std::cout<<i->str(); else std::cout<<"<null>";
+    }
+    std::cout<<std::endl;
+    return nullptr;
   });
   n["null"]=new NullObject();
   n["list"]=new FunctionNative([](std::vector<BasicObj*> args){
