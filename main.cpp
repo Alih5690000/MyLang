@@ -377,7 +377,6 @@ class FunctionObject:public BasicObj{
         throw ValueError("Function called with wrong number of arguments");
       }
       Namespace localNamespace = *context;
-      std::cout<<std::endl;
       for (int i=0;i<args.size();i++){
         localNamespace[argNames[i]]=args[i];
       }
@@ -599,7 +598,6 @@ class ListObject:public BasicObj{
     return result;
   }
   BasicObj* clone() override{
-    std::cout<<"Cloned list"<<std::endl;
     return new ListObject(items);
   }
 };
@@ -617,7 +615,7 @@ void remBrackets(std::string& code){
 int __count=0;
 
 BasicObj* exec(std::string code, Namespace& n){
-  std::cout<<"source "<<code<<std::endl;
+  //std::cout<<"source "<<code<<std::endl;
   __count++;
   //if (__count>5) return nullptr;
     try{
@@ -660,7 +658,6 @@ BasicObj* exec(std::string code, Namespace& n){
     }
 
     if (code.size() >= 2 && code[0] == '[' && code.back() == ']') {
-      std::cout<<"Parsing array "<<code<<std::endl;
       if (code.size() == 2){ 
         return new ListObject({});
       }
@@ -690,9 +687,7 @@ BasicObj* exec(std::string code, Namespace& n){
       if (!tmp.empty()) {
         items.push_back(exec(tmp, n));
       }
-      std::cout<<"Items size: "<<items.size()<<std::endl;
       BasicObj* res=new ListObject(items);
-      std::cout<<"Res address "<<res<<std::flush<<std::endl;
       return res;
     }
 
@@ -700,7 +695,6 @@ BasicObj* exec(std::string code, Namespace& n){
     if (!code.empty() && code.back()==';') code.pop_back();
     if (code.empty()) return nullptr;
     if (code.size()>=2 && code[0]=='i' && code[1]=='f'){
-      std::cout<<"if"<<std::endl;
       std::string expr;
       int depth=1;
       BasicObj* e=nullptr;
@@ -799,7 +793,6 @@ BasicObj* exec(std::string code, Namespace& n){
             break;
           }
           bracedepth--;
-          continue;
         }
         body+=code[i];
       }
@@ -968,7 +961,6 @@ BasicObj* exec(std::string code, Namespace& n){
       return new IntObj(cres?1:0);
     }
     if (!hasOp && hasMul){
-      std::cout<<"Short "<<code<<std::endl;
       BasicObj* res=nullptr;
       BasicObj *left,*right;
       bool side=false;
@@ -1034,10 +1026,6 @@ BasicObj* exec(std::string code, Namespace& n){
            int squeareDepth=0;
            bool inQuote=false;
            for (int j=i;j<code.size();j++){
-            std::cout<<"Parsing symbol "<<code[j]
-            <<" in function call, gapDepth "
-            <<gapDepth<<" squareDepth "<<squeareDepth
-            <<" inQuote "<<inQuote<<std::endl;
             if (code[j]=='"') inQuote=!inQuote;
             if (!inQuote && code[j]=='(') gapDepth++;
             if (!inQuote && code[j]==')') gapDepth--;
@@ -1049,12 +1037,18 @@ BasicObj* exec(std::string code, Namespace& n){
            std::vector<BasicObj*> args;
            std::string tmp;
            
+           gapDepth=0;
+           squeareDepth=0;
            inQuote = false;
            for (size_t k = 0; k < inGap.size(); k++) {
              if (inGap[k] == '"') {
                inQuote = !inQuote;
              }
-             if (inGap[k] == ',' && !inQuote) {
+              if (!inQuote && inGap[k] == '(') gapDepth++;
+              if (!inQuote && inGap[k] == ')') gapDepth--;
+              if (!inQuote && inGap[k] == '[') squeareDepth++;
+              if (!inQuote && inGap[k] == ']') squeareDepth--;
+             if (inGap[k] == ',' && !inQuote && gapDepth == 0 && squeareDepth == 0) {
                args.push_back(exec(tmp, n));
                tmp.clear();
              } else {
@@ -1066,7 +1060,6 @@ BasicObj* exec(std::string code, Namespace& n){
            }
           if (name=="return"){
             if (args.size()!=1) throw SyntaxError("Return statement must have exactly one argument");
-            std::cout<<"Returning "<<tmp<<std::endl;
             throw ReturnSig(args[0]);
           }
            BasicObj* a=exec(name,n);
@@ -1075,7 +1068,6 @@ BasicObj* exec(std::string code, Namespace& n){
              return a->call(args);
            }
            catch (...){
-            std::cout<<"Tried call to "<<name<<" with args "<<inGap<<std::endl;
             throw;
            }
          } 
@@ -1120,7 +1112,7 @@ BasicObj* exec(std::string code, Namespace& n){
              }
              return res;
            }
-           if (i+1<code.size() && code[i+1]=='['){
+           if (i+1<code.size() && (code[i+1]=='[' || code[i+1]=='.' || code[i+1]=='(')){
              std::string remaining;
              for (int j=i+1;j<code.size();j++){
                remaining+=code[j];
@@ -1129,8 +1121,8 @@ BasicObj* exec(std::string code, Namespace& n){
              tempns["__indexed_result__"] = indexed;
              return exec("__indexed_result__" + remaining, tempns);
            }
-           return indexed;
-         }
+            return indexed;
+          }
          else if(code[i]=='='){
             std::string value;
             for (int j=i+1;j<code.size();j++){
@@ -1154,7 +1146,7 @@ BasicObj* exec(std::string code, Namespace& n){
             val->dec();
             return val;
          }
-         else if(code[i]=='.'){
+         if(code[i]=='.'){
           std::string attr;
           int j;
           for (j=i+1;j<code.size();j++){
@@ -1180,13 +1172,16 @@ BasicObj* exec(std::string code, Namespace& n){
             std::string inGap;
             bool inQuote=false;
             int parenDepth=1;
+            int squareDepth=0;
             for (;k<code.size();k++){
               if (code[k]=='"') inQuote=!inQuote;
               if (!inQuote && code[k]=='(') parenDepth++;
               if (!inQuote && code[k]==')') {
                 parenDepth--;
-                if (parenDepth==0) break;
+                if (parenDepth==0 && squareDepth==0) break;
               }
+              if (!inQuote && code[k]=='[') squareDepth++;
+              if (!inQuote && code[k]==']') squareDepth--;
               inGap+=code[k];
             }
             std::vector<BasicObj*> args;
@@ -1213,9 +1208,6 @@ BasicObj* exec(std::string code, Namespace& n){
                 args.push_back(exec(tmp, n));
               }
             }
-            std::cout<<"Calling attribute "
-            <<attr<<" of object "<<obj->str()
-            <<" with args "<<inGap<<std::endl;
             return attr_obj->call(args);
           }
           return attr_obj;
@@ -1363,7 +1355,6 @@ Namespace CreateContext(){
   n["null"]=new NullObject();
   n["list"]=new FunctionNative([](std::vector<BasicObj*> args){
     BasicObj* res=new ListObject(args);
-    std::cout<<"Res is "<<res<<std::endl;
     return res;
   });
   n["flushOut"]=new FunctionNative([](std::vector<BasicObj*> args){
