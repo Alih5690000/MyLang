@@ -1235,15 +1235,48 @@ BasicObj* exec(std::string code, Namespace& n){
           std::string attr;
           int j;
           for (j=i+1;j<code.size();j++){
-            if (code[j]=='='|| code[j]==';' || code[j]=='(') break;
+            if (!std::isalpha(code[j]) && code[j]!='_') break;
             attr+=code[j];
           }
           BasicObj* obj=exec(name,n);
           if (!obj) throw ValueError("Object not found");
+          if (j<code.size() && (code[j]=='+' || code[j]=='-' || code[j]=='*' || code[j]=='/')){
+            char op = code[j];
+            j++;
+            if (j<code.size()){
+              std::string value;
+              for (int k=j;k<code.size();k++){ 
+                if (code[k]==';') break;
+                value+=code[k];
+              }
+              BasicObj* current = obj->getattr(attr);
+              BasicObj* operand = exec(value,n);
+              BasicObj* result = nullptr;
+              if (op == '+'){
+                result = current->add(operand, false);
+              } else if (op == '-'){
+                result = current->sub(operand, false);
+              } else if (op == '*'){
+                result = current->mul(operand, false);
+              } else if (op == '/'){
+                result = current->div(operand, false);
+              }
+              BasicObj* old = nullptr;
+              if (obj->attrs.find(attr)!=obj->attrs.end()) old = obj->attrs[attr];
+              obj->attrs[attr]=result;
+              if (old && old!=result && old!=current) old->refcount--;
+              return result;
+            }
+          }
           if (j<code.size() && code[j]=='='){
+            std::cout<<"Setting "<<name<<" object's "<<attr<<" attribute"<<std::endl;
             std::string value;
-            for (int k=j+1;k<code.size();k++) value+=code[k];
+            for (int k=j+1;k<code.size();k++){ 
+              if (code[k]==';') break;
+              value+=code[k];
+            }
             BasicObj* res = exec(value,n);
+            std::cout<<"to "<<res->str()<<std::endl;
             BasicObj* old = nullptr;
             if (obj->attrs.find(attr)!=obj->attrs.end()) old = obj->attrs[attr];
             obj->attrs[attr]=res;

@@ -59,7 +59,7 @@ int main(){
             a[plr.y][plr.x]="P";
             showMap(a);
             if (in=="w"){
-             plr.y-=1;
+             plr.y=plr.y-1;
             };
             if (in=="s"){   
              plr.y+=1;
