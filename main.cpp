@@ -7,6 +7,13 @@
 #include <sstream>
 #include <cctype>
 #include <functional>
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <dlfcn.h>
+#include <unistd.h>
+#endif
+
 
 class BasicObj;
 
@@ -88,6 +95,15 @@ class BasicObj{
 };
 
 typedef std::map<std::string,BasicObj*> Namespace;
+std::vector<std::function<void()>> __cleanupFuncs={[](){
+  for (int i=(int)__objs.size()-1;i>=0;i--){
+    if (__objs[i]->refcount<=0){
+      BasicObj* obj = __objs[i];
+      delete obj;
+      __objs.erase(__objs.begin()+i);
+    }
+  }
+}};
 Namespace CreateContext();
 
 class StringObject : public BasicObj {
@@ -362,6 +378,42 @@ class FloatObj:public BasicObj{
 
 BasicObj* doCode(std::string code, Namespace& n);
 BasicObj* exec(std::string code, Namespace& n);
+
+class MapObject:public BasicObj{
+  public:
+  std::map<BasicObj*,BasicObj*> items;
+  BasicObj* getitem(BasicObj* key) override{
+    std::cout<<"getitem "<<key->str()<<std::endl;
+    for (auto [k,val]:items){
+      if (k->equal(key,false)){
+        return val;
+      }
+    }
+    throw ValueError("Key not found");
+  }
+  void setitem(BasicObj* key, BasicObj* value) override{
+    std::cout<<"setitem "<<key->str()<<" to "<<(value? value->str() : "<null>")<<std::endl;
+    items[key]=value;
+  }
+  std::string str() override{
+    std::string result = "{";
+    bool first=true;
+    for (const auto& pair : items){
+      if (!first) result += ", ";
+      first=false;
+      result += pair.first->str() + ": " + (pair.second? pair.second->str() : "<null>");
+    }
+    result += "}";
+    return result;
+  }
+  BasicObj* clone() override{
+    MapObject* newMap = new MapObject();
+    for (const auto& pair : items){
+      newMap->items[pair.first] = pair.second;
+    }
+    return newMap;
+  }
+};
 
 class FunctionObject:public BasicObj{
     public:
@@ -1084,6 +1136,7 @@ BasicObj* exec(std::string code, Namespace& n){
            }
          } 
          else if (code[i]=='['){
+          std::cout<<"square bracket access detected"<<std::endl;
           i++;
           std::string inGap;
           bool inQuote=false;
@@ -1107,10 +1160,9 @@ BasicObj* exec(std::string code, Namespace& n){
            if (!a) throw ValueError("Indexing non-existent object");
            BasicObj* key=exec(inGap,n);
            if (!key) throw ValueError("Key is not an object");
-           
-           BasicObj* indexed = a->getitem(key);
-           
+
            if (i+1<code.size() && code[i+1]=='='){
+             std::cout<<"setitem detected"<<std::endl;
              i++; 
              std::string value;
              for (int j=i+1;j<code.size();j++){
@@ -1124,6 +1176,9 @@ BasicObj* exec(std::string code, Namespace& n){
              }
              return res;
            }
+           
+           BasicObj* indexed = a->getitem(key);
+
            if (i+1<code.size() && (code[i+1]=='[' || code[i+1]=='.' || code[i+1]=='(')){
              std::string remaining;
              for (int j=i+1;j<code.size();j++){
@@ -1143,9 +1198,8 @@ BasicObj* exec(std::string code, Namespace& n){
             }
             BasicObj* res=exec(value,n);
 
-            BasicObj* old=n[name];
             n[name]=res;
-            if (old && old!=res) old->refcount--;
+            res->refcount++;
             return res;
          }
          else if(i+1<code.size() && code[i]=='+' && code[i+1]=='+'){
@@ -1329,12 +1383,8 @@ BasicObj* doCode(std::string code, Namespace& n){
 }
 
 void __clean(){
-  for (int i=(int)__objs.size()-1;i>=0;i--){
-    if (__objs[i]->refcount<=0){
-      BasicObj* obj = __objs[i];
-      delete obj;
-      __objs.erase(__objs.begin()+i);
-    }
+  for (auto i:__cleanupFuncs){
+    i();
   }
 }
 
@@ -1396,6 +1446,62 @@ Namespace CreateContext(){
   n["getRefcount"]=new FunctionNative([](std::vector<BasicObj*> args){
     if (args.size()!=1) throw ValueError("getRefcount expects exactly one argument");
     return new IntObj(args[0]->refcount);
+  });
+  n["clone"]=new FunctionNative([](std::vector<BasicObj*> args){
+    if (args.size()!=1) throw ValueError("clone expects exactly one argument");
+    return args[0]->clone();
+  });
+  n["map"]=new FunctionNative([](std::vector<BasicObj*> args){
+    return new MapObject();
+  });
+  n["importdll"]=new FunctionNative([&n](std::vector<BasicObj*> args){
+    if (args.size()!=1) throw ValueError("importdll expects exactly one argument");
+    std::string dllName=args[0]->str();
+      #ifdef _WIN32
+          HMODULE hModule = LoadLibraryA(dllName.c_str());
+          if (!hModule) {
+              throw ValueError("Failed to load DLL: " + dllName);
+          }
+          FARPROC func = GetProcAddress(hModule, "Load");
+          if (!func) {
+              FreeLibrary(hModule);
+              throw ValueError("Failed to find Load function in DLL: " + dllName);
+          }
+          FARPROC freeFunc = GetProcAddress(hModule, "Clean");
+           if (!freeFunc) {
+              FreeLibrary(hModule);
+              throw ValueError("Failed to find Clean function in DLL: " + dllName);
+          }
+          typedef void (*FreeFunc)();
+          FreeFunc freeLibrary = (FreeFunc)freeFunc;
+          __cleanupFuncs.push_back([hModule, freeLibrary]() {
+              freeLibrary();
+          });
+          typedef Namespace* (*LoadFunc)();
+          LoadFunc loadFunc = (LoadFunc)func;
+          Namespace* dllNamespace = loadFunc();
+          for (const auto& pair : *dllNamespace) {
+              n[pair.first] = pair.second;
+              __objs.push_back(pair.second);
+          }
+      #else
+          void* handle = dlopen(dllName.c_str(), RTLD_LAZY);
+          if (!handle) {
+              throw ValueError(("Failed to load shared library: " + dllName + " - " + dlerror()).c_str());
+          }
+          typedef Namespace* (*LoadFunc)();
+          LoadFunc loadFunc = (LoadFunc)dlsym(handle, "Load");
+          if (!loadFunc) {
+              dlclose(handle);
+              throw ValueError(("Failed to find Load function in shared library: " + dllName).c_str());
+          }
+          Namespace* dllNamespace = loadFunc();
+          for (const auto& pair : *dllNamespace) {
+              n[pair.first] = pair.second;
+              __objs.push_back(pair.second);
+          }
+      #endif
+    return nullptr;
   });
   return n;
 }
