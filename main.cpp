@@ -64,6 +64,7 @@ static std::vector<BasicObj*> __objs;
 
 class BasicObj{
     public:
+    int typeID=0;
     int refcount=1;
     virtual BasicObj* add(BasicObj*,bool){throw NotAvailable("That is Base class (add)");};
     virtual BasicObj* sub(BasicObj*,bool){throw NotAvailable("That is Base class (sub)");};
@@ -110,7 +111,9 @@ class StringObject : public BasicObj {
 public:
     std::string value;
 
-    StringObject(const std::string& v) : value(v) {}
+    StringObject(const std::string& v) : value(v) {
+      typeID=1;
+    }
 
     std::string str() override {
         return value;
@@ -138,10 +141,12 @@ public:
 };
 
 class IntObj:public BasicObj{
+    
     public:
     int a;
     IntObj(int a){
         this->a=a;
+        typeID=2;
     }
     BasicObj* add(BasicObj* b,bool swapped) override{
       if (auto i=dynamic_cast<IntObj*>(b)){
@@ -239,9 +244,10 @@ class IntObj:public BasicObj{
 };
 
 class BoolObj:public BasicObj{
-  public:
+  
+    public:
   bool a;
-  BoolObj(bool s):a(s){}
+  BoolObj(bool s):a(s){typeID=3;}
   bool asbool() override{
     return a;
   }
@@ -259,6 +265,7 @@ class FloatObj:public BasicObj{
     float a;
     FloatObj(float a){
         this->a=a;
+        typeID=4;
     }
     BasicObj* add(BasicObj* b,bool swapped) override{
       if (auto i=dynamic_cast<FloatObj*>(b)){
@@ -382,6 +389,9 @@ BasicObj* exec(std::string code, Namespace& n);
 class MapObject:public BasicObj{
   public:
   std::map<BasicObj*,BasicObj*> items;
+  MapObject(){
+    typeID=5;
+  }
   BasicObj* getitem(BasicObj* key) override{
     std::cout<<"getitem "<<key->str()<<std::endl;
     for (auto [k,val]:items){
@@ -421,6 +431,7 @@ class FunctionObject:public BasicObj{
     std::string code;
     Namespace context;
     FunctionObject(std::vector<std::string> argNames,std::string code, Namespace* context){
+      typeID=6;
       this->argNames=argNames;
       this->code=code;
       this->context=*context;
@@ -456,6 +467,9 @@ class FunctionObject:public BasicObj{
 
 class NullObject:public BasicObj{
   public:
+  NullObject(){
+    typeID=7;
+  }
   std::string str() override{
     return "null";
   }
@@ -471,12 +485,16 @@ class ClassObject;
 
 BasicObj* InstanceObj(ClassObject* cls, std::vector<BasicObj*> args);
 
+int classes=12;
+
 class ClassObject:public BasicObj{
   public:
+  int instanceID=classes++;
   std::map<std::string,BasicObj*> attrs;
   std::string a;
   Namespace* context;
   ClassObject(const std::string& a, Namespace* context){
+      typeID=8;
       Namespace cls=*context;
       doCode(a,cls);
       attrs=cls;
@@ -484,7 +502,9 @@ class ClassObject:public BasicObj{
       this->context=context;
   }
   BasicObj* call(std::vector<BasicObj*> args){
-    return InstanceObj(this,args);
+    BasicObj* instance = InstanceObj(this,args);
+    instance->typeID=instanceID;
+    return instance;
   }
   std::string str() override{
     return "<ClassObject>";
@@ -604,7 +624,7 @@ public:
 class FunctionNative:public BasicObj{
   public:
   std::function<BasicObj*(std::vector<BasicObj*>)> func;
-  FunctionNative(std::function<BasicObj*(std::vector<BasicObj*>)> f):func(f){}
+  FunctionNative(std::function<BasicObj*(std::vector<BasicObj*>)> f):func(f){typeID=10;}
   BasicObj* call(std::vector<BasicObj*> args) override{
     return func(args);
   }
@@ -621,6 +641,7 @@ class ListObject:public BasicObj{
   public:
   std::vector<BasicObj*> items;
   ListObject(const std::vector<BasicObj*>& items):items(items){
+    typeID=11;
     auto appendFunc = new FunctionNative([this](std::vector<BasicObj*> args) {
       this->items.push_back(args[0]->clone());
       return nullptr;
@@ -1127,7 +1148,7 @@ BasicObj* exec(std::string code, Namespace& n){
             throw ReturnSig(args[0]);
           }
            BasicObj* a=exec(name,n);
-           if (!a) throw ValueError("Function not found");
+           if (!a) throw ValueError(("Function "+name+" not found").c_str());
            try{
              return a->call(args);
            }
@@ -1136,7 +1157,6 @@ BasicObj* exec(std::string code, Namespace& n){
            }
          } 
          else if (code[i]=='['){
-          std::cout<<"square bracket access detected"<<std::endl;
           i++;
           std::string inGap;
           bool inQuote=false;
@@ -1162,7 +1182,6 @@ BasicObj* exec(std::string code, Namespace& n){
            if (!key) throw ValueError("Key is not an object");
 
            if (i+1<code.size() && code[i+1]=='='){
-             std::cout<<"setitem detected"<<std::endl;
              i++; 
              std::string value;
              for (int j=i+1;j<code.size();j++){
@@ -1443,6 +1462,10 @@ Namespace CreateContext(){
     ss<<args[0];
     return new StringObject(ss.str());
   });
+  n["typeNo"]=new FunctionNative([](std::vector<BasicObj*> args){
+    if (args.size()!=1) throw ValueError("typeNo expects exactly one argument");
+    return new IntObj(args[0]->typeID);
+  });
   n["getRefcount"]=new FunctionNative([](std::vector<BasicObj*> args){
     if (args.size()!=1) throw ValueError("getRefcount expects exactly one argument");
     return new IntObj(args[0]->refcount);
@@ -1497,8 +1520,8 @@ Namespace CreateContext(){
           }
           Namespace* dllNamespace = loadFunc();
           for (const auto& pair : *dllNamespace) {
+              std::cout<<"Importing "<<pair.first<<" from "<<dllName<<std::endl;
               n[pair.first] = pair.second;
-              __objs.push_back(pair.second);
           }
       #endif
     return nullptr;

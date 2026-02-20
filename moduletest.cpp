@@ -13,5 +13,15 @@ extern "C" void Clean(){
 
 extern "C" Namespace* Load(){
     Namespace* n=new Namespace({{"a",new IntObj(5)}});
+    {
+        (*n)["sum"]=new FunctionNative([](std::vector<BasicObj*> args){
+            BasicObj* res=new IntObj(0);
+            for (auto i:args){
+                res->refcount--;
+                res=res->add(i,false);
+            }
+            return res;
+        });
+    }
     return n;
 }
