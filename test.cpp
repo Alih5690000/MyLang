@@ -66,16 +66,16 @@ int main(){
         for (;;){
             in=input();
             if (in=="w"){
-             plr.move(plr,0,-1);
+             plr.y-=1;
             };
             if (in=="s"){   
-             plr.y=plr.y+1;
+             plr.y+=1;
             };
             if (in=="a"){   
-             plr.x=plr.x-1;
+             plr.x-=1;
             };
             if (in=="d"){   
-             plr.x=plr.x+1;
+             plr.x+=1;
             };
             clearMap(a);
             a[plr.y][plr.x]="P";

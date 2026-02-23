@@ -674,7 +674,9 @@ class ListObject:public BasicObj{
   }
   BasicObj* getitem(BasicObj* key) override{
     if (auto i=dynamic_cast<IntObj*>(key)){
-      if (i->a<0 || i->a>=items.size()) throw ValueError("Index out of bounds");
+      if (i->a<0 || i->a>=items.size()) throw ValueError(
+        ("Index out of bounds (read) accesing to "+std::to_string(i->a)).c_str()
+      );
       return items[i->a];
     }
     else{
@@ -683,7 +685,9 @@ class ListObject:public BasicObj{
   }
   void setitem(BasicObj* key, BasicObj* value) override{
     if (auto i=dynamic_cast<IntObj*>(key)){
-      if (i->a<0 || i->a>=items.size()) throw ValueError("Index out of bounds");
+      if (i->a<0 || i->a>=items.size()) throw ValueError(
+        ("Index out of bounds (write) accesing to "+std::to_string(i->a)).c_str()
+      );;
       BasicObj* old = items[i->a];
       items[i->a] = value;
       if (old && old!=value) old->refcount--;
@@ -1018,6 +1022,7 @@ BasicObj* exec(std::string code, Namespace& n){
     bool hasMul=false;
     int gapDepth=0;
     int compPos=-1;
+    int opPos=0;
     std::string compOp;
     for (int i=0;i<code.size();i++){
       if (code[i]=='(') gapDepth++;
@@ -1042,11 +1047,26 @@ BasicObj* exec(std::string code, Namespace& n){
           hasMul=true;
         }
         if (code[i]=='+' || code[i]=='-'){
-          hasOp=true; break;
+          hasOp=true; opPos=i; break;
         }
       }
     }
+    if (hasOp){
+      std::string left = code.substr(0, opPos);
+      std::string right = code.substr(opPos);
+      if (right[1]=='=' && (right[0]=='+' || right[0]=='-' || right[0]=='*' || right[0]=='/')){
+        exec(
+          left+
+          '='+
+          left+
+          right[0]+
+          right.substr(2,right.size()),n
+        );
+        return nullptr;
+      }
+    }
     if (compPos!=-1){
+      bool inPlace=false;
       std::string left = code.substr(0, compPos);
       std::string right = code.substr(compPos + compOp.size());
       if (left.empty() || right.empty()) throw ValueError("Comparison operands are empty");
