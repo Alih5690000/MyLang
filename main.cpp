@@ -527,8 +527,12 @@ public:
         this->args = args;
 
         if (klass->attrs.count("__constructor__")) {
-            auto* ctor = dynamic_cast<FunctionObject*>(klass->attrs["__constructor__"]);
-            if (!ctor) throw ValueError("__constructor__ is not a function");
+            BasicObj* ctor = dynamic_cast<FunctionObject*>(klass->attrs["__constructor__"]);
+            if (!ctor){
+               ctor=dynamic_cast<FunctionNative*>(klass->attrs["__constructor__"]);
+               if (!ctor)
+                  throw ValueError("__constructor__ is not a function");
+            }
             std::vector<BasicObj*> callArgs = { this };
             for (auto* arg : args){ 
               callArgs.push_back(arg);
@@ -602,7 +606,7 @@ public:
         }
         return "<InstanceObject>";
     }
-    BasicObj* getattr(const std::string& name) {
+    BasicObj* getattr(const std::string& name) override{
         if (attrs.count(name)) {
             return attrs[name];
         }

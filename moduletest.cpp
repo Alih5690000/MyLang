@@ -22,6 +22,14 @@ extern "C" Namespace* Load(){
             }
             return res;
         });
+        (*n)["BankAccount"]=new ClassObject("",n);
+        {
+            BasicObj* b=(*n)["BankAccount"];
+            b->attrs["money"]=new IntObj(0);
+            b->attrs["increase"]=new FunctionNative([](auto a)->BasicObj*{
+                
+            });
+        }
     }
     return n;
 }
