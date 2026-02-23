@@ -83,6 +83,9 @@ class BasicObj{
       if (it==attrs.end()) throw ValueError("Attribute not found");
       return it->second;
     };
+    virtual void setattr(const std::string& name,BasicObj* o){
+      attrs[name]=o->clone();
+    }
     virtual BasicObj* getitem(BasicObj* key){throw NotAvailable("That is Base class (getitem)");};
     virtual BasicObj* setitem(std::vector<BasicObj*>){throw NotAvailable("That is Base class (setitem)");};
     virtual BasicObj* call(std::vector<BasicObj*>){throw NotAvailable("That is Base class (call)");};
@@ -1240,95 +1243,26 @@ BasicObj* exec(std::string code, Namespace& n){
           }
           BasicObj* obj=exec(name,n);
           if (!obj) throw ValueError("Object not found");
-          if (j<code.size() && (code[j]=='+' || code[j]=='-' || code[j]=='*' || code[j]=='/')){
-            char op = code[j];
-            j++;
-            if (j<code.size()){
-              std::string value;
-              for (int k=j;k<code.size();k++){ 
-                if (code[k]==';') break;
-                value+=code[k];
+          else if (i<code.size() && !std::isalpha(code[i])){
+             std::string remaining;
+             for (int k=j;k<code.size();k++){
+               remaining+=code[k];
+             }
+             Namespace tempns = n;
+             if (remaining[0]=='='){
+              std::string val;
+              for (int k=1;k<remaining.size();k++){
+                if (remaining[k]==';') break;
+                val+=remaining[k];
               }
-              BasicObj* current = obj->getattr(attr);
-              BasicObj* operand = exec(value,n);
-              BasicObj* result = nullptr;
-              if (op == '+'){
-                result = current->add(operand, false);
-              } else if (op == '-'){
-                result = current->sub(operand, false);
-              } else if (op == '*'){
-                result = current->mul(operand, false);
-              } else if (op == '/'){
-                result = current->div(operand, false);
-              }
-              BasicObj* old = nullptr;
-              if (obj->attrs.find(attr)!=obj->attrs.end()) old = obj->attrs[attr];
-              obj->attrs[attr]=result;
-              if (old && old!=result && old!=current) old->refcount--;
-              return result;
-            }
-          }
-          if (j<code.size() && code[j]=='='){
-            std::cout<<"Setting "<<name<<" object's "<<attr<<" attribute"<<std::endl;
-            std::string value;
-            for (int k=j+1;k<code.size();k++){ 
-              if (code[k]==';') break;
-              value+=code[k];
-            }
-            BasicObj* res = exec(value,n);
-            std::cout<<"to "<<res->str()<<std::endl;
-            BasicObj* old = nullptr;
-            if (obj->attrs.find(attr)!=obj->attrs.end()) old = obj->attrs[attr];
-            obj->attrs[attr]=res;
-            if (old && old!=res) old->refcount--;
-            return res;
-          }
-          BasicObj* attr_obj = obj->getattr(attr);
-          
-          if (j<code.size() && code[j]=='('){
-            int k=j+1;
-            std::string inGap;
-            bool inQuote=false;
-            int parenDepth=1;
-            int squareDepth=0;
-            for (;k<code.size();k++){
-              if (code[k]=='"') inQuote=!inQuote;
-              if (!inQuote && code[k]=='(') parenDepth++;
-              if (!inQuote && code[k]==')') {
-                parenDepth--;
-                if (parenDepth==0 && squareDepth==0) break;
-              }
-              if (!inQuote && code[k]=='[') squareDepth++;
-              if (!inQuote && code[k]==']') squareDepth--;
-              inGap+=code[k];
-            }
-            std::vector<BasicObj*> args;
-            if (!inGap.empty()){
-              std::istringstream iss(inGap);
-              std::string tmp;
-              bool inQuote=false;
-              int depth=0;
-              int squareDepth=0;
-              for (int l=0;l<inGap.size();l++){
-                if (inGap[l]=='"') inQuote=!inQuote;
-                if (!inQuote && inGap[l]=='(') depth++;
-                if (!inQuote && inGap[l]==')') depth--;
-                if (!inQuote && inGap[l]=='[') squareDepth++;
-                if (!inQuote && inGap[l]==']') squareDepth--;
-                if (!inQuote && inGap[l]==',' && depth==0 && squareDepth==0){
-                  args.push_back(exec(tmp,n));
-                  tmp="";
-                  continue;
-                }
-                tmp+=inGap[l];
-              }
-              if (!tmp.empty()) {
-                args.push_back(exec(tmp, n));
-              }
-            }
-            return attr_obj->call(args);
-          }
-          return attr_obj;
+              obj->setattr(attr,exec(val,n));
+              return nullptr;
+             }
+             tempns["__indexed_result__"] = obj->getattr(attr);
+             BasicObj* ret=exec("__indexed_result__" + remaining, tempns);
+             return ret;
+           }
+          return obj;
          }
        } 
        name+=code[i];

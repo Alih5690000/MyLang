@@ -6,6 +6,8 @@ int main(){
     std::cout<<"is print in namespace "<<n.count("print")<<std::endl;
     doCode(R"(
         print("Hello, World!");
+        arr=[1,2,3];
+        println(typeNo(arr.size()));
         if ("a"=="a"){
             print("Equality works!");
         };
@@ -53,23 +55,21 @@ int main(){
         a=createMap();
         for (;;){
             in=input();
-            print("You entered:",in,"\n");
-            print("coords is ",plr.x," ",plr.y);
-            clearMap(a);
-            a[plr.y][plr.x]="P";
-            showMap(a);
             if (in=="w"){
              plr.y=plr.y-1;
             };
             if (in=="s"){   
-             plr.y+=1;
+             plr.y=plr.y+1;
             };
             if (in=="a"){   
-             plr.x-=1;
+             plr.x=plr.x-1;
             };
             if (in=="d"){   
-             plr.x+=1;
+             plr.x=plr.x+1;
             };
+            clearMap(a);
+            a[plr.y][plr.x]="P";
+            showMap(a);
         };
     )",n);
     return 0;
