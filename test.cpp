@@ -49,14 +49,24 @@ int main(){
                 self.y=y;
                 return(null);
             };
+            fn a(self){
+                println("a");
+                return (null);
+            };
+            fn move(self,dx,dy){
+                self.x=self.x+dx;
+                self.y=self.y+dy;
+                return(null);
+            };
         };
         plr=Player(5,5);
+        plr.a(plr);
         print("after creation");
         a=createMap();
         for (;;){
             in=input();
             if (in=="w"){
-             plr.y=plr.y-1;
+             plr.move(plr,0,-1);
             };
             if (in=="s"){   
              plr.y=plr.y+1;

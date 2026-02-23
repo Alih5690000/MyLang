@@ -503,10 +503,6 @@ class ClassObject:public BasicObj{
       this->context=context;
   }
   BasicObj* call(std::vector<BasicObj*> args,Namespace& n) override{
-    std::cout<<"Calling at namespace"<<std::endl;
-    for (auto [key,val]:n){
-      std::cout<<key<<":"<<val->str()<<std::endl;
-    }
     BasicObj* instance = InstanceObj(this,args,n);
     instance->typeID=instanceID;
     return instance;
@@ -955,7 +951,6 @@ BasicObj* exec(std::string code, Namespace& n){
             break;
           }
           bracedepth--;
-          continue;
         }
         body+=code[i];
       }
@@ -1298,12 +1293,14 @@ BasicObj* exec(std::string code, Namespace& n){
     }
     bool isInt=true;
     bool isFloat=false;
-    for (int i=0;i<code.size();i++){
-      if (code[i]=='.'){ 
+    int startIdx=0;
+    if (!code.empty() && (code[0]=='+' || code[0]=='-')) startIdx=1;
+    for (int i=startIdx;i<code.size();i++){
+      if (code[i]=='.'){
         isFloat=true;
         continue;
       }
-      if (code[i]<'0' || code[i]>'9'){ 
+      if (code[i]<'0' || code[i]>'9'){
         isInt=false;
         break;
       }
