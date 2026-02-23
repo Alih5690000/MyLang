@@ -61,6 +61,7 @@ class ReturnSig{
 class BasicObj;
 
 static std::vector<BasicObj*> __objs;
+typedef std::map<std::string,BasicObj*> Namespace;
 
 class BasicObj{
     public:
@@ -88,7 +89,7 @@ class BasicObj{
     }
     virtual BasicObj* getitem(BasicObj* key){throw NotAvailable("That is Base class (getitem)");};
     virtual BasicObj* setitem(std::vector<BasicObj*>){throw NotAvailable("That is Base class (setitem)");};
-    virtual BasicObj* call(std::vector<BasicObj*>){throw NotAvailable("That is Base class (call)");};
+    virtual BasicObj* call(std::vector<BasicObj*>,Namespace&){throw NotAvailable("That is Base class (call)");};
     virtual void setitem(BasicObj* key, BasicObj* value){throw NotAvailable("That is Base class (setitem)");};
     virtual BasicObj* clone(){throw NotAvailable("That is Base class (clone)");};
     BasicObj(){
@@ -98,7 +99,6 @@ class BasicObj{
     std::map<std::string,BasicObj*> attrs;
 };
 
-typedef std::map<std::string,BasicObj*> Namespace;
 std::vector<std::function<void()>> __cleanupFuncs={[](){
   for (int i=(int)__objs.size()-1;i>=0;i--){
     if (__objs[i]->refcount<=0){
@@ -432,18 +432,16 @@ class FunctionObject:public BasicObj{
     public:
     std::vector<std::string> argNames;
     std::string code;
-    Namespace context;
-    FunctionObject(std::vector<std::string> argNames,std::string code, Namespace* context){
+    FunctionObject(std::vector<std::string> argNames,std::string code){
       typeID=6;
       this->argNames=argNames;
       this->code=code;
-      this->context=*context;
     }
-    BasicObj* call(std::vector<BasicObj*> args) override{
+    BasicObj* call(std::vector<BasicObj*> args,Namespace& n) override{
       if (args.size()!=argNames.size()){
         throw ValueError("Function called with wrong number of arguments");
       }
-      Namespace localNamespace = context;
+      Namespace localNamespace = n;
       for (int i=0;i<args.size();i++){
         localNamespace[argNames[i]]=args[i];
       }
@@ -463,7 +461,7 @@ class FunctionObject:public BasicObj{
       return "<FunctionObject>";
     }
     BasicObj* clone() override{
-      return new FunctionObject(argNames, code, &context);
+      return new FunctionObject(argNames, code);
     }
      ~FunctionObject() override = default;
 };
@@ -486,7 +484,7 @@ class NullObject:public BasicObj{
 
 class ClassObject;
 
-BasicObj* InstanceObj(ClassObject* cls, std::vector<BasicObj*> args);
+BasicObj* InstanceObj(ClassObject* cls, std::vector<BasicObj*> args,Namespace&);
 
 int classes=12;
 
@@ -504,8 +502,12 @@ class ClassObject:public BasicObj{
       this->a=a;
       this->context=context;
   }
-  BasicObj* call(std::vector<BasicObj*> args){
-    BasicObj* instance = InstanceObj(this,args);
+  BasicObj* call(std::vector<BasicObj*> args,Namespace& n) override{
+    std::cout<<"Calling at namespace"<<std::endl;
+    for (auto [key,val]:n){
+      std::cout<<key<<":"<<val->str()<<std::endl;
+    }
+    BasicObj* instance = InstanceObj(this,args,n);
     instance->typeID=instanceID;
     return instance;
   }
@@ -522,7 +524,7 @@ class FunctionNative:public BasicObj{
   public:
   std::function<BasicObj*(std::vector<BasicObj*>)> func;
   FunctionNative(std::function<BasicObj*(std::vector<BasicObj*>)> f):func(f){typeID=10;}
-  BasicObj* call(std::vector<BasicObj*> args) override{
+  BasicObj* call(std::vector<BasicObj*> args,Namespace&) override{
     return func(args);
   }
     std::string str() override{
@@ -540,7 +542,7 @@ public:
     ClassObject* klass;
 
     std::vector<BasicObj*> args;
-    InstanceObject(ClassObject* cls, std::vector<BasicObj*> args = {}, Namespace* context = nullptr) {
+    InstanceObject(ClassObject* cls, std::vector<BasicObj*> args,Namespace& n) {
         klass = cls;
         this->args = args;
 
@@ -555,7 +557,13 @@ public:
             for (auto* arg : args){ 
               callArgs.push_back(arg);
             }
-            ctor->call(callArgs);
+            Namespace local=n;
+            ctor->call(callArgs,local);
+            for (auto [key,val]:local){
+              if (!n.count(key) || n[key]!=local[key]){
+                attrs[key]=val;
+              }
+            }
         }
     }
 
@@ -563,7 +571,8 @@ public:
         if (klass->attrs.count("__add__")) {
             auto* func = dynamic_cast<FunctionObject*>(klass->attrs["__add__"]);
             std::vector<BasicObj*> args = { this, other };
-            return func->call(args);
+            Namespace n;
+            return func->call(args,n);
         }
         throw NotAvailable("Cannot add non-object to object");
     }
@@ -572,7 +581,8 @@ public:
         if (klass->attrs.count("__sub__")) {
             auto* func = dynamic_cast<FunctionObject*>(klass->attrs["__sub__"]);
             std::vector<BasicObj*> args = { this, other };
-            return func->call(args);
+            Namespace n;
+            return func->call(args,n);
         }
         throw NotAvailable("Cannot subtract non-object from object");
     }
@@ -581,7 +591,8 @@ public:
         if (klass->attrs.count("__mul__")) {
             auto* func = dynamic_cast<FunctionObject*>(klass->attrs["__mul__"]);
             std::vector<BasicObj*> args = { this, other };
-            return func->call(args);
+            Namespace n;
+            return func->call(args,n);
         }
         throw NotAvailable("Cannot multiply non-object by object");
     }
@@ -590,7 +601,8 @@ public:
         if (klass->attrs.count("__div__")) {
             auto* func = dynamic_cast<FunctionObject*>(klass->attrs["__div__"]);
             std::vector<BasicObj*> args = { this, other };
-            return func->call(args);
+            Namespace n;
+            return func->call(args,n);
         }
         throw NotAvailable("Cannot divide non-object by object");
     }
@@ -599,7 +611,8 @@ public:
         if (klass->attrs.count("__eq__")) {
             auto* func = dynamic_cast<FunctionObject*>(klass->attrs["__eq__"]);
             std::vector<BasicObj*> args = { this, other };
-            auto* res = func->call(args);
+            Namespace n;
+            auto* res = func->call(args,n);
             return res->asbool();
         }
         throw NotAvailable("Cannot compare non-object to object");
@@ -609,7 +622,8 @@ public:
         if (klass->attrs.count("__bool__")) {
             auto* func = dynamic_cast<FunctionObject*>(klass->attrs["__bool__"]);
             std::vector<BasicObj*> args = { this };
-            auto* res = func->call(args);
+            Namespace n;
+            auto* res = func->call(args,n);
             return res->asbool();
         }
         return true;
@@ -619,7 +633,8 @@ public:
         if (klass->attrs.count("__str__")) {
             auto* func = dynamic_cast<FunctionObject*>(klass->attrs["__str__"]);
             std::vector<BasicObj*> args = { this };
-            auto* res = func->call(args);
+            Namespace n;
+            auto* res = func->call(args,n);
             return res->str();
         }
         return "<InstanceObject>";
@@ -640,7 +655,7 @@ public:
     BasicObj* clone() override{
         std::vector<BasicObj*> newArgs;
         for(auto* a : args) newArgs.push_back(a->clone());
-        return new InstanceObject(klass, newArgs);
+        return new InstanceObject(klass, newArgs,attrs);
     }
     ~InstanceObject() override = default;
 
@@ -696,8 +711,8 @@ class ListObject:public BasicObj{
   }
 };
 
-BasicObj* InstanceObj(ClassObject* cls, std::vector<BasicObj*> args) {
-    return new InstanceObject(cls, args);
+BasicObj* InstanceObj(ClassObject* cls, std::vector<BasicObj*> args,Namespace& n) {
+    return new InstanceObject(cls, args, n);
 }
 
 void remBrackets(std::string& code){
@@ -1000,7 +1015,7 @@ BasicObj* exec(std::string code, Namespace& n){
         }
         body+=code[i];
       }
-      FunctionObject* func = new FunctionObject(argNames, body, &n);
+      FunctionObject* func = new FunctionObject(argNames, body);
       n[name]=func;
       return func;
     }
@@ -1159,7 +1174,7 @@ BasicObj* exec(std::string code, Namespace& n){
            BasicObj* a=exec(name,n);
            if (!a) throw ValueError(("Function "+name+" not found").c_str());
            try{
-             return a->call(args);
+             return a->call(args,n);
            }
            catch (...){
             throw;
