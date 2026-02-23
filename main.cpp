@@ -517,6 +517,24 @@ class ClassObject:public BasicObj{
   }
 };
 
+
+class FunctionNative:public BasicObj{
+  public:
+  std::function<BasicObj*(std::vector<BasicObj*>)> func;
+  FunctionNative(std::function<BasicObj*(std::vector<BasicObj*>)> f):func(f){typeID=10;}
+  BasicObj* call(std::vector<BasicObj*> args) override{
+    return func(args);
+  }
+    std::string str() override{
+      return "<NativeFunction>";
+    }
+    BasicObj* clone() override{
+      return new FunctionNative(func);
+    }
+     ~FunctionNative() override = default;
+};
+
+
 class InstanceObject : public BasicObj {
 public:
     ClassObject* klass;
@@ -626,22 +644,6 @@ public:
     }
     ~InstanceObject() override = default;
 
-};
-
-class FunctionNative:public BasicObj{
-  public:
-  std::function<BasicObj*(std::vector<BasicObj*>)> func;
-  FunctionNative(std::function<BasicObj*(std::vector<BasicObj*>)> f):func(f){typeID=10;}
-  BasicObj* call(std::vector<BasicObj*> args) override{
-    return func(args);
-  }
-    std::string str() override{
-      return "<NativeFunction>";
-    }
-    BasicObj* clone() override{
-      return new FunctionNative(func);
-    }
-     ~FunctionNative() override = default;
 };
 
 class ListObject:public BasicObj{
