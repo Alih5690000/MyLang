@@ -60,7 +60,8 @@ int main(){
             };
         };
         plr=Player(5,5);
-        plr.a(plr);
+        println("Created player");
+        plr.a();
         print("after creation");
         a=createMap();
         for (;;){

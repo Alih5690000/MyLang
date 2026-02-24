@@ -17,6 +17,20 @@
 
 class BasicObj;
 
+std::map<std::string, int> typeNames = {
+    {"BasicObj",      0},
+    {"StringObject",   1},
+    {"IntObj",          2},
+    {"BoolObj",          3},
+    {"FloatObj",         4},
+    {"MapObject",         5},
+    {"FunctionObject",     6},
+    {"NullObject",           7},
+    {"ClassObject",            8},
+    {"FunctionNative",           10},
+    {"ListObject",                 11}
+};
+
 class NotAvailable:public std::exception{
   public:
   std::string mes;
@@ -439,7 +453,8 @@ class FunctionObject:public BasicObj{
     }
     BasicObj* call(std::vector<BasicObj*> args,Namespace& n) override{
       if (args.size()!=argNames.size()){
-        throw ValueError("Function called with wrong number of arguments");
+        throw ValueError(("Function called with wrong number of arguments. "+
+          std::to_string(args.size())+" instead of "+std::to_string(argNames.size())).c_str());
       }
       Namespace localNamespace = n;
       for (int i=0;i<args.size();i++){
@@ -464,6 +479,24 @@ class FunctionObject:public BasicObj{
       return new FunctionObject(argNames, code);
     }
      ~FunctionObject() override = default;
+};
+
+class BoundMethod:public BasicObj{
+  public:
+  BasicObj* func;
+  BasicObj* self;
+  BoundMethod(BasicObj* f,BasicObj* s):func(f),self(s){}
+  BasicObj* call(std::vector<BasicObj*> a,Namespace& n) override{
+    std::cout<<"Called BoundMethode with "<<a.size()<<" args"<<std::endl;
+    std::vector<BasicObj*> callArgs={self};
+    for (auto i:a){
+      callArgs.push_back(i);
+    }
+    return func->call(callArgs,n);
+  }
+  std::string str() override{
+    return "<BoundMethod>";
+  }
 };
 
 class NullObject:public BasicObj{
@@ -556,7 +589,9 @@ public:
             Namespace local=n;
             ctor->call(callArgs,local);
             for (auto [key,val]:local){
-              if (!n.count(key) || n[key]!=local[key]){
+              if (!n.count(key)) goto here;
+              if (n[key]!=local[key]){
+                here:
                 attrs[key]=val;
               }
             }
@@ -635,14 +670,23 @@ public:
         }
         return "<InstanceObject>";
     }
-    BasicObj* getattr(const std::string& name) override{
-        if (attrs.count(name)) {
-            return attrs[name];
-        }
-        else if (klass->attrs.count(name)) {
-            return klass->attrs[name];
-        }
-        throw ValueError("Attribute not found");
+    BasicObj* getattr(const std::string& name) override {
+      if (attrs.count(name)) {
+          return attrs[name];
+      }
+
+      if (klass->attrs.count(name)) {
+          BasicObj* val = klass->attrs[name];
+
+          if (val->typeID == typeNames.at("FunctionObject") ||
+              val->typeID == typeNames.at("FunctionNative")) {
+              return new BoundMethod(val, this);
+          }
+
+          return val;
+      }
+
+      throw ValueError("Attribute not found");
     }
     void setitem(BasicObj* key, BasicObj* value) override{
         std::string attrName = key->str();
