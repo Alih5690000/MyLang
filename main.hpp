@@ -1,261 +1,204 @@
 #pragma once
 
-#include <vector>
 #include <string>
 #include <map>
-#include <sstream>
-#include <iostream>
+#include <vector>
 #include <exception>
-#include <cctype>
 #include <functional>
 
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include <dlfcn.h>
-#include <unistd.h>
-#endif
-
 class BasicObj;
+class FunctionObject;
+class FunctionNative;
 class ClassObject;
 class InstanceObject;
+class BoundMethod;
+
+extern std::vector<BasicObj*> __objs;
+extern int classes;
 
 using Namespace = std::map<std::string, BasicObj*>;
 
-extern std::vector<BasicObj*> __objs;
-
-/* ===================== Exceptions ===================== */
+// ================= EXCEPTIONS =================
 
 class NotAvailable : public std::exception {
 public:
-    std::string mes;
-    NotAvailable(const char* mes);
+    NotAvailable(const char* msg);
     const char* what() const noexcept override;
 };
 
 class ValueError : public std::exception {
 public:
-    std::string mes;
-    ValueError(const char* mes);
+    ValueError(const char* msg);
     const char* what() const noexcept override;
 };
 
-class SyntaxError : public std::exception {
-public:
-    std::string mes;
-    SyntaxError(const char* mes);
-    const char* what() const noexcept override;
-};
-
-class ReturnSig {
-public:
-    BasicObj* val;
-    ReturnSig(BasicObj* val);
-};
-
-/* ===================== Core Object ===================== */
+// ================= BASE OBJECT =================
 
 class BasicObj {
 public:
-    int typeID;
     int refcount;
+    int typeID;
     std::map<std::string, BasicObj*> attrs;
 
     BasicObj();
     virtual ~BasicObj();
 
-    virtual BasicObj* add(BasicObj*, bool);
-    virtual BasicObj* sub(BasicObj*, bool);
-    virtual BasicObj* mul(BasicObj*, bool);
-    virtual BasicObj* div(BasicObj*, bool);
+    virtual BasicObj* call(std::vector<BasicObj*> args, Namespace& n);
+    virtual BasicObj* clone();
 
-    virtual void inc();
-    virtual void dec();
+    virtual BasicObj* getattr(const std::string& name);
+    virtual void setattr(const std::string& name, BasicObj* value);
+
+    virtual BasicObj* add(BasicObj* other, bool reverse = false);
+    virtual BasicObj* sub(BasicObj* other, bool reverse = false);
+    virtual BasicObj* mul(BasicObj* other, bool reverse = false);
+    virtual BasicObj* div(BasicObj* other, bool reverse = false);
+
+    virtual BasicObj* getitem(BasicObj* key);
+    virtual void setitem(BasicObj* key, BasicObj* value);
 
     virtual std::string str();
-
-    virtual bool greater(BasicObj*, bool);
-    virtual bool less(BasicObj*, bool);
-    virtual bool equal(BasicObj*, bool);
-    virtual bool asbool();
-
-    virtual void free();
-
-    virtual BasicObj* getattr(const std::string&);
-    virtual void setattr(const std::string&, BasicObj*);
-
-    virtual BasicObj* getitem(BasicObj*);
-    virtual void setitem(BasicObj*, BasicObj*);
-    virtual BasicObj* call(std::vector<BasicObj*>);
-    virtual BasicObj* clone();
 };
 
-/* ===================== Primitive Types ===================== */
-
-class StringObject : public BasicObj {
-public:
-    std::string value;
-    StringObject(const std::string& v);
-
-    std::string str() override;
-    BasicObj* add(BasicObj*, bool) override;
-    bool equal(BasicObj*, bool) override;
-    bool asbool() override;
-    BasicObj* clone() override;
-};
-
-class IntObj : public BasicObj {
-public:
-    int a;
-    IntObj(int a);
-
-    BasicObj* add(BasicObj*, bool) override;
-    BasicObj* sub(BasicObj*, bool) override;
-    BasicObj* mul(BasicObj*, bool) override;
-    BasicObj* div(BasicObj*, bool) override;
-
-    bool greater(BasicObj*, bool) override;
-    bool less(BasicObj*, bool) override;
-    bool equal(BasicObj*, bool) override;
-
-    std::string str() override;
-    bool asbool() override;
-
-    void inc() override;
-    void dec() override;
-
-    BasicObj* clone() override;
-};
-
-class BoolObj : public BasicObj {
-public:
-    bool a;
-    BoolObj(bool);
-
-    bool asbool() override;
-    std::string str() override;
-    BasicObj* clone() override;
-};
-
-class FloatObj : public BasicObj {
-public:
-    float a;
-    FloatObj(float);
-
-    BasicObj* add(BasicObj*, bool) override;
-    BasicObj* sub(BasicObj*, bool) override;
-    BasicObj* mul(BasicObj*, bool) override;
-    BasicObj* div(BasicObj*, bool) override;
-
-    bool greater(BasicObj*, bool) override;
-    bool less(BasicObj*, bool) override;
-    bool equal(BasicObj*, bool) override;
-
-    std::string str() override;
-    bool asbool() override;
-
-    void inc() override;
-    void dec() override;
-
-    BasicObj* clone() override;
-};
-
-class NullObject : public BasicObj {
-public:
-    NullObject();
-    std::string str() override;
-    bool asbool() override;
-    BasicObj* clone() override;
-};
-
-/* ===================== Containers ===================== */
-
-class ListObject : public BasicObj {
-public:
-    std::vector<BasicObj*> items;
-    ListObject(const std::vector<BasicObj*>&);
-
-    BasicObj* getitem(BasicObj*) override;
-    void setitem(BasicObj*, BasicObj*) override;
-    std::string str() override;
-    BasicObj* clone() override;
-};
-
-class MapObject : public BasicObj {
-public:
-    std::map<BasicObj*, BasicObj*> items;
-
-    MapObject();
-    BasicObj* getitem(BasicObj*) override;
-    void setitem(BasicObj*, BasicObj*) override;
-    std::string str() override;
-    BasicObj* clone() override;
-};
-
-/* ===================== Functions ===================== */
+// ================= FUNCTION OBJECT =================
 
 class FunctionObject : public BasicObj {
 public:
     std::vector<std::string> argNames;
-    std::string code;
-    Namespace context;
+    std::string body;
+    Namespace* closure;
 
-    FunctionObject(std::vector<std::string>, std::string, Namespace*);
-    BasicObj* call(std::vector<BasicObj*>) override;
-    std::string str() override;
+    FunctionObject(const std::vector<std::string>& args,
+                   const std::string& body,
+                   Namespace* closure);
+
+    BasicObj* call(std::vector<BasicObj*> args, Namespace& n) override;
     BasicObj* clone() override;
 };
+
+// ================= NATIVE FUNCTION =================
 
 class FunctionNative : public BasicObj {
 public:
-    std::function<BasicObj*(std::vector<BasicObj*>)> func;
+    using NativeFn = std::function<BasicObj*(std::vector<BasicObj*>, Namespace&)>;
 
-    FunctionNative(std::function<BasicObj*(std::vector<BasicObj*>)>);
-    BasicObj* call(std::vector<BasicObj*>) override;
-    std::string str() override;
+    NativeFn func;
+
+    FunctionNative(NativeFn f);
+
+    BasicObj* call(std::vector<BasicObj*> args, Namespace& n) override;
     BasicObj* clone() override;
 };
 
-/* ===================== Classes ===================== */
+// ================= CLASS OBJECT =================
 
 class ClassObject : public BasicObj {
 public:
-    int instanceID;
-    std::map<std::string, BasicObj*> attrs;
-    std::string a;
+    std::string body;
     Namespace* context;
 
-    ClassObject(const std::string&, Namespace*);
-    BasicObj* call(std::vector<BasicObj*>) override;
-    std::string str() override;
+    ClassObject(const std::string& body, Namespace* ctx);
+
+    BasicObj* call(std::vector<BasicObj*> args, Namespace& n) override;
     BasicObj* clone() override;
 };
+
+// ================= INSTANCE OBJECT =================
 
 class InstanceObject : public BasicObj {
 public:
     ClassObject* klass;
-    std::vector<BasicObj*> args;
 
-    InstanceObject(ClassObject*, std::vector<BasicObj*>);
+    InstanceObject(ClassObject* cls,
+                   std::vector<BasicObj*> args,
+                   Namespace& n);
 
-    BasicObj* add(BasicObj*, bool) override;
-    BasicObj* sub(BasicObj*, bool) override;
-    BasicObj* mul(BasicObj*, bool) override;
-    BasicObj* div(BasicObj*, bool) override;
+    BasicObj* getattr(const std::string& name) override;
+    void setattr(const std::string& name, BasicObj* value) override;
 
-    bool equal(BasicObj*, bool) override;
-    bool asbool() override;
-    std::string str() override;
-
-    BasicObj* getattr(const std::string&);
-    void setitem(BasicObj*, BasicObj*) override;
     BasicObj* clone() override;
 };
 
-/* ===================== Runtime API ===================== */
+// ================= BOUND METHOD =================
 
-BasicObj* exec(std::string, Namespace&);
-BasicObj* doCode(std::string, Namespace&);
-Namespace CreateContext();
-void __clean();
-BasicObj* InstanceObj(ClassObject*, std::vector<BasicObj*>);
+class BoundMethod : public BasicObj {
+public:
+    BasicObj* func;
+    BasicObj* self;
+
+    BoundMethod(BasicObj* func, BasicObj* self);
+    ~BoundMethod();
+
+    BasicObj* call(std::vector<BasicObj*> args, Namespace& n) override;
+};
+
+// ================= INT OBJECT =================
+
+class IntObj : public BasicObj {
+public:
+    int value;
+
+    IntObj(int v);
+
+    BasicObj* add(BasicObj* other, bool reverse) override;
+    BasicObj* sub(BasicObj* other, bool reverse ) override;
+    BasicObj* mul(BasicObj* other, bool reverse ) override;
+    BasicObj* div(BasicObj* other, bool reverse ) override;
+
+    std::string str() override;
+    BasicObj* clone() override;
+};
+
+// ================= FLOAT OBJECT =================
+
+class FloatObj : public BasicObj {
+public:
+    float value;
+
+    FloatObj(float v);
+
+    BasicObj* add(BasicObj* other, bool reverse ) override;
+    BasicObj* sub(BasicObj* other, bool reverse ) override;
+    BasicObj* mul(BasicObj* other, bool reverse ) override;
+    BasicObj* div(BasicObj* other, bool reverse ) override;
+
+    std::string str() override;
+    BasicObj* clone() override;
+};
+
+// ================= STRING OBJECT =================
+
+class StrObj : public BasicObj {
+public:
+    std::string value;
+
+    StrObj(const std::string& v);
+
+    BasicObj* add(BasicObj* other, bool reverse) override;
+    BasicObj* getitem(BasicObj* key) override;
+
+    std::string str() override;
+    BasicObj* clone() override;
+};
+
+// ================= BOOL OBJECT =================
+
+class BoolObj : public BasicObj {
+public:
+    bool value;
+
+    BoolObj(bool v);
+
+    std::string str() override;
+    BasicObj* clone() override;
+};
+
+// ================= NONE OBJECT =================
+
+class NoneObj : public BasicObj {
+public:
+    NoneObj();
+
+    std::string str() override;
+    BasicObj* clone() override;
+};

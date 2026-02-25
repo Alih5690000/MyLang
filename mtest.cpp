@@ -3,9 +3,14 @@
 
 int main(){
     Namespace n=CreateContext();
+    // g++ mtest.cpp -o mtest && ./mtest
     doCode(R"(
         importdll("./module.so");
-        print("Hello from module: ", sum(1,2,3));
+        a=BankAccount();
+        println("a.type ",typeNo(a));
+        println("Created");
+        println(a.m);
+        a.inc(12);
     )",n);
     return 0;
 }

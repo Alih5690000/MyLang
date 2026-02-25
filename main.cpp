@@ -14,7 +14,6 @@
 #include <unistd.h>
 #endif
 
-
 class BasicObj;
 
 std::map<std::string, int> typeNames = {
@@ -74,13 +73,13 @@ class ReturnSig{
 
 class BasicObj;
 
-static std::vector<BasicObj*> __objs;
+std::vector<BasicObj*> __objs;
 typedef std::map<std::string,BasicObj*> Namespace;
 
 class BasicObj{
     public:
     int typeID=0;
-    int refcount=1;
+    int refcount=0;
     virtual BasicObj* add(BasicObj*,bool){throw NotAvailable("That is Base class (add)");};
     virtual BasicObj* sub(BasicObj*,bool){throw NotAvailable("That is Base class (sub)");};
     virtual BasicObj* mul(BasicObj*,bool){throw NotAvailable("That is Base class (mul)");};
@@ -95,11 +94,16 @@ class BasicObj{
     virtual void free(){throw NotAvailable("That is Base class (free)");};
     virtual BasicObj* getattr(const std::string& s){
       auto it = attrs.find(s);
-      if (it==attrs.end()) throw ValueError("Attribute not found");
+      if (it==attrs.end()) throw ValueError(("Attribute "+s+" not found").c_str());
       return it->second;
     };
     virtual void setattr(const std::string& name,BasicObj* o){
-      attrs[name]=o->clone();
+      if (attrs.count(name)) {
+        attrs[name]->refcount--;
+      }
+      BasicObj* cloned = o->clone();
+      cloned->refcount++;
+      attrs[name]=cloned;
     }
     virtual BasicObj* getitem(BasicObj* key){throw NotAvailable("That is Base class (getitem)");};
     virtual BasicObj* setitem(std::vector<BasicObj*>){throw NotAvailable("That is Base class (setitem)");};
@@ -277,6 +281,98 @@ class BoolObj:public BasicObj{
   ~BoolObj() override = default;
 };
 
+class ReferenceObject : public BasicObj {
+public:
+    BasicObj** o;
+
+    ReferenceObject(BasicObj** target) : o(target) {
+        typeID = 12;
+    }
+
+    // ===== доступ к целевому объекту =====
+    BasicObj* target() {
+        if (!o || !*o) throw ValueError("Reference is null");
+        return *o;
+    }
+
+    // ===== делегация арифметики =====
+    BasicObj* add(BasicObj* other, bool swapped) override {
+        return target()->add(other, swapped);
+    }
+
+    BasicObj* sub(BasicObj* other, bool swapped) override {
+        return target()->sub(other, swapped);
+    }
+
+    BasicObj* mul(BasicObj* other, bool swapped) override {
+        return target()->mul(other, swapped);
+    }
+
+    BasicObj* div(BasicObj* other, bool swapped) override {
+        return target()->div(other, swapped);
+    }
+
+    // ===== инк/дек =====
+    void inc() override {
+        target()->inc();
+    }
+
+    void dec() override {
+        target()->dec();
+    }
+
+    // ===== сравнения =====
+    bool greater(BasicObj* other, bool swapped) override {
+        return target()->greater(other, swapped);
+    }
+
+    bool less(BasicObj* other, bool swapped) override {
+        return target()->less(other, swapped);
+    }
+
+    bool equal(BasicObj* other, bool swapped) override {
+        return target()->equal(other, swapped);
+    }
+
+    // ===== логика =====
+    bool asbool() override {
+        return target()->asbool();
+    }
+
+    // ===== строка =====
+    std::string str() override {
+        return target()->str();
+    }
+
+    // ===== clone =====
+    BasicObj* clone() override {
+        return new ReferenceObject(o);
+    }
+
+    // ===== getattr / setattr =====
+    BasicObj* getattr(const std::string& s) override {
+        return target()->getattr(s);
+    }
+
+    void setattr(const std::string& name, BasicObj* obj) override {
+        target()->setattr(name, obj);
+    }
+
+    // ===== getitem / setitem =====
+    BasicObj* getitem(BasicObj* key) override {
+        return target()->getitem(key);
+    }
+
+    void setitem(BasicObj* key, BasicObj* value) override {
+        target()->setitem(key, value);
+    }
+
+    // ===== call (если target callable) =====
+    BasicObj* call(std::vector<BasicObj*> args, Namespace& n) override {
+        return target()->call(args, n);
+    }
+};
+
 class FloatObj:public BasicObj{
     public:
     float a;
@@ -420,6 +516,10 @@ class MapObject:public BasicObj{
   }
   void setitem(BasicObj* key, BasicObj* value) override{
     std::cout<<"setitem "<<key->str()<<" to "<<(value? value->str() : "<null>")<<std::endl;
+    if (items.count(key)) {
+      items[key]->refcount--;
+    }
+    value->refcount++;
     items[key]=value;
   }
   std::string str() override{
@@ -519,12 +619,13 @@ class ClassObject;
 
 BasicObj* InstanceObj(ClassObject* cls, std::vector<BasicObj*> args,Namespace&);
 
-int classes=12;
+#ifndef OWNER
+int classes=13;
+#endif
 
 class ClassObject:public BasicObj{
   public:
   int instanceID=classes++;
-  std::map<std::string,BasicObj*> attrs;
   std::string a;
   Namespace* context;
   ClassObject(const std::string& a, Namespace* context){
@@ -551,10 +652,10 @@ class ClassObject:public BasicObj{
 
 class FunctionNative:public BasicObj{
   public:
-  std::function<BasicObj*(std::vector<BasicObj*>)> func;
-  FunctionNative(std::function<BasicObj*(std::vector<BasicObj*>)> f):func(f){typeID=10;}
-  BasicObj* call(std::vector<BasicObj*> args,Namespace&) override{
-    return func(args);
+  std::function<BasicObj*(std::vector<BasicObj*>,Namespace&)> func;
+  FunctionNative(std::function<BasicObj*(std::vector<BasicObj*>,Namespace&)> f):func(f){typeID=10;}
+  BasicObj* call(std::vector<BasicObj*> args,Namespace& n) override{
+    return func(args,n);
   }
     std::string str() override{
       return "<NativeFunction>";
@@ -574,27 +675,17 @@ public:
     InstanceObject(ClassObject* cls, std::vector<BasicObj*> args,Namespace& n) {
         klass = cls;
         this->args = args;
-
         if (klass->attrs.count("__constructor__")) {
-            BasicObj* ctor = dynamic_cast<FunctionObject*>(klass->attrs["__constructor__"]);
-            if (!ctor){
-               ctor=dynamic_cast<FunctionNative*>(klass->attrs["__constructor__"]);
-               if (!ctor)
-                  throw ValueError("__constructor__ is not a function");
-            }
+          std::cout<<"Calling constructor"<<std::endl;
+            BasicObj* ctor = klass->attrs["__constructor__"];
             std::vector<BasicObj*> callArgs = { this };
             for (auto* arg : args){ 
               callArgs.push_back(arg);
             }
-            Namespace local=n;
-            ctor->call(callArgs,local);
-            for (auto [key,val]:local){
-              if (!n.count(key)) goto here;
-              if (n[key]!=local[key]){
-                here:
-                attrs[key]=val;
-              }
-            }
+            Namespace local = *klass->context;
+            local["self"] = this;
+
+            ctor->call(callArgs, local);
         }
     }
 
@@ -686,16 +777,28 @@ public:
           return val;
       }
 
-      throw ValueError("Attribute not found");
+      throw ValueError(("Attribute "+name+" not found").c_str());
     }
-    void setitem(BasicObj* key, BasicObj* value) override{
-        std::string attrName = key->str();
+    void setattr(const std::string& s, BasicObj* value) override{
+        std::string attrName = s;
+        if (attrs.count(attrName)) {
+          attrs[attrName]->refcount--;
+        }
+        value->refcount++;
         attrs[attrName] = value;
     }
     BasicObj* clone() override{
         std::vector<BasicObj*> newArgs;
         for(auto* a : args) newArgs.push_back(a->clone());
         return new InstanceObject(klass, newArgs,attrs);
+    }
+    void setitem(BasicObj* key,BasicObj* val)override{
+      Namespace dull;
+      klass->getattr("__getitem__")->call({this,key,val},dull);
+    }
+    BasicObj* getitem(BasicObj* key)override{
+      Namespace dull;
+      return klass->getattr("__setitem__")->call({this,key},dull);
     }
     ~InstanceObject() override = default;
 
@@ -706,13 +809,13 @@ class ListObject:public BasicObj{
   std::vector<BasicObj*> items;
   ListObject(const std::vector<BasicObj*>& items):items(items){
     typeID=11;
-    auto appendFunc = new FunctionNative([this](std::vector<BasicObj*> args) {
+    auto appendFunc = new FunctionNative([this](std::vector<BasicObj*> args,Namespace) {
       this->items.push_back(args[0]->clone());
       return nullptr;
     });
     attrs["append"] = appendFunc;
     attrs["push_back"] = appendFunc;
-    attrs["size"]=new FunctionNative([this](std::vector<BasicObj*> args){
+    attrs["size"]=new FunctionNative([this](std::vector<BasicObj*> args,Namespace&){
       return new IntObj(this->items.size());
     });
   }
@@ -733,8 +836,9 @@ class ListObject:public BasicObj{
         ("Index out of bounds (write) accesing to "+std::to_string(i->a)).c_str()
       );;
       BasicObj* old = items[i->a];
-      items[i->a] = value;
       if (old && old!=value) old->refcount--;
+      value->refcount++;
+      items[i->a] = value;
     }
     else{
       throw ValueError("Key is not an integer");
@@ -1300,6 +1404,8 @@ BasicObj* exec(std::string code, Namespace& n){
             }
             BasicObj* res=exec(value,n);
 
+            if (n.count(name))
+              n[name]->refcount--;
             n[name]=res;
             res->refcount++;
             return res;
@@ -1460,17 +1566,17 @@ Namespace CreateContext(){
   Namespace n;
   n["true"]=new BoolObj(true);
   n["false"]=new BoolObj(false);
-  n["IntFromString"]=new FunctionNative([](std::vector<BasicObj*> args){
+  n["IntFromString"]=new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
     if (args.size()!=1) throw ValueError("IntFromString expects exactly one argument");
     return new IntObj(std::stoi(args[0]->str()));
   });
-  n["print"]=new FunctionNative([](std::vector<BasicObj*> args){
+  n["print"]=new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
     for (auto i:args){
       if (i) std::cout<<i->str(); else std::cout<<"<null>";
     }
     return nullptr;
   });
-  n["input"]=new FunctionNative([](std::vector<BasicObj*> args){
+  n["input"]=new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
     if (args.size()>1) throw ValueError("Input function expects at most one argument");
     std::string prompt;
     if (args.size()==1) prompt=args[0]->str();
@@ -1482,7 +1588,7 @@ Namespace CreateContext(){
 
     return new StringObject(line);
   });
-  n["println"]=new FunctionNative([](std::vector<BasicObj*> args){
+  n["println"]=new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
     for (auto i:args){
       if (i) std::cout<<i->str(); else std::cout<<"<null>";
     }
@@ -1490,43 +1596,65 @@ Namespace CreateContext(){
     return nullptr;
   });
   n["null"]=new NullObject();
-  n["list"]=new FunctionNative([](std::vector<BasicObj*> args){
+  n["list"]=new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
     BasicObj* res=new ListObject(args);
     return res;
   });
-  n["flushOut"]=new FunctionNative([](std::vector<BasicObj*> args){
+  n["flushOut"]=new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
     std::cout.flush();
     return nullptr;
   });
-  n["currentNamespace"]=new FunctionNative([&n](std::vector<BasicObj*> args){
+  n["currentNamespace"]=new FunctionNative([&n](std::vector<BasicObj*> args,Namespace&){
     ListObject* lst = new ListObject({});
     for (auto& pair : n) {      
       lst->items.push_back(new StringObject(pair.first));
     }
     return lst;
   });
-  n["addr"]=new FunctionNative([](std::vector<BasicObj*> args){
+  n["addr"]=new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
     if (args.size()!=1) throw ValueError("addr expects exactly one argument");
     std::stringstream ss;
     ss<<args[0];
     return new StringObject(ss.str());
   });
-  n["typeNo"]=new FunctionNative([](std::vector<BasicObj*> args){
+  n["typeNo"]=new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
     if (args.size()!=1) throw ValueError("typeNo expects exactly one argument");
     return new IntObj(args[0]->typeID);
   });
-  n["getRefcount"]=new FunctionNative([](std::vector<BasicObj*> args){
+  n["getRefcount"]=new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
     if (args.size()!=1) throw ValueError("getRefcount expects exactly one argument");
     return new IntObj(args[0]->refcount);
   });
-  n["clone"]=new FunctionNative([](std::vector<BasicObj*> args){
+  n["clone"]=new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
     if (args.size()!=1) throw ValueError("clone expects exactly one argument");
     return args[0]->clone();
   });
-  n["map"]=new FunctionNative([](std::vector<BasicObj*> args){
+  n["ref"] = new FunctionNative([](std::vector<BasicObj*> args,Namespace& n) {
+    std::cout<<"Calling in ns"<<std::endl;
+    for (auto [key,val]:n){
+      std::cout<<key<<":"<<val->str()<<std::endl;
+    }
+    std::string name = args[0]->str();
+
+    auto it = n.find(name);
+    if (it != n.end()) {
+        return new ReferenceObject(&it->second);
+    }
+
+    throw ValueError(("Name not "+name+ " found").c_str());
+});
+  n["map"]=new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
     return new MapObject();
   });
-  n["importdll"]=new FunctionNative([&n](std::vector<BasicObj*> args){
+  n["viewDict"]=new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
+    std::cout<<"Called view dict"<<std::endl;
+    for (auto [key,val]:args[0]->attrs){
+      std::cout<<key<<":"<<val->str()<<std::endl;
+    }
+    return nullptr;
+  });
+  n["importdll"]=new FunctionNative([](std::vector<BasicObj*> args,Namespace& n){
+    std::cout<<"Importing dll to ns "<<&n<<std::endl;
     if (args.size()!=1) throw ValueError("importdll expects exactly one argument");
     std::string dllName=args[0]->str();
       #ifdef _WIN32
@@ -1561,19 +1689,20 @@ Namespace CreateContext(){
           if (!handle) {
               throw ValueError(("Failed to load shared library: " + dllName + " - " + dlerror()).c_str());
           }
-          typedef Namespace* (*LoadFunc)();
+          typedef void (*LoadFunc)(Namespace&);
           LoadFunc loadFunc = (LoadFunc)dlsym(handle, "Load");
           if (!loadFunc) {
               dlclose(handle);
               throw ValueError(("Failed to find Load function in shared library: " + dllName).c_str());
           }
-          Namespace* dllNamespace = loadFunc();
-          for (const auto& pair : *dllNamespace) {
-              std::cout<<"Importing "<<pair.first<<" from "<<dllName<<std::endl;
-              n[pair.first] = pair.second;
-          }
+          loadFunc(n);
       #endif
     return nullptr;
   });
   return n;
 }
+
+#ifndef OWNER
+#define OWNER
+#endif
+
