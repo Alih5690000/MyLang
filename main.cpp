@@ -1689,13 +1689,13 @@ Namespace CreateContext(){
           if (!handle) {
               throw ValueError(("Failed to load shared library: " + dllName + " - " + dlerror()).c_str());
           }
-          typedef void (*LoadFunc)(Namespace&);
+          typedef void (*LoadFunc)(Namespace&,int*,std::vector<BasicObj*>*);
           LoadFunc loadFunc = (LoadFunc)dlsym(handle, "Load");
           if (!loadFunc) {
               dlclose(handle);
               throw ValueError(("Failed to find Load function in shared library: " + dllName).c_str());
           }
-          loadFunc(n);
+          loadFunc(n,&classes,&__objs);
       #endif
     return nullptr;
   });

@@ -1,21 +1,12 @@
-#include "main.cpp"
+#include "main.hpp"
 #include <iostream>
 #include <map>
 
 //g++ -shared -o module.so -fPIC moduletest.cpp
-
-extern "C" void Clean(){
-    for (int i=0;i<__objs.size();i++){
-        if (__objs[i]->refcount<=0){
-            delete __objs[i];
-            __objs.erase(__objs.begin()+i);
-            i--;
-        }
-    }
-}
-
-extern "C" void Load(Namespace& n){
+extern "C" void Load(Namespace& n,int* t,std::vector<BasicObj*>* a){
     {
+        classes=t;
+        __objs=a;
         std::cout<<"Loading to ns "<<&n<<std::endl;
         n["sum"]=new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
             BasicObj* res=new IntObj(0);
