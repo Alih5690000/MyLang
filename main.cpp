@@ -95,7 +95,9 @@ class BasicObj{
     virtual BasicObj* getattr(const std::string& s){
       auto it = attrs.find(s);
       if (it==attrs.end()) throw ValueError(("Attribute "+s+" not found").c_str());
-      return it->second;
+      BasicObj* res = it->second;
+      res->refcount++;
+      return res;
     };
     virtual void setattr(const std::string& name,BasicObj* o){
       if (attrs.count(name)) {
@@ -143,7 +145,9 @@ public:
     BasicObj* add(BasicObj* other, bool) override {
         StringObject* o = dynamic_cast<StringObject*>(other);
         if (!o) throw NotAvailable("Cannot add non-string object to string");
-        return new StringObject(value + o->value);
+      BasicObj* tmp = new StringObject(value + o->value);
+      tmp->refcount++;
+      return tmp;
     }
 
     bool equal(BasicObj* other, bool) override {
@@ -156,7 +160,9 @@ public:
         return !value.empty();
     }
     BasicObj* clone() override{
-        return new StringObject(value);
+      BasicObj* tmp = new StringObject(value);
+      tmp->refcount++;
+      return tmp;
     }
     ~StringObject() override = default;
 };
@@ -171,7 +177,9 @@ class IntObj:public BasicObj{
     }
     BasicObj* add(BasicObj* b,bool swapped) override{
       if (auto i=dynamic_cast<IntObj*>(b)){
-        return new IntObj(this->a + i->a);
+        BasicObj* tmp = new IntObj(this->a + i->a);
+        tmp->refcount++;
+        return tmp;
       }
       else{
         if (!swapped)
@@ -182,7 +190,9 @@ class IntObj:public BasicObj{
     }
     BasicObj* sub(BasicObj* b,bool swapped) override{
       if (auto i=dynamic_cast<IntObj*>(b)){
-        return new IntObj(this->a - i->a);
+        BasicObj* tmp = new IntObj(this->a - i->a);
+        tmp->refcount++;
+        return tmp;
       }
       else{
         if (!swapped)
@@ -193,7 +203,9 @@ class IntObj:public BasicObj{
     }
     BasicObj* div(BasicObj* b,bool swapped) override{
       if (auto i=dynamic_cast<IntObj*>(b)){
-        return new IntObj(this->a / i->a);
+        BasicObj* tmp = new IntObj(this->a / i->a);
+        tmp->refcount++;
+        return tmp;
       }
       else{
         if (!swapped)
@@ -204,7 +216,9 @@ class IntObj:public BasicObj{
     }
     BasicObj* mul(BasicObj* b,bool swapped) override{
       if (auto i=dynamic_cast<IntObj*>(b)){
-        return new IntObj(this->a * i->a);
+        BasicObj* tmp = new IntObj(this->a * i->a);
+        tmp->refcount++;
+        return tmp;
       }
       else{
         if (!swapped)
@@ -259,7 +273,9 @@ class IntObj:public BasicObj{
       a--;
     }
     BasicObj* clone() override{
-        return new IntObj(a);
+      BasicObj* tmp = new IntObj(a);
+      tmp->refcount++;
+      return tmp;
     }
     ~IntObj() override = default;
 };
@@ -276,7 +292,9 @@ class BoolObj:public BasicObj{
     return a?"true":"false";
   }
   BasicObj* clone() override{
-    return new BoolObj(a);
+    BasicObj* tmp = new BoolObj(a);
+    tmp->refcount++;
+    return tmp;
   }
   ~BoolObj() override = default;
 };
@@ -346,7 +364,9 @@ public:
 
     // ===== clone =====
     BasicObj* clone() override {
-        return new ReferenceObject(o);
+      BasicObj* tmp = new ReferenceObject(o);
+      tmp->refcount++;
+      return tmp;
     }
 
     // ===== getattr / setattr =====
@@ -369,7 +389,10 @@ public:
 
     // ===== call (если target callable) =====
     BasicObj* call(std::vector<BasicObj*> args, Namespace& n) override {
-        return target()->call(args, n);
+      refcount++;
+      BasicObj* res = target()->call(args, n);
+      refcount--;
+      return res;
     }
 };
 
@@ -382,10 +405,14 @@ class FloatObj:public BasicObj{
     }
     BasicObj* add(BasicObj* b,bool swapped) override{
       if (auto i=dynamic_cast<FloatObj*>(b)){
-        return new FloatObj(this->a + i->a);
+        BasicObj* tmp = new FloatObj(this->a + i->a);
+        tmp->refcount++;
+        return tmp;
       }
       else if(auto i=dynamic_cast<IntObj*>(b)){
-        return new FloatObj(this->a + i->a);
+        BasicObj* tmp = new FloatObj(this->a + i->a);
+        tmp->refcount++;
+        return tmp;
       }
       else{
         if (!swapped)
@@ -396,10 +423,14 @@ class FloatObj:public BasicObj{
     }
     BasicObj* sub(BasicObj* b,bool swapped) override{
       if (auto i=dynamic_cast<FloatObj*>(b)){
-        return new FloatObj(this->a - i->a);
+        BasicObj* tmp = new FloatObj(this->a - i->a);
+        tmp->refcount++;
+        return tmp;
       }
       else if(auto i=dynamic_cast<IntObj*>(b)){
-        return new FloatObj(this->a - i->a);
+        BasicObj* tmp = new FloatObj(this->a - i->a);
+        tmp->refcount++;
+        return tmp;
       }
       else{
         if (!swapped)
@@ -410,10 +441,14 @@ class FloatObj:public BasicObj{
     }
     BasicObj* div(BasicObj* b,bool swapped) override{
       if (auto i=dynamic_cast<FloatObj*>(b)){
-        return new FloatObj(this->a / i->a);
+        BasicObj* tmp = new FloatObj(this->a / i->a);
+        tmp->refcount++;
+        return tmp;
       }
       else if(auto i=dynamic_cast<IntObj*>(b)){
-        return new FloatObj(this->a / i->a);
+        BasicObj* tmp = new FloatObj(this->a / i->a);
+        tmp->refcount++;
+        return tmp;
       }
       else{
         if (!swapped)
@@ -424,10 +459,14 @@ class FloatObj:public BasicObj{
     }
     BasicObj* mul(BasicObj* b,bool swapped) override{
       if (auto i=dynamic_cast<FloatObj*>(b)){
-        return new FloatObj(this->a * i->a);
+        BasicObj* tmp = new FloatObj(this->a * i->a);
+        tmp->refcount++;
+        return tmp;
       }
       else if(auto i=dynamic_cast<IntObj*>(b)){
-        return new FloatObj(this->a * i->a);
+        BasicObj* tmp = new FloatObj(this->a * i->a);
+        tmp->refcount++;
+        return tmp;
       }
       else{
         if (!swapped)
@@ -491,7 +530,9 @@ class FloatObj:public BasicObj{
       a--;
     }
     BasicObj* clone() override{
-        return new FloatObj(a);
+      BasicObj* tmp = new FloatObj(a);
+      tmp->refcount++;
+      return tmp;
     }
     ~FloatObj() override = default;
 };
@@ -509,6 +550,7 @@ class MapObject:public BasicObj{
     std::cout<<"getitem "<<key->str()<<std::endl;
     for (auto [k,val]:items){
       if (k->equal(key,false)){
+        val->refcount++;
         return val;
       }
     }
@@ -538,6 +580,7 @@ class MapObject:public BasicObj{
     for (const auto& pair : items){
       newMap->items[pair.first] = pair.second;
     }
+    newMap->refcount++;
     return newMap;
   }
 };
@@ -552,7 +595,9 @@ class FunctionObject:public BasicObj{
       this->code=code;
     }
     BasicObj* call(std::vector<BasicObj*> args,Namespace& n) override{
+      refcount++;
       if (args.size()!=argNames.size()){
+        refcount--;
         throw ValueError(("Function called with wrong number of arguments. "+
           std::to_string(args.size())+" instead of "+std::to_string(argNames.size())).c_str());
       }
@@ -563,12 +608,15 @@ class FunctionObject:public BasicObj{
 
       try{
         doCode(code,localNamespace);
+        refcount--;
         throw SyntaxError("Function must have a return statement (can return null with 'return null')");
       }
       catch (const ReturnSig& sig){
+        refcount--;
         return sig.val;
       }
       catch(...){
+        refcount--;
         throw;
       }
     }
@@ -576,7 +624,9 @@ class FunctionObject:public BasicObj{
       return "<FunctionObject>";
     }
     BasicObj* clone() override{
-      return new FunctionObject(argNames, code);
+      BasicObj* tmp = new FunctionObject(argNames, code);
+      tmp->refcount++;
+      return tmp;
     }
      ~FunctionObject() override = default;
 };
@@ -587,12 +637,15 @@ class BoundMethod:public BasicObj{
   BasicObj* self;
   BoundMethod(BasicObj* f,BasicObj* s):func(f),self(s){}
   BasicObj* call(std::vector<BasicObj*> a,Namespace& n) override{
+    refcount++;
     std::cout<<"Called BoundMethode with "<<a.size()<<" args"<<std::endl;
     std::vector<BasicObj*> callArgs={self};
     for (auto i:a){
       callArgs.push_back(i);
     }
-    return func->call(callArgs,n);
+    BasicObj* res = func->call(callArgs,n);
+    refcount--;
+    return res;
   }
   std::string str() override{
     return "<BoundMethod>";
@@ -611,7 +664,9 @@ class NullObject:public BasicObj{
     return false;
   }
   BasicObj* clone() override{
-    return new NullObject();
+    BasicObj* tmp = new NullObject();
+    tmp->refcount++;
+    return tmp;
   }
 };
 
@@ -637,15 +692,19 @@ class ClassObject:public BasicObj{
       this->context=context;
   }
   BasicObj* call(std::vector<BasicObj*> args,Namespace& n) override{
+    refcount++;
     BasicObj* instance = InstanceObj(this,args,n);
     instance->typeID=instanceID;
+    refcount--;
     return instance;
   }
   std::string str() override{
     return "<ClassObject>";
   }
   BasicObj* clone() override{
-    return new ClassObject(a,context);
+    BasicObj* tmp = new ClassObject(a,context);
+    tmp->refcount++;
+    return tmp;
   }
 };
 
@@ -655,13 +714,18 @@ class FunctionNative:public BasicObj{
   std::function<BasicObj*(std::vector<BasicObj*>,Namespace&)> func;
   FunctionNative(std::function<BasicObj*(std::vector<BasicObj*>,Namespace&)> f):func(f){typeID=10;}
   BasicObj* call(std::vector<BasicObj*> args,Namespace& n) override{
-    return func(args,n);
+    refcount++;
+    BasicObj* res = func(args,n);
+    refcount--;
+    return res;
   }
     std::string str() override{
       return "<NativeFunction>";
     }
     BasicObj* clone() override{
-      return new FunctionNative(func);
+      BasicObj* tmp = new FunctionNative(func);
+      tmp->refcount++;
+      return tmp;
     }
      ~FunctionNative() override = default;
 };
@@ -771,7 +835,11 @@ public:
 
           if (val->typeID == typeNames.at("FunctionObject") ||
               val->typeID == typeNames.at("FunctionNative")) {
-              return new BoundMethod(val, this);
+                {
+                  BasicObj* tmp = new BoundMethod(val, this);
+                  tmp->refcount++;
+                  return tmp;
+                }
           }
 
           return val;
@@ -788,9 +856,11 @@ public:
         attrs[attrName] = value;
     }
     BasicObj* clone() override{
-        std::vector<BasicObj*> newArgs;
-        for(auto* a : args) newArgs.push_back(a->clone());
-        return new InstanceObject(klass, newArgs,attrs);
+      std::vector<BasicObj*> newArgs;
+      for(auto* a : args) newArgs.push_back(a->clone());
+      BasicObj* tmp = new InstanceObject(klass, newArgs,attrs);
+      tmp->refcount++;
+      return tmp;
     }
     void setitem(BasicObj* key,BasicObj* val)override{
       Namespace dull;
@@ -813,11 +883,16 @@ class ListObject:public BasicObj{
       this->items.push_back(args[0]->clone());
       return nullptr;
     });
+    appendFunc->refcount++;
     attrs["append"] = appendFunc;
     attrs["push_back"] = appendFunc;
-    attrs["size"]=new FunctionNative([this](std::vector<BasicObj*> args,Namespace&){
-      return new IntObj(this->items.size());
+    BasicObj* sizeFunc = new FunctionNative([this](std::vector<BasicObj*> args,Namespace&){
+      BasicObj* tmp = new IntObj(this->items.size());
+      tmp->refcount++;
+      return tmp;
     });
+    sizeFunc->refcount++;
+    attrs["size"] = sizeFunc;
   }
   BasicObj* getitem(BasicObj* key) override{
     if (auto i=dynamic_cast<IntObj*>(key)){
@@ -855,12 +930,16 @@ class ListObject:public BasicObj{
     return result;
   }
   BasicObj* clone() override{
-    return new ListObject(items);
+    BasicObj* tmp = new ListObject(items);
+    tmp->refcount++;
+    return tmp;
   }
 };
 
 BasicObj* InstanceObj(ClassObject* cls, std::vector<BasicObj*> args,Namespace& n) {
-    return new InstanceObject(cls, args, n);
+  BasicObj* tmp = new InstanceObject(cls, args, n);
+  tmp->refcount++;
+  return tmp;
 }
 
 void remBrackets(std::string& code){
@@ -911,12 +990,20 @@ BasicObj* exec(std::string code, Namespace& n){
           unescaped.push_back(raw[i]);
         }
       }
-      return new StringObject(unescaped);
+      {
+        BasicObj* tmp = new StringObject(unescaped);
+        tmp->refcount++;
+        return tmp;
+      }
     }
 
     if (code.size() >= 2 && code[0] == '[' && code.back() == ']') {
       if (code.size() == 2){ 
-        return new ListObject({});
+        {
+          BasicObj* tmp = new ListObject({});
+          tmp->refcount++;
+          return tmp;
+        }
       }
       std::vector<BasicObj*> items;
       std::string inner = code.substr(1, code.size() - 2);
@@ -1230,7 +1317,11 @@ BasicObj* exec(std::string code, Namespace& n){
       else if (compOp=="<") cres = L->less(R,false);
       else if (compOp==">=") cres = L->greater(R,false) || L->equal(R,false);
       else if (compOp=="<=") cres = L->less(R,false) || L->equal(R,false);
-      return new IntObj(cres?1:0);
+      {
+        BasicObj* tmp = new IntObj(cres?1:0);
+        tmp->refcount++;
+        return tmp;
+      }
     }
     if (!hasOp && hasMul){
       BasicObj* res=nullptr;
@@ -1476,10 +1567,18 @@ BasicObj* exec(std::string code, Namespace& n){
       }
     }
     if (isInt && isFloat){
-      return new FloatObj(std::stof(code));
+      {
+        BasicObj* tmp = new FloatObj(std::stof(code));
+        tmp->refcount++;
+        return tmp;
+      }
     }
     else if (isInt){
-      return new IntObj(std::stoi(code));
+      {
+        BasicObj* tmp = new IntObj(std::stoi(code));
+        tmp->refcount++;
+        return tmp;
+      }
     }
   BasicObj* res=nullptr;
   BasicObj* right;
@@ -1564,95 +1663,177 @@ void __clean(){
 
 Namespace CreateContext(){
   Namespace n;
-  n["true"]=new BoolObj(true);
-  n["false"]=new BoolObj(false);
-  n["IntFromString"]=new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
-    if (args.size()!=1) throw ValueError("IntFromString expects exactly one argument");
-    return new IntObj(std::stoi(args[0]->str()));
-  });
-  n["print"]=new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
-    for (auto i:args){
-      if (i) std::cout<<i->str(); else std::cout<<"<null>";
-    }
-    return nullptr;
-  });
-  n["input"]=new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
-    if (args.size()>1) throw ValueError("Input function expects at most one argument");
-    std::string prompt;
-    if (args.size()==1) prompt=args[0]->str();
-    std::cout<<prompt;
-    std::cout.flush();
-
-    std::string line;
-    std::cin>>line;
-
-    return new StringObject(line);
-  });
-  n["println"]=new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
-    for (auto i:args){
-      if (i) std::cout<<i->str(); else std::cout<<"<null>";
-    }
-    std::cout<<std::endl;
-    return nullptr;
-  });
-  n["null"]=new NullObject();
-  n["list"]=new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
-    BasicObj* res=new ListObject(args);
-    return res;
-  });
-  n["flushOut"]=new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
-    std::cout.flush();
-    return nullptr;
-  });
-  n["currentNamespace"]=new FunctionNative([&n](std::vector<BasicObj*> args,Namespace&){
-    ListObject* lst = new ListObject({});
-    for (auto& pair : n) {      
-      lst->items.push_back(new StringObject(pair.first));
-    }
-    return lst;
-  });
-  n["addr"]=new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
-    if (args.size()!=1) throw ValueError("addr expects exactly one argument");
-    std::stringstream ss;
-    ss<<args[0];
-    return new StringObject(ss.str());
-  });
-  n["typeNo"]=new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
-    if (args.size()!=1) throw ValueError("typeNo expects exactly one argument");
-    return new IntObj(args[0]->typeID);
-  });
-  n["getRefcount"]=new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
-    if (args.size()!=1) throw ValueError("getRefcount expects exactly one argument");
-    return new IntObj(args[0]->refcount);
-  });
-  n["clone"]=new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
-    if (args.size()!=1) throw ValueError("clone expects exactly one argument");
-    return args[0]->clone();
-  });
-  n["ref"] = new FunctionNative([](std::vector<BasicObj*> args,Namespace& n) {
-    std::cout<<"Calling in ns"<<std::endl;
-    for (auto [key,val]:n){
-      std::cout<<key<<":"<<val->str()<<std::endl;
-    }
-    std::string name = args[0]->str();
-
-    auto it = n.find(name);
-    if (it != n.end()) {
-        return new ReferenceObject(&it->second);
-    }
-
-    throw ValueError(("Name not "+name+ " found").c_str());
-});
-  n["map"]=new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
-    return new MapObject();
-  });
-  n["viewDict"]=new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
-    std::cout<<"Called view dict"<<std::endl;
-    for (auto [key,val]:args[0]->attrs){
-      std::cout<<key<<":"<<val->str()<<std::endl;
-    }
-    return nullptr;
-  });
+  {
+    BasicObj* t = new BoolObj(true);
+    t->refcount++;
+    n["true"] = t;
+  }
+  {
+    BasicObj* f = new BoolObj(false);
+    f->refcount++;
+    n["false"] = f;
+  }
+  {
+    BasicObj* fn = new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
+      if (args.size()!=1) throw ValueError("IntFromString expects exactly one argument");
+      BasicObj* tmp = new IntObj(std::stoi(args[0]->str()));
+      tmp->refcount++;
+      return tmp;
+    });
+    fn->refcount++;
+    n["IntFromString"] = fn;
+  }
+  {
+    BasicObj* fn = new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
+      for (auto i:args){
+        if (i) std::cout<<i->str(); else std::cout<<"<null>";
+      }
+      return nullptr;
+    });
+    fn->refcount++;
+    n["print"] = fn;
+  }
+  {
+    BasicObj* fn = new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
+      if (args.size()>1) throw ValueError("Input function expects at most one argument");
+      std::string prompt;
+      if (args.size()==1) prompt=args[0]->str();
+      std::cout<<prompt;
+      std::cout.flush();
+      std::string line;
+      std::cin>>line;
+      BasicObj* tmp = new StringObject(line);
+      tmp->refcount++;
+      return tmp;
+    });
+    fn->refcount++;
+    n["input"] = fn;
+  }
+  {
+    BasicObj* fn = new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
+      for (auto i:args){
+        if (i) std::cout<<i->str(); else std::cout<<"<null>";
+      }
+      std::cout<<std::endl;
+      return nullptr;
+    });
+    fn->refcount++;
+    n["println"] = fn;
+  }
+  {
+    BasicObj* nullObj = new NullObject();
+    nullObj->refcount++;
+    n["null"] = nullObj;
+  }
+  {
+    BasicObj* fn = new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
+      BasicObj* res=new ListObject(args);
+      res->refcount++;
+      return res;
+    });
+    fn->refcount++;
+    n["list"] = fn;
+  }
+  {
+    BasicObj* fn = new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
+      std::cout.flush();
+      return nullptr;
+    });
+    fn->refcount++;
+    n["flushOut"] = fn;
+  }
+  {
+    BasicObj* fn = new FunctionNative([&n](std::vector<BasicObj*> args,Namespace&){
+      ListObject* lst = new ListObject({});
+      lst->refcount++;
+      for (auto& pair : n) {
+        BasicObj* s = new StringObject(pair.first);
+        s->refcount++;
+        lst->items.push_back(s);
+      }
+      return lst;
+    });
+    fn->refcount++;
+    n["currentNamespace"] = fn;
+  }
+  {
+    BasicObj* fn = new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
+      if (args.size()!=1) throw ValueError("addr expects exactly one argument");
+      std::stringstream ss;
+      ss<<args[0];
+      BasicObj* tmp = new StringObject(ss.str());
+      tmp->refcount++;
+      return tmp;
+    });
+    fn->refcount++;
+    n["addr"] = fn;
+  }
+  {
+    BasicObj* fn = new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
+      if (args.size()!=1) throw ValueError("typeNo expects exactly one argument");
+      BasicObj* tmp = new IntObj(args[0]->typeID);
+      tmp->refcount++;
+      return tmp;
+    });
+    fn->refcount++;
+    n["typeNo"] = fn;
+  }
+  {
+    BasicObj* fn = new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
+      if (args.size()!=1) throw ValueError("getRefcount expects exactly one argument");
+      BasicObj* tmp = new IntObj(args[0]->refcount);
+      tmp->refcount++;
+      return tmp;
+    });
+    fn->refcount++;
+    n["getRefcount"] = fn;
+  }
+  {
+    BasicObj* fn = new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
+      if (args.size()!=1) throw ValueError("clone expects exactly one argument");
+      return args[0]->clone();
+    });
+    fn->refcount++;
+    n["clone"] = fn;
+  }
+  {
+    BasicObj* fn = new FunctionNative([](std::vector<BasicObj*> args,Namespace& n) {
+      std::cout<<"Calling in ns"<<std::endl;
+      for (auto [key,val]:n){
+        std::cout<<key<<":"<<val->str()<<std::endl;
+      }
+      std::string name = args[0]->str();
+      auto it = n.find(name);
+      if (it != n.end()) {
+          BasicObj* tmp = new ReferenceObject(&it->second);
+          tmp->refcount++;
+          return tmp;
+      }
+      throw ValueError(("Name not "+name+ " found").c_str());
+    });
+    fn->refcount++;
+    n["ref"] = fn;
+  }
+  {
+    BasicObj* fn = new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
+      BasicObj* tmp = new MapObject();
+      tmp->refcount++;
+      return tmp;
+    });
+    fn->refcount++;
+    n["map"] = fn;
+  }
+  {
+    BasicObj* fn = new FunctionNative([](std::vector<BasicObj*> args,Namespace&){
+      std::cout<<"Called view dict"<<std::endl;
+      for (auto [key,val]:args[0]->attrs){
+        std::cout<<key<<":"<<val->str()<<std::endl;
+      }
+      return nullptr;
+    });
+    fn->refcount++;
+    n["viewDict"] = fn;
+  }
   n["importdll"]=new FunctionNative([](std::vector<BasicObj*> args,Namespace& n){
     std::cout<<"Importing dll to ns "<<&n<<std::endl;
     if (args.size()!=1) throw ValueError("importdll expects exactly one argument");
