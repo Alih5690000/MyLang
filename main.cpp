@@ -680,6 +680,7 @@ int classes=13;
 
 class ClassObject:public BasicObj{
   public:
+  BasicObj* parent=nullptr;
   int instanceID=classes++;
   std::string a;
   Namespace* context;
@@ -706,6 +707,7 @@ class ClassObject:public BasicObj{
     tmp->refcount++;
     return tmp;
   }
+  //BasicObj* getattr(); complete
 };
 
 
@@ -831,7 +833,7 @@ public:
       }
 
       if (klass->attrs.count(name)) {
-          BasicObj* val = klass->attrs[name];
+          BasicObj* val = klass->getattr(name);
 
           if (val->typeID == typeNames.at("FunctionObject") ||
               val->typeID == typeNames.at("FunctionNative")) {
