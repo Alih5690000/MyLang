@@ -92,6 +92,7 @@ class BasicObj{
     virtual bool equal(BasicObj*,bool){throw NotAvailable("That is Base class (equal)");};
     virtual bool asbool(){throw NotAvailable("That is Base class (asbool)");};
     virtual void free(){throw NotAvailable("That is Base class (free)");};
+    virtual bool hasattr(const std::string& s){return attrs.count(s);};
     virtual BasicObj* getattr(const std::string& s){
       auto it = attrs.find(s);
       if (it==attrs.end()) throw ValueError(("Attribute "+s+" not found").c_str());
@@ -707,7 +708,27 @@ class ClassObject:public BasicObj{
     tmp->refcount++;
     return tmp;
   }
-  //BasicObj* getattr(); complete
+  bool hasattr(const std::string& name) override{
+    ClassObject* cls = this;
+    while (cls) {
+        if (cls->attrs.count(name)) {
+            return true;
+        }
+        cls = dynamic_cast<ClassObject*>(cls->parent);
+    }
+    return false;
+  }
+  BasicObj* getattr(const std::string& str) override{
+    ClassObject* cls=this;
+    while (cls){
+      if (cls->attrs.count(str)){
+        BasicObj* r=cls->attrs[str];
+        r->refcount++;
+        return r;
+      }
+      cls=cls->parent;
+   }
+   throw ValueError("Attribute not found");
 };
 
 
@@ -741,9 +762,9 @@ public:
     InstanceObject(ClassObject* cls, std::vector<BasicObj*> args,Namespace& n) {
         klass = cls;
         this->args = args;
-        if (klass->attrs.count("__constructor__")) {
+        if (klass->hasattr("__constructor__")) {
           std::cout<<"Calling constructor"<<std::endl;
-            BasicObj* ctor = klass->attrs["__constructor__"];
+            BasicObj* ctor = klass->getattr["__constructor__"];
             std::vector<BasicObj*> callArgs = { this };
             for (auto* arg : args){ 
               callArgs.push_back(arg);
@@ -756,8 +777,8 @@ public:
     }
 
     BasicObj* add(BasicObj* other, bool swapped) override {
-        if (klass->attrs.count("__add__")) {
-            auto* func = dynamic_cast<FunctionObject*>(klass->attrs["__add__"]);
+        if (klass->hasattr("__add__")) {
+            auto* func = dynamic_cast<FunctionObject*>(klass->getattr("__add__"));
             std::vector<BasicObj*> args = { this, other };
             Namespace n;
             return func->call(args,n);
@@ -766,8 +787,8 @@ public:
     }
 
     BasicObj* sub(BasicObj* other, bool swapped) override {
-        if (klass->attrs.count("__sub__")) {
-            auto* func = dynamic_cast<FunctionObject*>(klass->attrs["__sub__"]);
+        if (klass->hasattr("__sub__")) {
+            auto* func = dynamic_cast<FunctionObject*>(klass->getattr("__sub__"));
             std::vector<BasicObj*> args = { this, other };
             Namespace n;
             return func->call(args,n);
@@ -776,8 +797,8 @@ public:
     }
 
     BasicObj* mul(BasicObj* other, bool swapped) override {
-        if (klass->attrs.count("__mul__")) {
-            auto* func = dynamic_cast<FunctionObject*>(klass->attrs["__mul__"]);
+        if (klass->hasattr("__mul__")) {
+            auto* func = dynamic_cast<FunctionObject*>(klass->getattr("__mul__"));
             std::vector<BasicObj*> args = { this, other };
             Namespace n;
             return func->call(args,n);
@@ -786,8 +807,8 @@ public:
     }
 
     BasicObj* div(BasicObj* other, bool swapped) override {
-        if (klass->attrs.count("__div__")) {
-            auto* func = dynamic_cast<FunctionObject*>(klass->attrs["__div__"]);
+        if (klass->hasattr("__div__")) {
+            auto* func = dynamic_cast<FunctionObject*>(klass->getattr("__div__"));
             std::vector<BasicObj*> args = { this, other };
             Namespace n;
             return func->call(args,n);
@@ -796,8 +817,8 @@ public:
     }
 
     bool equal(BasicObj* other, bool swapped) override {
-        if (klass->attrs.count("__eq__")) {
-            auto* func = dynamic_cast<FunctionObject*>(klass->attrs["__eq__"]);
+        if (klass->hasattr("__eq__")) {
+            auto* func = dynamic_cast<FunctionObject*>(klass->getattr("__eq__"));
             std::vector<BasicObj*> args = { this, other };
             Namespace n;
             auto* res = func->call(args,n);
@@ -807,8 +828,8 @@ public:
     }
 
     bool asbool() override {
-        if (klass->attrs.count("__bool__")) {
-            auto* func = dynamic_cast<FunctionObject*>(klass->attrs["__bool__"]);
+        if (klass->hasattr("__bool__")) {
+            auto* func = dynamic_cast<FunctionObject*>(klass->getattr("__bool__"));
             std::vector<BasicObj*> args = { this };
             Namespace n;
             auto* res = func->call(args,n);
@@ -818,8 +839,8 @@ public:
     }
 
     std::string str() override {
-        if (klass->attrs.count("__str__")) {
-            auto* func = dynamic_cast<FunctionObject*>(klass->attrs["__str__"]);
+        if (klass->hasattr("__str__")) {
+            auto* func = dynamic_cast<FunctionObject*>(klass->getattr("__str__"));
             std::vector<BasicObj*> args = { this };
             Namespace n;
             auto* res = func->call(args,n);
@@ -832,17 +853,14 @@ public:
           return attrs[name];
       }
 
-      if (klass->attrs.count(name)) {
           BasicObj* val = klass->getattr(name);
 
           if (val->typeID == typeNames.at("FunctionObject") ||
               val->typeID == typeNames.at("FunctionNative")) {
-                {
                   BasicObj* tmp = new BoundMethod(val, this);
                   tmp->refcount++;
                   return tmp;
                 }
-          }
 
           return val;
       }
@@ -866,11 +884,11 @@ public:
     }
     void setitem(BasicObj* key,BasicObj* val)override{
       Namespace dull;
-      klass->getattr("__getitem__")->call({this,key,val},dull);
+      klass->getattr("__setitem__")->call({this,key,val},dull);
     }
     BasicObj* getitem(BasicObj* key)override{
       Namespace dull;
-      return klass->getattr("__setitem__")->call({this,key},dull);
+      return klass->getattr("__getitem__")->call({this,key},dull);
     }
     ~InstanceObject() override = default;
 
