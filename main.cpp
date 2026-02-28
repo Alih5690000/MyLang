@@ -1191,6 +1191,21 @@ BasicObj* exec(std::string code, Namespace& n){
           }
         }
         if (name.empty()) throw SyntaxError("Invalid class name");
+        ClassObject* p=nullptr;
+        {
+          std::string parentName;
+          bool parent=false;
+          for (int k=0;k<name.size();k++){
+            if (name[k]==':'){
+              parent=true;
+              continue;
+            }
+            if (parent) parentName+=name[i];
+          }
+          BasicObj* pp=exec(parentName,n);
+          p=dynamic_cast<ClassObject*>(pp);
+        }
+
       std::string body;
       int bracedepth=0;
       bool started=false;
