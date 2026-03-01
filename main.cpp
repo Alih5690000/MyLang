@@ -676,18 +676,24 @@ class ClassObject;
 BasicObj* InstanceObj(ClassObject* cls, std::vector<BasicObj*> args,Namespace&);
 
 #ifndef OWNER
-int classes=13;
+int classes=14;
 #endif
 
 class ClassObject:public BasicObj{
   public:
-  BasicObj* parent=nullptr;
+  ClassObject* parent=nullptr;
   int instanceID=classes++;
   std::string a;
   Namespace* context;
-  ClassObject(const std::string& a, Namespace* context){
+  ClassObject(const std::string& a, Namespace* context,ClassObject* parent){
+      this->parent=parent;
       typeID=8;
       Namespace cls=*context;
+      if (parent){
+        for (auto [k,v]:parent->attrs){
+          attrs[k]=v;
+        }
+      }
       doCode(a,cls);
       attrs=cls;
       this->a=a;
@@ -704,7 +710,7 @@ class ClassObject:public BasicObj{
     return "<ClassObject>";
   }
   BasicObj* clone() override{
-    BasicObj* tmp = new ClassObject(a,context);
+    BasicObj* tmp = new ClassObject(a,context,parent);
     tmp->refcount++;
     return tmp;
   }
@@ -729,6 +735,7 @@ class ClassObject:public BasicObj{
       cls=cls->parent;
    }
    throw ValueError("Attribute not found");
+  }
 };
 
 
@@ -764,7 +771,7 @@ public:
         this->args = args;
         if (klass->hasattr("__constructor__")) {
           std::cout<<"Calling constructor"<<std::endl;
-            BasicObj* ctor = klass->getattr["__constructor__"];
+            BasicObj* ctor = klass->getattr("__constructor__");
             std::vector<BasicObj*> callArgs = { this };
             for (auto* arg : args){ 
               callArgs.push_back(arg);
@@ -863,7 +870,7 @@ public:
                 }
 
           return val;
-      }
+
 
       throw ValueError(("Attribute "+name+" not found").c_str());
     }
@@ -894,11 +901,65 @@ public:
 
 };
 
+
+class SuperObject : public BasicObj {
+public:
+    InstanceObject* self;
+    ClassObject* startClass;
+
+    SuperObject(InstanceObject* instance, ClassObject* currentClass)
+        : self(instance)
+    {
+        typeID = 11;
+        if (!currentClass)
+            throw ValueError("SuperObject requires current class");
+
+        startClass = currentClass->parent;
+        if (!startClass)
+            throw ValueError("Class has no parent for super()");
+    }
+
+    BasicObj* getattr(const std::string& name) override {
+        ClassObject* cls = startClass;
+
+        while (cls) {
+            if (cls->attrs.count(name)) {
+                BasicObj* val = cls->attrs[name];
+
+                // если это функция — возвращаем BoundMethod
+                if (val->typeID == typeNames.at("FunctionObject") ||
+                    val->typeID == typeNames.at("FunctionNative")) {
+
+                    BasicObj* tmp = new BoundMethod(val, (BasicObj*)self);
+                    tmp->refcount++;
+                    return tmp;
+                }
+
+                val->refcount++;
+                return val;
+            }
+            cls = cls->parent;
+        }
+
+        throw ValueError(("Attribute " + name + " not found in super").c_str());
+    }
+
+    std::string str() override {
+        return "<SuperObject>";
+    }
+
+    BasicObj* clone() override {
+        BasicObj* tmp = new SuperObject(self, self->klass);
+        tmp->refcount++;
+        return tmp;
+    }
+};
+
 class ListObject:public BasicObj{
   public:
   std::vector<BasicObj*> items;
   ListObject(const std::vector<BasicObj*>& items):items(items){
-    typeID=11;
+    typeID=12;
     auto appendFunc = new FunctionNative([this](std::vector<BasicObj*> args,Namespace) {
       this->items.push_back(args[0]->clone());
       return nullptr;
@@ -1186,22 +1247,31 @@ BasicObj* exec(std::string code, Namespace& n){
           i++;
         }
         else{
-          for (; i<code.size() && (std::isalnum((unsigned char)code[i]) || code[i]=='_'); ++i){
+          for (; i<code.size() && (std::isalnum((unsigned char)code[i]) || code[i]=='_' || code[i]==':'); ++i){
             name+=code[i];
           }
         }
         if (name.empty()) throw SyntaxError("Invalid class name");
+        std::cout<<"Class name "<<name<<std::endl;
         ClassObject* p=nullptr;
+        std::string realName;
         {
           std::string parentName;
           bool parent=false;
           for (int k=0;k<name.size();k++){
+            std::cout<<"Char is "<<name[k]<<std::endl;
             if (name[k]==':'){
               parent=true;
               continue;
             }
-            if (parent) parentName+=name[i];
+            if (parent){ 
+              parentName+=name[k];
+            }
+            else{
+              realName+=name[k];
+            }
           }
+          std::cout<<"Parent name "<<parentName<<std::endl;
           BasicObj* pp=exec(parentName,n);
           p=dynamic_cast<ClassObject*>(pp);
         }
@@ -1228,8 +1298,8 @@ BasicObj* exec(std::string code, Namespace& n){
         }
         body+=code[i];
       }
-      ClassObject* cls = new ClassObject(body,&n);
-      n[name]=cls;
+      ClassObject* cls = new ClassObject(body,&n,p);
+      n[realName]=cls;
       return cls;
     }
     else if (code.size()>=2 && code.substr(0,2)=="fn"){
@@ -1423,7 +1493,8 @@ BasicObj* exec(std::string code, Namespace& n){
            int gapDepth=1;
            int squeareDepth=0;
            bool inQuote=false;
-           for (int j=i;j<code.size();j++){
+           int j=i;
+           for (;j<code.size();j++){
             if (code[j]=='"') inQuote=!inQuote;
             if (!inQuote && code[j]=='(') gapDepth++;
             if (!inQuote && code[j]==')') gapDepth--;
@@ -1431,6 +1502,10 @@ BasicObj* exec(std::string code, Namespace& n){
             if (!inQuote && code[j]==']') squeareDepth--;
             if (code[j] ==')' && !inQuote && gapDepth==0 && squeareDepth==0) break;
              inGap+=code[j];
+           }
+           j++;
+           if (j<code.size()){
+
            }
            std::vector<BasicObj*> args;
            std::string tmp;
@@ -1463,8 +1538,22 @@ BasicObj* exec(std::string code, Namespace& n){
            BasicObj* a=exec(name,n);
            if (!a) throw ValueError(("Function "+name+" not found").c_str());
            try{
-             return a->call(args,n);
-           }
+             BasicObj* result = a->call(args,n);
+
+             if (j < code.size() && (code[j]=='[' || code[j]=='.' || code[j]=='(')) {
+                std::string remaining;
+                for (int k=j; k<code.size(); k++){
+                remaining+=code[k];
+             }
+
+              Namespace tempns = n;
+              tempns["__indexed_result__"] = result;
+
+              return exec("__indexed_result__" + remaining, tempns);
+            }
+
+            return result;
+          }
            catch (...){
             throw;
            }
@@ -1868,6 +1957,42 @@ Namespace CreateContext(){
     });
     fn->refcount++;
     n["viewDict"] = fn;
+  }
+  {
+    BasicObj* o=new FunctionNative([](std::vector<BasicObj*> args,Namespace& n){
+      if (args.size()!=1) throw ValueError("super() expects 1 argument");
+      InstanceObject* instance=dynamic_cast<InstanceObject*>(args[0]);
+      if (!instance) throw ValueError("First argument must be InstanceObject");
+      ClassObject* currentClass = instance->klass;
+      if (!currentClass)
+          throw ValueError("Instance has no class");
+
+      return new SuperObject(instance,currentClass);
+    });
+    o->refcount++;
+    n["super"]=o;
+  }
+  {
+    BasicObj* fn=new FunctionNative([](std::vector<BasicObj*> args,Namespace& n){
+      std::cout<<"Recieved type "<<args[0]->typeID<<std::endl;
+      FunctionObject* func=dynamic_cast<FunctionObject*>(args[0]);
+      if (func){
+        std::cout<<"Function body "<<func->code<<std::endl;;
+      }
+      else{
+        BoundMethod* f=dynamic_cast<BoundMethod*>(args[0]);
+        if (!f)
+          throw ValueError("Error while casting");
+        else{
+          std::cout<<"is bound method"<<std::endl;
+          FunctionObject* ff=dynamic_cast<FunctionObject*>(f->func);
+          if (!ff) throw ValueError("Is native function");
+          std::cout<<"Function body "<<ff->code<<std::endl;
+        }
+      }
+      return nullptr;
+    });
+    n["viewFunc"]=fn;
   }
   n["importdll"]=new FunctionNative([](std::vector<BasicObj*> args,Namespace& n){
     std::cout<<"Importing dll to ns "<<&n<<std::endl;
