@@ -5,23 +5,14 @@ int main(){
     Namespace n=CreateContext();
     // g++ mtest.cpp -o mtest && ./mtest
     doCode(R"(
-        class A{
-            fn __constructor__(self){
-                self.x=0;
-                println("A ctr");
-                return(null);
-            };
+        a=input();
+        b=input();
+        if (a==b){
+            println("They are same");
         };
-        class B:A{
-            fn __constructor__(self){
-                viewFunc(super(self).__constructor__);
-                super(self).__constructor__();
-                println("B ctor");
-                return(null);
-            }
+        if (a!=b){
+            println("They are not same");
         };
-        a=B();
-        println(a.x);
     )",n);
     return 0;
 }
