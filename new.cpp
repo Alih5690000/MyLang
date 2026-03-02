@@ -4,6 +4,8 @@
 #include <vector>
 #include <functional>
 
+//g++ new.cpp -o new && ./new
+
 class NotAvailable:public std::exception{
   public:
   std::string mes;
@@ -239,12 +241,47 @@ struct Context{
 struct Node{
     public:
     virtual BasicObj* eval(Context&)=0;
+    virtual void set(Context&,Node*){throw ValueError("Can not asign");}
+    virtual std::string str(){return "<Node>";}
+    virtual ~Node()=default;
 };
 
 struct LiteralNode:public Node{
     BasicObj* o;
     LiteralNode(BasicObj* l):o(l){}
     BasicObj* eval(Context&) override{return o;}
+    std::string str() override{
+      return "<LiteralNode>";
+    }
+};
+
+struct IdentifierNode:public Node{
+  public:
+  std::string name;
+  IdentifierNode(std::string n):name(n){}
+  BasicObj* eval(Context& c){return c.ns[name];}
+  void set(Context& c,Node* e){
+    if (c.ns[name])
+      c.ns[name]->refcount--;
+    BasicObj* res=e->eval(c);
+    res->refcount++;
+    c.ns[name]=res;
+  }
+  std::string str() override{
+      return "<IdentifierNode>";
+    }
+};
+
+struct AsignNode:public Node{
+  Node *l,*r;
+  AsignNode(Node* a,Node* b):l(a),r(b){}
+  BasicObj* eval(Context& c){
+    l->set(c,r);
+    return nullptr;
+  }
+  std::string str() override{
+      return "<AsignNode>";
+    }
 };
 
 struct BinaryNode:public Node{
@@ -269,9 +306,13 @@ struct BinaryNode:public Node{
         }
         return nullptr;
     }
+    std::string str() override{
+      return "<BinaryNode>";
+    }
 };
 
 Node* parse(std::string a,Context& c){
+  std::cout<<"source "<<a<<std::endl;
     bool sheerName=true;
     bool isInt=true;
     bool hasOp=false;
@@ -283,6 +324,7 @@ Node* parse(std::string a,Context& c){
         n+=i;
     }
     a=n;
+    if (a.back()==';') a.pop_back();
     if (a[0]=='('){
         int depth=0;
         for (int i=0;i<a.size();i++){
@@ -295,10 +337,26 @@ Node* parse(std::string a,Context& c){
             }
         }
     }
-    for (auto i:a){
+    for (int ii=0;ii<a.size();ii++){
+      char i=a[ii];
         if (i=='(') depth++;
         if (i==')') depth--;
-        if (!std::isalpha(i) && i!='_') sheerName=false;
+        if (!std::isalpha(i) && i!='_'){ 
+          sheerName=false;
+          if (i=='='){
+            std::cout<<"Asigning "<<name<<std::endl;
+            Node* l=parse(name,c);
+            std::cout<<"Left is "<<l->str()<<std::endl;
+            ii++;
+            std::string L;
+            for (int j=ii;j<a.size() && a[j]!=';';j++){
+              L+=a[j];
+            }
+            Node* r=parse(L,c);
+            std::cout<<"Right is "<<r->str()<<std::endl;
+            return new AsignNode(l,r);
+          }
+        }
         if (!std::isalnum((unsigned char)i)) isInt=false;
         if ((i=='+' || i=='-') && depth==0){
             hasOp=true;
@@ -340,14 +398,19 @@ Node* parse(std::string a,Context& c){
             return new BinaryNode(r,l,std::string(1,op));
         }
     }
-    if (sheerName) return new LiteralNode{c.ns[name]};
+    if (sheerName){ 
+      std::cout<<"sheer name "<<name<<std::endl;
+      return new IdentifierNode{name};
+    }
     if (isInt) return new LiteralNode{new IntObj(std::stoi(name))};
     return nullptr;
 }
 
 int main(){
     Context c;
-    Node* a=parse("(4+3)-2",c);
+    Node* b=parse("a=2;",c);
+    b->eval(c);
+    Node* a=parse("a;",c);
     std::cout<<a->eval(c)->str()<<std::endl;
     return 0;
 }
