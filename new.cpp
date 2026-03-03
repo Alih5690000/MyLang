@@ -310,6 +310,25 @@ class FunctionObject:public BasicObj{
      ~FunctionObject() override = default;
 };
 
+class FunctionNative:public BasicObj{
+  public:
+  std::function<BasicObj*(std::vector<BasicObj*>,Context*)> func;
+  Context* c;
+  FunctionNative(std::function<BasicObj*(std::vector<BasicObj*>,Context*)> f,Context* t):func(f),c(t){typeID=10;}
+  BasicObj* call(std::vector<BasicObj*> args) override{
+    BasicObj* res = func(args,c);
+    return res;
+  }
+    std::string str() override{
+      return "<NativeFunction>";
+    }
+    BasicObj* clone() override{
+      BasicObj* tmp = new FunctionNative(func,c);
+      return tmp;
+    }
+     ~FunctionNative() override = default;
+};
+
 struct LiteralNode:public Node{
     BasicObj* o;
     LiteralNode(BasicObj* l):o(l){}
@@ -570,11 +589,14 @@ Node* parse(std::string a,Context& c){
       }
       return new IfNode(cond,elseBody,body);
     }
+    else if (a.substr(0,2)=="fn"){
+      int j=2;
+      
+    }
     for (int ii=0;ii<a.size();ii++){
         char i=a[ii];
         std::cout<<"i is "<<i<<std::endl;
-        if (i=='(') depth++;
-        if (i==')') depth--;
+        
         if (i<'0' || i>'9'){ 
           std::cout<<"Not int due to "<<i<<std::endl;
           isInt=false;
@@ -620,7 +642,7 @@ Node* parse(std::string a,Context& c){
                 int depth2=0;
                 for (;ii<a.size();ii++){
                   i=a[ii];
-                  //std::cout<<"Char "<<i<<std::endl;
+                  std::cout<<"Char "<<i<<std::endl;
                   if (i=='(') depth1++;
                   if (i==')'){ 
                     depth1--;
@@ -629,16 +651,21 @@ Node* parse(std::string a,Context& c){
                   if (i=='[') depth2++;
                   if (i==']') depth2--;
                   if (i==',' && depth1==1 && depth2==0){
-                    if(!acc.empty())
+                    if(!acc.empty()){
                       args.push_back(parse(acc,c));
+                      acc.clear();
+                    }
                     continue;
                   }
                   acc+=i;
                 }
                 if(!acc.empty())
                   args.push_back(parse(acc,c));
+                for (auto i:args){
+                  std::cout<<"Arg is "<<i->str()<<std::endl;
+                }
                 res=new CallNode(res,args);
-                //std::cout<<"Res is "<<res->str()<<std::endl;
+                std::cout<<"Res is "<<res->str()<<std::endl;
               }
               if (i=='['){
                 Node* key;
@@ -664,8 +691,11 @@ Node* parse(std::string a,Context& c){
                 }
               }
           }
+          std::cout<<"The final res is "<<res->str()<<std::endl;
           return res;
         }
+        if (i=='(') depth++;
+        if (i==')') depth--;
         name+=i;
     }
     if (hasMul && !hasOp){
@@ -794,12 +824,17 @@ std::vector<Node*> parseCode(std::string s,Context& c){
 
 int main(){
     Context c;
+    c.ns["add"]=new FunctionNative([](std::vector<BasicObj*> args,Context* c){
+      if (args.size()!=2) throw ValueError("Add requires 2 arguements");
+      std::cout<<"Called add"<<std::endl;
+      return args[0]->add(args[1],false);
+    },&c);
     auto a=parseCode("{if (0){b=1;};else{b=0;}}",c);
     std::cout<<"Evaling "<<std::endl;
     for (auto i:a){
        i->eval(c);
     }
-    Node* b=parse("b[9];",c);
+    Node* b=parse("add(3,3);",c);
     std::cout<<b->eval(c)->str()<<std::endl;
     return 0;
 }
