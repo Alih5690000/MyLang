@@ -415,11 +415,12 @@ struct BinaryNode:public Node{
 };
 
 Node* parse(std::string a,Context& c){
-  //std::cout<<"source "<<a<<std::endl;
+  std::cout<<"source "<<a<<std::endl;
     bool sheerName=true;
     bool isInt=true;
     bool hasOp=false;
-    int depth;
+    bool hasMul=false;
+    int depth=0;
     std::string name;
     std::string n;
     for (auto i:a){
@@ -518,24 +519,29 @@ Node* parse(std::string a,Context& c){
     }
     for (int ii=0;ii<a.size();ii++){
         char i=a[ii];
-        //std::cout<<"i is "<<i<<std::endl;
+        std::cout<<"i is "<<i<<std::endl;
         if (i=='(') depth++;
         if (i==')') depth--;
         if (i<'0' || i>'9'){ 
-          //std::cout<<"Not int due to "<<i<<std::endl;
+          std::cout<<"Not int due to "<<i<<std::endl;
           isInt=false;
         }
         else{
+          std::cout<<i<<" is number"<<std::endl;
           name+=i;
           continue;
         }
         if ((i=='+' || i=='-') && depth==0){
+            std::cout<<"Has op "<<i<<std::endl;
             hasOp=true;
-            break;
         }
-        if (!std::isalpha(i) && i!='_'){ 
+        if ((i=='*' || i=='/') && depth==0){
+            std::cout<<"Has mul "<<i<<std::endl;
+            hasMul=true;
+        }
+        if ((i=='(' || i=='[' || i=='=' || i=='.' ) && depth==0){ 
           Node* res=parse(name,c);
-          //std::cout<<"Base is "<<name<<std::endl;
+          std::cout<<"Base is "<<name<<std::endl;
           sheerName=false;
           for (;ii<a.size();ii++){
               char i=a[ii];
@@ -553,7 +559,7 @@ Node* parse(std::string a,Context& c){
                 return new AsignNode(l,r);
               }
               if (i=='('){
-                //std::cout<<"Calling "<<name<<std::endl;
+                std::cout<<"Calling "<<name<<std::endl;
                 std::vector<Node*> args;
                 std::string acc;
                 ii++;
@@ -609,46 +615,94 @@ Node* parse(std::string a,Context& c){
         }
         name+=i;
     }
-    if (hasOp){
-        //std::cout<<"has op"<<std::endl;
+    if (hasMul && !hasOp){
+      std::cout<<"has mul"<<std::endl;
         int bracketDepth=0;
         bool side=false;
-        Node *l,*r;
+        Node *r,*curr;
         std::string acc;
-        char op;
+        std::string op;
         for (auto i:a){
-            //std::cout<<"char "<<i<<std::endl;
+            std::cout<<"ChAr "<<i<<std::endl;
             if (i=='(') bracketDepth++;
             if (i==')') bracketDepth--;
-            if ((i=='+' || i=='-') && bracketDepth==0){
-                if (!side){
-                    l=parse(acc,c);
-                    //std::cout<<"left "<<acc<<std::endl;
-                    acc.clear();
-                    op=i;
-                    continue;
+            if ((i=='*' || i=='/') && bracketDepth==0){ 
+                if (!curr){
+                  curr=parse(acc,c);
+                  std::cout<<"curr's first is "<<acc<<std::endl;
                 }
                 else{
-                    //std::cout<<"right "<<acc<<std::endl;
-                    r=parse(acc,c);
-                    return new BinaryNode(r,l,std::string(1,op));
+                  std::cout<<"right is "<<acc<<std::endl;
+                  r=parse(acc,c);
+                  curr=new BinaryNode(r,curr,std::string(1,i));
                 }
-                side=!side;
+                op=i;
+                acc.clear();
+                continue;
             }
             acc+=i;
         }
         if (!acc.empty()){
-            //std::cout<<"right "<<acc<<std::endl;
-            r=parse(acc,c);
-            return new BinaryNode(r,l,std::string(1,op));
+            if (!curr){
+              curr=parse(acc,c);
+              std::cout<<"curr's first is "<<acc<<std::endl;
+            }
+            else{
+              std::cout<<"right is "<<acc<<std::endl;
+              r=parse(acc,c);
+              curr=new BinaryNode(r,curr,op);
+            }
+            acc.clear();
         }
+      return curr;
+    }
+    if (hasOp){
+        std::cout<<"has op"<<std::endl;
+        int bracketDepth=0;
+        bool side=false;
+        Node *r,*curr;
+        std::string acc;
+        std::string op;
+        for (auto i:a){
+            std::cout<<"ChAr "<<i<<std::endl;
+            if (i=='(') bracketDepth++;
+            if (i==')') bracketDepth--;
+            if ((i=='+' || i=='-') && bracketDepth==0){ 
+                if (!curr){
+                  curr=parse(acc,c);
+                  std::cout<<"curr's first is "<<acc<<std::endl;
+                }
+                else{
+                  std::cout<<"right is "<<acc<<std::endl;
+                  r=parse(acc,c);
+                  curr=new BinaryNode(r,curr,std::string(1,i));
+                }
+                op=i;
+                acc.clear();
+                continue;
+            }
+            acc+=i;
+        }
+        if (!acc.empty()){
+            if (!curr){
+              curr=parse(acc,c);
+              std::cout<<"curr's first is "<<acc<<std::endl;
+            }
+            else{
+              std::cout<<"right is "<<acc<<std::endl;
+              r=parse(acc,c);
+              curr=new BinaryNode(r,curr,op);
+            }
+            acc.clear();
+        }
+      return curr;
     }
     if (isInt){ 
-      //std::cout<<"Int is "<<name<<std::endl;
+      std::cout<<"Int is "<<name<<std::endl;
       return new LiteralNode{new IntObj(std::stoi(name))};
     }
-    if (sheerName){ 
-      //std::cout<<"sheer name "<<name<<std::endl;
+    else if (sheerName){ 
+      std::cout<<"sheer name "<<name<<std::endl;
       return new IdentifierNode{name};
     }
     
@@ -692,7 +746,7 @@ int main(){
     for (auto i:a){
        i->eval(c);
     }
-    Node* b=parse("b",c);
+    Node* b=parse("b[9];",c);
     std::cout<<b->eval(c)->str()<<std::endl;
     return 0;
 }
