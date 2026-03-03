@@ -6,6 +6,8 @@
 
 //g++ new.cpp -o new && ./new
 
+class BasicObj;
+
 class NotAvailable:public std::exception{
   public:
   std::string mes;
@@ -28,6 +30,14 @@ class ValueError:public std::exception{
   }
 };
 
+class ReturnSig{
+  public:
+  BasicObj* val;
+  ReturnSig(BasicObj* val) {
+    this->val=val;
+  }
+};
+
 class SyntaxError:public std::exception{
   public:
   std::string mes;
@@ -39,9 +49,13 @@ class SyntaxError:public std::exception{
   }
 };
 
-class BasicObj;
-
 typedef std::map<std::string,BasicObj*> Namespace;
+
+struct Context{
+    Namespace ns;
+};
+
+class Node;
 
 class BasicObj{
     public:
@@ -77,7 +91,7 @@ class BasicObj{
     }
     virtual BasicObj* getitem(BasicObj* key){throw NotAvailable("That is Base class (getitem)");};
     virtual BasicObj* setitem(std::vector<BasicObj*>){throw NotAvailable("That is Base class (setitem)");};
-    virtual BasicObj* call(std::vector<BasicObj*>,Namespace&){throw NotAvailable("That is Base class (call)");};
+    virtual BasicObj* call(std::vector<BasicObj*>){throw NotAvailable("That is Base class (call)");};
     virtual void setitem(BasicObj* key, BasicObj* value){throw NotAvailable("That is Base class (setitem)");};
     virtual BasicObj* clone(){throw NotAvailable("That is Base class (clone)");};
     virtual ~BasicObj()=default;
@@ -233,7 +247,6 @@ class IntObj:public BasicObj{
     }
     ~IntObj() override = default;
 };
-
 class NullObject:public BasicObj{
   public:
   NullObject(){
@@ -252,9 +265,9 @@ class NullObject:public BasicObj{
   }
 };
 
-struct Context{
-    Namespace ns;
-};
+
+
+
 
 struct Node;
 
@@ -266,6 +279,35 @@ struct Node{
     virtual void set(Context&,Node*){throw ValueError("Can not asign");}
     virtual std::string str(){return "<Node>";}
     virtual ~Node()=default;
+};
+class FunctionObject:public BasicObj{
+    public:
+    std::vector<std::string> argNames;
+    std::vector<Node*> code;
+    Context* closure;
+    FunctionObject(std::vector<std::string> argNames,std::vector<Node*> code,Context* c):closure(c){
+      typeID=6;
+      this->argNames=argNames;
+      this->code=code;
+    }
+    BasicObj* call(std::vector<BasicObj*> args) override{
+      if (args.size()!=argNames.size()){
+        throw ValueError(("Function called with wrong number of arguments. "+
+          std::to_string(args.size())+" instead of "+std::to_string(argNames.size())).c_str());
+      }
+      Context local=*closure;
+      for (int i=0;i<args.size();i++){
+        local.ns[argNames[i]]=args[i];
+      }
+      if (code.empty())
+        return new NullObject();
+      for (int i=0;i<code.size()-1;i++) code[i]->eval(local);
+      return code.back()->eval(local);
+    }
+    std::string str() override{
+      return "<FunctionObject>";
+    }
+     ~FunctionObject() override = default;
 };
 
 struct LiteralNode:public Node{
@@ -322,11 +364,22 @@ struct CallNode:public Node{
       std::cout<<"Evaling node for func "<<i->str()<<std::endl;
       callArgs.push_back(i->eval(c));
     }
-    return target->eval(c)->call(callArgs,c.ns);
+    return target->eval(c)->call(callArgs);
   }
   std::string str() override{
       return "<CallNode>";
     }
+};
+
+struct FunctionNode:public Node{
+  std::string name;
+  std::vector<Node*> body;
+  std::vector<std::string> argNames;
+  FunctionNode(std::string n,std::vector<Node*> b,std::vector<std::string> a):name(n),body(b),argNames(a){}
+  BasicObj* eval(Context& c) override{
+    c.ns[name]=new FunctionObject(argNames,body,&c);
+    return new NullObject();
+  }
 };
 
 struct IndexNode:public Node{
