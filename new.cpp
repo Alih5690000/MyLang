@@ -799,11 +799,10 @@ Node* parse(std::string a,Context& c){
             }
         }
     }
-    if (a.substr(0,2)=="if"){
+    if (a.substr(0,3)=="if("){
       std::cout<<"if branch"<<std::endl;
       Node* cond;
       std::string acc;
-      if (a[2]!='(') throw SyntaxError("Invalid if syntax");
       int depth=1;
       int j=3;
       for (;j<a.size();j++){
@@ -876,12 +875,10 @@ Node* parse(std::string a,Context& c){
       }
       return new ReturnNode(parse(val,c));
     }
-    else if (a.substr(0,5)=="class"){
+    else if (a.substr(0,6)=="class("){
       std::cout<<"Parsing class"<<std::endl;
-      int j=5;
+      int j=6;
       std::string name;
-      if (a[j]!='(') throw SyntaxError("'(' after 'class' epected");
-      j++;
       for (;j<a.size();j++){
         if (a[j]==')') break;
         name+=a[j];
@@ -904,10 +901,8 @@ Node* parse(std::string a,Context& c){
       auto Body=parseCode(body,c);
       return new ClassNode(name,Body,nullptr);
     }
-    else if (a.substr(0,2)=="fn"){
-      int j=2;
-      if (a[j]!='(') throw SyntaxError("'(' after 'fn' epected");
-      j++;
+    else if (a.substr(0,3)=="fn("){
+      int j=3;
       std::string funcName;
       for (;j<a.size();j++){
         if (a[j]==')') break;
