@@ -36,6 +36,9 @@ class ReturnSig{
   ReturnSig(BasicObj* val) {
     this->val=val;
   }
+  const char* what(){
+    return "return is not allowed here";
+  }
 };
 
 class SyntaxError:public std::exception{
@@ -295,14 +298,26 @@ class FunctionObject:public BasicObj{
         throw ValueError(("Function called with wrong number of arguments. "+
           std::to_string(args.size())+" instead of "+std::to_string(argNames.size())).c_str());
       }
+      std::cout<<"Called FunctiobObject with args"<<std::endl;
+      for (auto k:args) std::cout<<k->str()<<std::endl;
+      std::cout<<"ArgNames are"<<std::endl;
+      for (auto k:argNames) std::cout<<k<<std::endl;
       Context local=*closure;
       for (int i=0;i<args.size();i++){
         local.ns[argNames[i]]=args[i];
       }
       if (code.empty())
         return new NullObject();
-      for (int i=0;i<code.size()-1;i++) code[i]->eval(local);
-      return code.back()->eval(local);
+      for (int i=0;i<code.size();i++){ 
+        try{
+          code[i]->eval(local);
+        }
+        catch(const ReturnSig& s){
+          std::cout<<"Catched return val is "<<s.val<<std::endl;
+          return s.val;
+        }
+      }
+      return new NullObject();
     }
     std::string str() override{
       return "<FunctionObject>";
@@ -396,6 +411,7 @@ struct FunctionNode:public Node{
   std::vector<std::string> argNames;
   FunctionNode(std::string n,std::vector<Node*> b,std::vector<std::string> a):name(n),body(b),argNames(a){}
   BasicObj* eval(Context& c) override{
+    std::cout<<"Evaled FunctionNode name "<<name<<std::endl;
     c.ns[name]=new FunctionObject(argNames,body,&c);
     return new NullObject();
   }
@@ -429,6 +445,17 @@ struct AttributeNode:public Node{
   std::string str() override{
       return "<AttributeNode>";
     }
+};
+
+struct ReturnNode:public Node{
+  Node* val;
+  ReturnNode(Node* r):val(r){}
+  BasicObj* eval(Context& c) override{
+    throw ReturnSig(val->eval(c));
+  }
+  std::string str() override{
+    return "<ReturnNode>";
+  }
 };
 
 struct IfNode:public Node{
@@ -589,20 +616,78 @@ Node* parse(std::string a,Context& c){
       }
       return new IfNode(cond,elseBody,body);
     }
+    else if (a.substr(0,7)=="return("){
+      int j=7;
+      std::string val;
+      depth=1;
+      for (;j<a.size();j++){
+        if (a[j]=='(') depth++;
+        else if (a[j]==')') {
+          depth--;
+          if (depth==0) break;
+        }
+        val+=a[j];
+      }
+      return new ReturnNode(parse(val,c));
+    }
     else if (a.substr(0,2)=="fn"){
       int j=2;
-      
+      if (a[j]!='(') throw SyntaxError("'(' after 'fn' epected");
+      j++;
+      std::string funcName;
+      for (;j<a.size();j++){
+        if (a[j]==')') break;
+        funcName+=a[j];
+      }
+      std::cout<<"name is "<<funcName<<std::endl;
+      if (j==a.size()-1){
+        throw SyntaxError("No closing ')'");
+      }
+      j++;
+      if (a[j]!='(') throw SyntaxError("'(' expected for arguments list");
+      j++;
+      std::vector<std::string> argNames;
+      std::string acc;
+      for (;j<a.size();j++){
+        if (a[j]==','){
+          argNames.push_back(acc);
+          acc.clear();
+          continue;
+        }
+        if (a[j]==')') break;
+        acc+=a[j];
+      }
+      if (!acc.empty()){
+        argNames.push_back(acc);
+        acc.clear();
+      }
+      std::string body;
+      j++;
+      if (a[j]!='{') throw SyntaxError("Expected '{' for function body");
+      j++;
+      int depth=1;
+      for (;j<a.size();j++){
+        if (a[j]=='{') depth++;
+        if (a[j]=='}'){
+           depth--;
+           if (depth==0) break;
+        }
+        body+=a[j];
+      }
+      auto nodes=parseCode(body,c);
+      for (auto k:nodes) std::cout<<"Node is "<<k->str()<<std::endl;
+      return new FunctionNode(funcName,nodes,argNames);
     }
     for (int ii=0;ii<a.size();ii++){
         char i=a[ii];
         std::cout<<"i is "<<i<<std::endl;
         
         if (i<'0' || i>'9'){ 
-          std::cout<<"Not int due to "<<i<<std::endl;
+          //std::cout<<"Not int due to "<<i<<std::endl;
           isInt=false;
         }
         else{
-          std::cout<<i<<" is number"<<std::endl;
+          //std::cout<<i<<" is number"<<std::endl;
           name+=i;
           continue;
         }
@@ -621,17 +706,16 @@ Node* parse(std::string a,Context& c){
           for (;ii<a.size();ii++){
               char i=a[ii];
               if (i=='='){
-                //std::cout<<"Asigning "<<name<<std::endl;
-                Node* l=parse(name,c);
-                //std::cout<<"Left is "<<l->str()<<std::endl;
+                std::cout<<"Asigning "<<name<<std::endl;
+                std::cout<<"Left is "<<res->str()<<std::endl;
                 ii++;
                 std::string L;
                 for (;ii<a.size() && a[ii]!=';';ii++){
                   L+=a[ii];
                 }
                 Node* r=parse(L,c);
-                //std::cout<<"Right is "<<L<<std::endl;
-                return new AsignNode(l,r);
+                std::cout<<"Right is "<<L<<std::endl;
+                return new AsignNode(res,r);
               }
               if (i=='('){
                 std::cout<<"Calling "<<name<<std::endl;
@@ -666,6 +750,19 @@ Node* parse(std::string a,Context& c){
                 }
                 res=new CallNode(res,args);
                 std::cout<<"Res is "<<res->str()<<std::endl;
+              }
+              if (i=='.'){
+                std::string attrName;
+                ii++;
+                for (;ii<a.size();ii++){
+                  char i=a[ii];
+                  if (i=='(' || i=='[' || i=='=' || i=='.' ){ 
+                    ii--;
+                    break;
+                  }
+                  attrName+=i;
+                }
+                res=new AttributeNode(res,attrName);
               }
               if (i=='['){
                 Node* key;
@@ -702,7 +799,7 @@ Node* parse(std::string a,Context& c){
       std::cout<<"has mul"<<std::endl;
         int bracketDepth=0;
         bool side=false;
-        Node *r,*curr;
+        Node *r=nullptr,*curr=nullptr;
         std::string acc;
         std::string op;
         for (auto i:a){
@@ -743,7 +840,7 @@ Node* parse(std::string a,Context& c){
         std::cout<<"has op"<<std::endl;
         int bracketDepth=0;
         bool side=false;
-        Node *r,*curr;
+        Node *r=nullptr,*curr=nullptr;
         std::string acc;
         std::string op;
         for (auto i:a){
@@ -834,7 +931,11 @@ int main(){
     for (auto i:a){
        i->eval(c);
     }
-    Node* b=parse("add(3,3);",c);
+    Node* cc=parse("add.x=99;",c);
+    cc->eval(c);
+    Node* dd=parse("fn(addd)(a,b){return(a+b);}",c);
+    dd->eval(c);
+    Node* b=parse("addd(5,6);",c);
     std::cout<<b->eval(c)->str()<<std::endl;
     return 0;
 }
