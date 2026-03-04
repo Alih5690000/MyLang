@@ -6,6 +6,8 @@
 
 //g++ new.cpp -o new && ./new
 
+int classes;
+
 class BasicObj;
 
 class NotAvailable:public std::exception{
@@ -94,7 +96,7 @@ class BasicObj{
     }
     virtual BasicObj* getitem(BasicObj* key){throw NotAvailable("That is Base class (getitem)");};
     virtual BasicObj* setitem(std::vector<BasicObj*>){throw NotAvailable("That is Base class (setitem)");};
-    virtual BasicObj* call(std::vector<BasicObj*>){throw NotAvailable("That is Base class (call)");};
+    virtual BasicObj* call(std::vector<BasicObj*>,Context*){throw NotAvailable("That is Base class (call)");};
     virtual void setitem(BasicObj* key, BasicObj* value){throw NotAvailable("That is Base class (setitem)");};
     virtual BasicObj* clone(){throw NotAvailable("That is Base class (clone)");};
     virtual ~BasicObj()=default;
@@ -287,13 +289,12 @@ class FunctionObject:public BasicObj{
     public:
     std::vector<std::string> argNames;
     std::vector<Node*> code;
-    Context* closure;
-    FunctionObject(std::vector<std::string> argNames,std::vector<Node*> code,Context* c):closure(c){
+    FunctionObject(std::vector<std::string> argNames,std::vector<Node*> code){
       typeID=6;
       this->argNames=argNames;
       this->code=code;
     }
-    BasicObj* call(std::vector<BasicObj*> args) override{
+    BasicObj* call(std::vector<BasicObj*> args,Context* c) override{
       if (args.size()!=argNames.size()){
         throw ValueError(("Function called with wrong number of arguments. "+
           std::to_string(args.size())+" instead of "+std::to_string(argNames.size())).c_str());
@@ -302,7 +303,7 @@ class FunctionObject:public BasicObj{
       for (auto k:args) std::cout<<k->str()<<std::endl;
       std::cout<<"ArgNames are"<<std::endl;
       for (auto k:argNames) std::cout<<k<<std::endl;
-      Context local=*closure;
+      Context local=*c;
       for (int i=0;i<args.size();i++){
         local.ns[argNames[i]]=args[i];
       }
@@ -327,10 +328,10 @@ class FunctionObject:public BasicObj{
 
 class FunctionNative:public BasicObj{
   public:
+  Context* saved;
   std::function<BasicObj*(std::vector<BasicObj*>,Context*)> func;
-  Context* c;
-  FunctionNative(std::function<BasicObj*(std::vector<BasicObj*>,Context*)> f,Context* t):func(f),c(t){typeID=10;}
-  BasicObj* call(std::vector<BasicObj*> args) override{
+  FunctionNative(std::function<BasicObj*(std::vector<BasicObj*>,Context*)> f):func(f){typeID=10;}
+  BasicObj* call(std::vector<BasicObj*> args,Context* c) override{
     BasicObj* res = func(args,c);
     return res;
   }
@@ -338,7 +339,7 @@ class FunctionNative:public BasicObj{
       return "<NativeFunction>";
     }
     BasicObj* clone() override{
-      BasicObj* tmp = new FunctionNative(func,c);
+      BasicObj* tmp = new FunctionNative(func);
       return tmp;
     }
      ~FunctionNative() override = default;
@@ -398,7 +399,7 @@ struct CallNode:public Node{
       std::cout<<"Evaling node for func "<<i->str()<<std::endl;
       callArgs.push_back(i->eval(c));
     }
-    return target->eval(c)->call(callArgs);
+    return target->eval(c)->call(callArgs,&c);
   }
   std::string str() override{
       return "<CallNode>";
@@ -412,8 +413,251 @@ struct FunctionNode:public Node{
   FunctionNode(std::string n,std::vector<Node*> b,std::vector<std::string> a):name(n),body(b),argNames(a){}
   BasicObj* eval(Context& c) override{
     std::cout<<"Evaled FunctionNode name "<<name<<std::endl;
-    c.ns[name]=new FunctionObject(argNames,body,&c);
+    c.ns[name]=new FunctionObject(argNames,body);
     return new NullObject();
+  }
+};
+
+class ClassObject;
+
+BasicObj* InstanceObj(ClassObject*,std::vector<BasicObj*>,Context&);
+
+class ClassObject:public BasicObj{
+  public:
+  ClassObject* parent=nullptr;
+  int instanceID=classes++;
+  std::vector<Node*> a;
+  ClassObject(std::vector<Node*> a,ClassObject* parent){
+      this->parent=parent;
+      typeID=8;
+      Context cls;
+      if (parent){
+        for (auto [k,v]:parent->attrs){
+          attrs[k]=v;
+        }
+      }
+      for (auto i:a) i->eval(cls);
+      attrs=cls.ns;
+      this->a=a;
+  }
+  BasicObj* call(std::vector<BasicObj*> args,Context* c) override{
+    refcount++;
+    BasicObj* instance = InstanceObj(this,args,*c);
+    instance->typeID=instanceID;
+    refcount--;
+    return instance;
+  }
+  std::string str() override{
+    return "<ClassObject>";
+  }
+  BasicObj* clone() override{
+    BasicObj* tmp = new ClassObject(a,parent);
+    tmp->refcount++;
+    return tmp;
+  }
+  bool hasattr(const std::string& name) override{
+    ClassObject* cls = this;
+    while (cls) {
+        if (cls->attrs.count(name)) {
+            return true;
+        }
+        cls = dynamic_cast<ClassObject*>(cls->parent);
+    }
+    return false;
+  }
+  BasicObj* getattr(const std::string& str) override{
+    ClassObject* cls=this;
+    while (cls){
+      if (cls->attrs.count(str)){
+        BasicObj* r=cls->attrs[str];
+        r->refcount++;
+        return r;
+      }
+      cls=cls->parent;
+   }
+   throw ValueError("Attribute not found");
+  }
+};
+
+class BoundMethod:public BasicObj{
+  public:
+  BasicObj* func;
+  BasicObj* self;
+  BoundMethod(BasicObj* f,BasicObj* s):func(f),self(s){}
+  BasicObj* call(std::vector<BasicObj*> a,Context* n) override{
+    refcount++;
+    std::cout<<"Called BoundMethode with "<<a.size()<<" args"<<std::endl;
+    std::vector<BasicObj*> callArgs={self};
+    for (auto i:a){
+      callArgs.push_back(i);
+    }
+    BasicObj* res = func->call(callArgs,n);
+    refcount--;
+    return res;
+  }
+  std::string str() override{
+    return "<BoundMethod>";
+  }
+};
+
+class InstanceObject : public BasicObj {
+public:
+    ClassObject* klass;
+
+    std::vector<BasicObj*> args;
+    InstanceObject(ClassObject* cls, std::vector<BasicObj*> args,Namespace& n) {
+        klass = cls;
+        this->args = args;
+        if (klass->hasattr("__constructor__")) {
+          std::cout<<"Calling constructor"<<std::endl;
+            BasicObj* ctor = klass->getattr("__constructor__");
+            std::vector<BasicObj*> callArgs = { this };
+            for (auto* arg : args){ 
+              callArgs.push_back(arg);
+            }
+            Context local;
+            local.ns["self"] = this;
+
+            ctor->call(callArgs, &local);
+        }
+    }
+
+    BasicObj* add(BasicObj* other, bool swapped) override {
+        if (klass->hasattr("__add__")) {
+            auto* func = dynamic_cast<FunctionObject*>(klass->getattr("__add__"));
+            std::vector<BasicObj*> args = { this, other };
+            Context n;
+            return func->call(args,&n);
+        }
+        throw NotAvailable("Cannot add non-object to object");
+    }
+
+    BasicObj* sub(BasicObj* other, bool swapped) override {
+        if (klass->hasattr("__sub__")) {
+            auto* func = dynamic_cast<FunctionObject*>(klass->getattr("__sub__"));
+            std::vector<BasicObj*> args = { this, other };
+            Context n;
+            return func->call(args,&n);
+        }
+        throw NotAvailable("Cannot subtract non-object from object");
+    }
+
+    BasicObj* mul(BasicObj* other, bool swapped) override {
+        if (klass->hasattr("__mul__")) {
+            auto* func = dynamic_cast<FunctionObject*>(klass->getattr("__mul__"));
+            std::vector<BasicObj*> args = { this, other };
+            Context n;
+            return func->call(args,&n);
+        }
+        throw NotAvailable("Cannot multiply non-object by object");
+    }
+
+    BasicObj* div(BasicObj* other, bool swapped) override {
+        if (klass->hasattr("__div__")) {
+            auto* func = dynamic_cast<FunctionObject*>(klass->getattr("__div__"));
+            std::vector<BasicObj*> args = { this, other };
+            Context n;
+            return func->call(args,&n);
+        }
+        throw NotAvailable("Cannot divide non-object by object");
+    }
+
+    bool equal(BasicObj* other, bool swapped) override {
+        if (klass->hasattr("__eq__")) {
+            auto* func = dynamic_cast<FunctionObject*>(klass->getattr("__eq__"));
+            std::vector<BasicObj*> args = { this, other };
+            Context n;
+            auto* res = func->call(args,&n);
+            return res->asbool();
+        }
+        throw NotAvailable("Cannot compare non-object to object");
+    }
+
+    bool asbool() override {
+        if (klass->hasattr("__bool__")) {
+            auto* func = dynamic_cast<FunctionObject*>(klass->getattr("__bool__"));
+            std::vector<BasicObj*> args = { this };
+            Context n;
+            auto* res = func->call(args,&n);
+            return res->asbool();
+        }
+        return true;
+    }
+
+    std::string str() override {
+        if (klass->hasattr("__str__")) {
+            auto* func = dynamic_cast<FunctionObject*>(klass->getattr("__str__"));
+            std::vector<BasicObj*> args = { this };
+            Context n;
+            auto* res = func->call(args,&n);
+            return res->str();
+        }
+        return "<InstanceObject>";
+    }
+    BasicObj* getattr(const std::string& name) override {
+      if (attrs.count(name)) {
+          return attrs[name];
+      }
+
+          BasicObj* val = klass->getattr(name);
+
+          if (dynamic_cast<FunctionObject*>(val) ||
+              dynamic_cast<FunctionNative*>(val)) {
+                  BasicObj* tmp = new BoundMethod(val, this);
+                  tmp->refcount++;
+                  return tmp;
+                }
+
+          return val;
+
+
+      throw ValueError(("Attribute "+name+" not found").c_str());
+    }
+    void setattr(const std::string& s, BasicObj* value) override{
+        std::string attrName = s;
+        if (attrs.count(attrName)) {
+          attrs[attrName]->refcount--;
+        }
+        value->refcount++;
+        attrs[attrName] = value;
+    }
+    BasicObj* clone() override{
+      std::vector<BasicObj*> newArgs;
+      for(auto* a : args) newArgs.push_back(a->clone());
+      BasicObj* tmp = new InstanceObject(klass, newArgs,attrs);
+      tmp->refcount++;
+      return tmp;
+    }
+    void setitem(BasicObj* key,BasicObj* val)override{
+      Context dull;
+      klass->getattr("__setitem__")->call({this,key,val},&dull);
+    }
+    BasicObj* getitem(BasicObj* key)override{
+      Context dull;
+      return klass->getattr("__getitem__")->call({this,key},&dull);
+    }
+    ~InstanceObject() override = default;
+
+};
+
+BasicObj* InstanceObj(ClassObject* cls,std::vector<BasicObj*> args,Context& c){
+  return new InstanceObject(cls,args,c.ns);
+}
+
+struct ClassNode:public Node{
+  std::string name;
+  std::vector<Node*> body;
+  Node* p;
+  ClassNode(std::string n,std::vector<Node*> b,Node* a):name(n),body(b),p(a){}
+  BasicObj* eval(Context& c)override{
+    BasicObj* original=p->eval(c);
+    ClassObject* par=nullptr;
+    if (original){
+      par=dynamic_cast<ClassObject*>(original);
+      if (!par) throw ValueError("Trying to inhertit from non-class object");
+    }
+    c.ns[name]=new ClassObject(body,par);
+    return nullptr;
   }
 };
 
@@ -629,6 +873,31 @@ Node* parse(std::string a,Context& c){
         val+=a[j];
       }
       return new ReturnNode(parse(val,c));
+    }
+    else if (a.substr(0,5)=="class"){
+      int j=5;
+      std::string name;
+      if (a[j]!='(') throw SyntaxError("'(' after 'class' epected");
+      j++;
+      for (;j<a.size();j++){
+        if (a[j]==')') break;
+        name+=a[j];
+      }
+      j++;
+      if (a[j]!='{') throw SyntaxError("'{' for class body");
+      j++;
+      std::string body;
+      int depth=1;
+      for (;j<a.size();j++){
+        if (a[j]=='{') depth++;
+        if (a[j]=='}'){
+           depth--;
+           if (depth==0) break;
+        }
+        body+=a[j];
+      }
+      auto Body=parseCode(body,c);
+      return new ClassNode(name,Body,nullptr);
     }
     else if (a.substr(0,2)=="fn"){
       int j=2;
@@ -925,7 +1194,8 @@ int main(){
       if (args.size()!=2) throw ValueError("Add requires 2 arguements");
       std::cout<<"Called add"<<std::endl;
       return args[0]->add(args[1],false);
-    },&c);
+    });
+    c.ns["cc"]=new ClassObject((std::vector<Node*>){new AsignNode(new IdentifierNode("x"),new LiteralNode(new IntObj(5)))},nullptr);
     auto a=parseCode("{if (0){b=1;};else{b=0;}}",c);
     std::cout<<"Evaling "<<std::endl;
     for (auto i:a){
@@ -935,7 +1205,10 @@ int main(){
     cc->eval(c);
     Node* dd=parse("fn(addd)(a,b){return(a+b);}",c);
     dd->eval(c);
-    Node* b=parse("addd(5,6);",c);
+    Node* aa=parse("a=cc();",c);
+    aa->eval(c);
+    Node* b=parse("addd(a.x,5);",c);
+    parse("class(klass){a=67;};",c)->eval(c);
     std::cout<<b->eval(c)->str()<<std::endl;
     return 0;
 }
