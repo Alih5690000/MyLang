@@ -650,11 +650,13 @@ struct ClassNode:public Node{
   Node* p;
   ClassNode(std::string n,std::vector<Node*> b,Node* a):name(n),body(b),p(a){}
   BasicObj* eval(Context& c)override{
-    BasicObj* original=p->eval(c);
     ClassObject* par=nullptr;
-    if (original){
-      par=dynamic_cast<ClassObject*>(original);
-      if (!par) throw ValueError("Trying to inhertit from non-class object");
+    if (p){
+      BasicObj* original=p->eval(c);
+      if (original){
+        par=dynamic_cast<ClassObject*>(original);
+        if (!par) throw ValueError("Trying to inhertit from non-class object");
+      }
     }
     c.ns[name]=new ClassObject(body,par);
     return nullptr;
@@ -875,6 +877,7 @@ Node* parse(std::string a,Context& c){
       return new ReturnNode(parse(val,c));
     }
     else if (a.substr(0,5)=="class"){
+      std::cout<<"Parsing class"<<std::endl;
       int j=5;
       std::string name;
       if (a[j]!='(') throw SyntaxError("'(' after 'class' epected");
@@ -883,6 +886,7 @@ Node* parse(std::string a,Context& c){
         if (a[j]==')') break;
         name+=a[j];
       }
+      std::cout<<"Class name "<<name<<std::endl;
       j++;
       if (a[j]!='{') throw SyntaxError("'{' for class body");
       j++;
@@ -896,6 +900,7 @@ Node* parse(std::string a,Context& c){
         }
         body+=a[j];
       }
+      std::cout<<"Body is "<<body<<std::endl;
       auto Body=parseCode(body,c);
       return new ClassNode(name,Body,nullptr);
     }
@@ -1205,10 +1210,10 @@ int main(){
     cc->eval(c);
     Node* dd=parse("fn(addd)(a,b){return(a+b);}",c);
     dd->eval(c);
-    Node* aa=parse("a=cc();",c);
-    aa->eval(c);
-    Node* b=parse("addd(a.x,5);",c);
     parse("class(klass){a=67;};",c)->eval(c);
+    Node* aa=parse("a=klass();",c);
+    aa->eval(c);
+    Node* b=parse("a.a;",c);
     std::cout<<b->eval(c)->str()<<std::endl;
     return 0;
 }
