@@ -347,7 +347,7 @@ class FunctionNative:public BasicObj{
 
 struct LiteralNode:public Node{
     BasicObj* o;
-    LiteralNode(BasicObj* l):o(l){}
+    LiteralNode(BasicObj* l):o(l){l->refcount++;}
     BasicObj* eval(Context&) override{return o;}
     std::string str() override{
       return "<LiteralNode>";
