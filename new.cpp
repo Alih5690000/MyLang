@@ -270,10 +270,6 @@ class NullObject:public BasicObj{
   }
 };
 
-
-
-
-
 struct Node;
 
 std::vector<Node*> parseCode(std::string s,Context& c);
@@ -352,6 +348,68 @@ struct LiteralNode:public Node{
     std::string str() override{
       return "<LiteralNode>";
     }
+};
+
+class ListObject:public BasicObj{
+  public:
+  std::vector<BasicObj*> items;
+  ListObject(const std::vector<BasicObj*>& items):items(items){
+    typeID=12;
+    auto appendFunc = new FunctionNative([this](std::vector<BasicObj*> args,Context*) {
+      this->items.push_back(args[0]->clone());
+      return nullptr;
+    });
+    appendFunc->refcount++;
+    attrs["append"] = appendFunc;
+    attrs["push_back"] = appendFunc;
+    BasicObj* sizeFunc = new FunctionNative([this](std::vector<BasicObj*> args,Context* c){
+      BasicObj* tmp = new IntObj(this->items.size());
+      tmp->refcount++;
+      return tmp;
+    });
+    sizeFunc->refcount++;
+    attrs["size"] = sizeFunc;
+  }
+  BasicObj* getitem(BasicObj* key) override{
+    if (auto i=dynamic_cast<IntObj*>(key)){
+      if (i->a<0 || i->a>=items.size()) throw ValueError(
+        ("Index out of bounds (read) accesing to "+std::to_string(i->a)).c_str()
+      );
+      return items[i->a];
+    }
+    else{
+      throw ValueError("Key is not an integer");
+    }
+  }
+  void setitem(BasicObj* key, BasicObj* value) override{
+    if (auto i=dynamic_cast<IntObj*>(key)){
+      if (i->a<0 || i->a>=items.size()) throw ValueError(
+        ("Index out of bounds (write) accesing to "+std::to_string(i->a)).c_str()
+      );;
+      BasicObj* old = items[i->a];
+      if (old && old!=value) old->refcount--;
+      value->refcount++;
+      items[i->a] = value;
+    }
+    else{
+      throw ValueError("Key is not an integer");
+    }
+  }
+  std::string str() override{
+    std::string result = "[";
+    for (size_t i=0; i<items.size(); i++){
+      if (i>0) result += ", ";
+      if (items[i]) result += items[i]->str();
+      else result += "<null>";
+    }
+    result += "]";
+    return result;
+  }
+  BasicObj* clone() override{
+    BasicObj* tmp = new ListObject(items);
+    tmp->refcount++;
+    return tmp;
+  }
 };
 
 struct IdentifierNode:public Node{
@@ -839,6 +897,57 @@ Node* parse(std::string a,Context& c){
             }
         }
     }
+    if (a[0]=='"'){
+      bool quoted=false;
+      for (int i=0;i<a.size();i++){
+          if (a[i]=='"') {
+            quoted=!quoted;
+            if (!quoted && i==a.size()-1){
+              return new LiteralNode{new StringObject(a.substr(1,a.size()-2))};
+            }
+          }
+      }
+    }
+    if (a[0]=='['){
+      bool quoted=false;
+      int depth=0;
+      for (int i=0;i<a.size();i++){
+          if (a[i]=='"') quoted=!quoted;
+          if (!quoted){
+            if (a[i]=='[') depth++;
+            if (a[i]==']'){ 
+              depth--;
+              if (i==a.size()-1 && depth==0){
+                std::vector<Node*> items;
+                std::string acc;
+                int innerDepth=0;
+                bool innerQuoted=false;
+                for (int j=1;j<a.size()-1;j++){
+                  if (a[j]=='"') innerQuoted=!innerQuoted;
+                  if (!innerQuoted){
+                    if (a[j]=='[') innerDepth++;
+                    if (a[j]==']') innerDepth--;
+                    if (a[j]==',' && innerDepth==0){
+                      items.push_back(parse(acc,c));
+                      acc.clear();
+                      continue;
+                    }
+                  }
+                  acc+=a[j];
+                }
+                if (!acc.empty()){
+                  items.push_back(parse(acc,c));
+                }
+                std::vector<BasicObj*> itemObjs;
+                for (auto i:items){
+                  itemObjs.push_back(i->eval(c));
+                }
+                return new LiteralNode{new ListObject(itemObjs)};
+              }
+            }
+          }
+      }
+    }
     if (a.substr(0,3)=="if("){
       std::cout<<"if branch"<<std::endl;
       Node* cond;
@@ -1287,13 +1396,14 @@ int main(){
     for (auto i:a){
        i->eval(c);
     }
+    parse("a=[1,2,3,4,5]",c)->eval(c);
     Node* g=parse(R"(
       for (i=0;i<5;i=i+1){
         print(i);
       };
     )",c);
     g->eval(c);
-    Node* b=parse("i",c);
+    Node* b=parse("a[0]",c);
     std::cout<<b->eval(c)->str()<<std::endl;
     return 0;
 }
