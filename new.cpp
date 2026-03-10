@@ -740,10 +740,29 @@ struct ForNode:public Node{
   ForNode(Node* c,Node* s,Node* b,Node* i):cond(c),step(s),body(b),init(i){}
   BasicObj* eval(Context& c) override{
     int i=0;
-    for (init->eval(c);cond->eval(c)->asbool();step->eval(c)){
+    if (init) {
+      init->eval(c);
+    }
+    BasicObj* co = nullptr;
+    if (cond) {
+      co = cond->eval(c);
+    }
+    if (!co) {
+      co = new IntObj(1);
+      co->refcount++;
+    }
+    while (co->asbool()){
       std::cout<<"Loop NO "<<i<<std::endl;
       i++;
-      body->eval(c);
+      if (body) {
+        body->eval(c);
+      }
+      if (step) {
+        step->eval(c);
+      }
+      if (cond) {
+        co = cond->eval(c);
+      }
     }
     return nullptr;
   }
@@ -793,6 +812,7 @@ Node* parse(std::string a,Context& c){
         n+=i;
     }
     a=n;
+    if (a.substr(0,2)=="//") return new LiteralNode{new NullObject};
     if (a.empty()) return new LiteralNode{new NullObject};
     if (a.back()==';') a.pop_back();
     if (a[0]=='('){
@@ -1248,18 +1268,31 @@ std::vector<Node*> parseCode(std::string s,Context& c){
   return res;
 }
 
+Context CreateContext(){
+  Context c;
+  c.ns["print"]=new FunctionNative([](std::vector<BasicObj*> args,Context* c){
+    for (auto i:args){
+      std::cout<<i->str()<<" ";
+    }
+    std::cout<<std::endl;
+    return new NullObject();
+  });
+  return c;
+}
+
 int main(){
-    Context c;
+    Context c=CreateContext();
     auto a=parseCode("{if (0){b=1;};else{b=0;}}",c);
     std::cout<<"Evaling "<<std::endl;
     for (auto i:a){
        i->eval(c);
     }
-    parse(R"(
+    Node* g=parse(R"(
       for (i=0;i<5;i=i+1){
-      
+        print(i);
       };
-    )",c)->eval(c);
+    )",c);
+    g->eval(c);
     Node* b=parse("i",c);
     std::cout<<b->eval(c)->str()<<std::endl;
     return 0;
