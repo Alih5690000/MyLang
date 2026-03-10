@@ -3,6 +3,7 @@
 #include <map>
 #include <vector>
 #include <functional>
+#include <list>
 
 //g++ new.cpp -o new && ./new
 
@@ -732,6 +733,20 @@ struct IfNode:public Node{
     }
 };
 
+struct ForNode:public Node{
+  Node* body;
+  Node* init;
+  Node* cond;
+  Node* step;
+  ForNode(Node* c,Node* s,Node* b,Node* i):cond(c),step(s),body(b),init(i){}
+  BasicObj* eval(Context& c) override{
+    for (init->eval(c);cond->eval(c)->asbool();step->eval(c)){
+      body->eval(c);
+    }
+    return nullptr;
+  }
+};
+
 struct BinaryNode:public Node{
     public:
     std::string op;
@@ -860,6 +875,41 @@ Node* parse(std::string a,Context& c){
         elseBody={};
       }
       return new IfNode(cond,elseBody,body);
+    }
+    else if(a.substr(0,4)=="for("){
+      int j=4;
+      int depth=1;
+      std::string acc;
+      std::vector<Node*> exprs;
+      for (;j<a.size();j++){
+        if (a[j]=='(') depth++;
+        else if (a[j]==')'){ 
+          depth--;
+          if (depth==0) break;
+        }
+        if (a[j]==';' && depth==1){
+          exprs.push_back(parse(acc,c));
+          acc.clear();
+          continue;
+        }
+        acc+=a[j];
+      }
+      if (!acc.empty()){
+        exprs.push_back(parse(acc,c));
+        acc.clear();
+      }
+      j++;
+      depth=1;
+      acc.clear();
+      for (;j<a.size();j++){
+        if (a[j]=='{') depth++;
+        else if (a[j]=='}'){ 
+          depth--;
+          if (depth==0) break;
+        }
+        acc+=a[j];
+      }
+      return new ForNode(exprs[1],exprs[2],parse(acc,c),exprs[0]);
     }
     else if (a.substr(0,7)=="return("){
       int j=7;
