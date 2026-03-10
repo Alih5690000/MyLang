@@ -3,7 +3,6 @@
 #include <map>
 #include <vector>
 #include <functional>
-#include <list>
 
 //g++ new.cpp -o new && ./new
 
@@ -740,7 +739,10 @@ struct ForNode:public Node{
   Node* step;
   ForNode(Node* c,Node* s,Node* b,Node* i):cond(c),step(s),body(b),init(i){}
   BasicObj* eval(Context& c) override{
+    int i=0;
     for (init->eval(c);cond->eval(c)->asbool();step->eval(c)){
+      std::cout<<"Loop NO "<<i<<std::endl;
+      i++;
       body->eval(c);
     }
     return nullptr;
@@ -767,6 +769,9 @@ struct BinaryNode:public Node{
         if (op=="/"){
             return l->div(r,false);
         }
+        if (op=="<") return new IntObj(l->less(r,false));
+        if (op==">") return new IntObj(l->greater(r,false));
+        if (op=="==") return new IntObj(l->equal(r,false));
         return nullptr;
     }
     std::string str() override{
@@ -877,6 +882,7 @@ Node* parse(std::string a,Context& c){
       return new IfNode(cond,elseBody,body);
     }
     else if(a.substr(0,4)=="for("){
+      std::cout<<"is for "<<std::endl;
       int j=4;
       int depth=1;
       std::string acc;
@@ -889,6 +895,7 @@ Node* parse(std::string a,Context& c){
         }
         if (a[j]==';' && depth==1){
           exprs.push_back(parse(acc,c));
+          std::cout<<"ACC "<<acc<<std::endl;
           acc.clear();
           continue;
         }
@@ -896,6 +903,7 @@ Node* parse(std::string a,Context& c){
       }
       if (!acc.empty()){
         exprs.push_back(parse(acc,c));
+        std::cout<<"ACC "<<acc<<std::endl;
         acc.clear();
       }
       j++;
@@ -909,6 +917,7 @@ Node* parse(std::string a,Context& c){
         }
         acc+=a[j];
       }
+      std::cout<<"BODY "<<acc<<std::endl;
       return new ForNode(exprs[1],exprs[2],parse(acc,c),exprs[0]);
     }
     else if (a.substr(0,7)=="return("){
@@ -1010,7 +1019,7 @@ Node* parse(std::string a,Context& c){
           name+=i;
           continue;
         }
-        if ((i=='+' || i=='-') && depth==0){
+        if ((i=='+' || i=='-' || i=='<' || i=='>') && depth==0){
             std::cout<<"Has op "<<i<<std::endl;
             hasOp=true;
         }
@@ -1123,6 +1132,7 @@ Node* parse(std::string a,Context& c){
         std::string op;
         for (auto i:a){
             std::cout<<"ChAr "<<i<<std::endl;
+            _Exit(0);
             if (i=='(') bracketDepth++;
             if (i==')') bracketDepth--;
             if ((i=='*' || i=='/') && bracketDepth==0){ 
@@ -1166,7 +1176,7 @@ Node* parse(std::string a,Context& c){
             std::cout<<"ChAr "<<i<<std::endl;
             if (i=='(') bracketDepth++;
             if (i==')') bracketDepth--;
-            if ((i=='+' || i=='-') && bracketDepth==0){ 
+            if ((i=='+' || i=='-' || i=='<' || i=='>') && bracketDepth==0){ 
                 if (!curr){
                   curr=parse(acc,c);
                   std::cout<<"curr's first is "<<acc<<std::endl;
@@ -1240,25 +1250,17 @@ std::vector<Node*> parseCode(std::string s,Context& c){
 
 int main(){
     Context c;
-    c.ns["add"]=new FunctionNative([](std::vector<BasicObj*> args,Context* c){
-      if (args.size()!=2) throw ValueError("Add requires 2 arguements");
-      std::cout<<"Called add"<<std::endl;
-      return args[0]->add(args[1],false);
-    });
-    c.ns["cc"]=new ClassObject((std::vector<Node*>){new AsignNode(new IdentifierNode("x"),new LiteralNode(new IntObj(5)))},nullptr);
     auto a=parseCode("{if (0){b=1;};else{b=0;}}",c);
     std::cout<<"Evaling "<<std::endl;
     for (auto i:a){
        i->eval(c);
     }
-    Node* cc=parse("add.x=99;",c);
-    cc->eval(c);
-    Node* dd=parse("fn(addd)(a,b){return(a+b);}",c);
-    dd->eval(c);
-    parse("class(klass){a=67;};",c)->eval(c);
-    Node* aa=parse("a=klass();",c);
-    aa->eval(c);
-    Node* b=parse("a.a;",c);
+    parse(R"(
+      for (i=0;i<5;i=i+1){
+      
+      };
+    )",c)->eval(c);
+    Node* b=parse("i",c);
     std::cout<<b->eval(c)->str()<<std::endl;
     return 0;
 }
