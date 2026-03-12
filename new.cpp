@@ -86,13 +86,14 @@ class BasicObj{
       res->refcount++;
       return res;
     };
-    virtual void setattr(const std::string& name,BasicObj* o){
-      if (attrs.count(name)) {
-        attrs[name]->refcount--;
+    virtual void setattr(const std::string& s, BasicObj* value){
+      if (attrs.count(s)) {
+          attrs[s]->refcount--;
       }
-      BasicObj* cloned = o->clone();
+
+      BasicObj* cloned = value->clone();
       cloned->refcount++;
-      attrs[name]=cloned;
+      attrs[s] = cloned;
     }
     virtual BasicObj* getitem(BasicObj* key){throw NotAvailable("That is Base class (getitem)");};
     virtual BasicObj* setitem(std::vector<BasicObj*>){throw NotAvailable("That is Base class (setitem)");};
@@ -533,7 +534,7 @@ class ClassObject:public BasicObj{
       }
       cls=cls->parent;
    }
-   throw ValueError("Attribute not found");
+   throw ValueError(("Attribute "+str+"not found").c_str());
   }
 };
 
@@ -574,6 +575,7 @@ public:
               callArgs.push_back(arg);
             }
             Context local;
+            local.ns=n;
             local.ns["self"] = this;
 
             ctor->call(callArgs, &local);
@@ -865,14 +867,16 @@ Node* parse(std::string a,Context& c){
     int depth=0;
     std::string name;
     std::string n;
+    bool quoted=false;
     for (auto i:a){
-        if (isspace(i)) continue;
+        if (i=='"') quoted=!quoted;
+        if (isspace(i) && !quoted) continue;
         n+=i;
     }
     a=n;
+    if (a.back()==';') a.pop_back();
     if (a.substr(0,2)=="//") return new LiteralNode{new NullObject};
     if (a.empty()) return new LiteralNode{new NullObject};
-    if (a.back()==';') a.pop_back();
     if (a[0]=='('){
         int depth=0;
         for (int i=0;i<a.size();i++){
@@ -1213,7 +1217,7 @@ Node* parse(std::string a,Context& c){
                 ii++;
                 for (;ii<a.size();ii++){
                   char i=a[ii];
-                  if (i=='(' || i=='[' || i=='=' || i=='.' ){ 
+                  if (!std::isalpha(i) && i!='_'){ 
                     ii--;
                     break;
                   }
@@ -1391,19 +1395,23 @@ Context CreateContext(){
 
 int main(){
     Context c=CreateContext();
-    auto a=parseCode("{if (0){b=1;};else{b=0;}}",c);
-    std::cout<<"Evaling "<<std::endl;
-    for (auto i:a){
-       i->eval(c);
-    }
-    parse("a=[1,2,3,4,5]",c)->eval(c);
-    Node* g=parse(R"(
-      for (i=0;i<5;i=i+1){
-        print(i);
+    auto a=parseCode(R"(
+      class(A){
+        fn(__constructor__)(self){
+          print("Constructor called");
+          self.x=0;
+        };
+        fn(inc)(self){
+          self.x=self.x+1;
+        };
       };
+      a=A();
+      print("Created object");
+      a.inc();
+      print(a.x);
     )",c);
-    g->eval(c);
-    Node* b=parse("a[0]",c);
-    std::cout<<b->eval(c)->str()<<std::endl;
+    for (auto i:a){
+      i->eval(c);
+    }
     return 0;
 }
