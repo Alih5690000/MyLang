@@ -1166,6 +1166,12 @@ Node* parse(std::string a,Context& c){
           sheerName=false;
           for (;ii<a.size();ii++){
               char i=a[ii];
+              if ((i=='+'||i=='-'||i=='*'||i=='/'||i=='<'||i=='>') && depth==0) {
+                  std::string op(1,i);
+                  std::string rightStr = a.substr(ii+1);
+                  Node* rightNode = parse(rightStr,c);
+                  return new BinaryNode(rightNode,res,op);
+              }
               if (i=='='){
                 std::cout<<"Asigning "<<name<<std::endl;
                 std::cout<<"Left is "<<res->str()<<std::endl;
@@ -1399,7 +1405,7 @@ int main(){
       class(A){
         fn(__constructor__)(self){
           print("Constructor called");
-          self.x=0;
+          self.x=5;
         };
         fn(inc)(self){
           self.x=self.x+1;
