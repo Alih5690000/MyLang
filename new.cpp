@@ -278,7 +278,7 @@ std::vector<Node*> parseCode(std::string s,Context& c);
 struct Node{
     public:
     virtual BasicObj* eval(Context&)=0;
-    virtual void set(Context&,Node*){throw ValueError("Can not asign");}
+    virtual void set(Context&,Node*){throw ValueError(("Can not asign:"+str()).c_str());}
     virtual std::string str(){return "<Node>";}
     virtual ~Node()=default;
 };
@@ -296,10 +296,10 @@ class FunctionObject:public BasicObj{
         throw ValueError(("Function called with wrong number of arguments. "+
           std::to_string(args.size())+" instead of "+std::to_string(argNames.size())).c_str());
       }
-      std::cout<<"Called FunctiobObject with args"<<std::endl;
-      for (auto k:args) std::cout<<k->str()<<std::endl;
-      std::cout<<"ArgNames are"<<std::endl;
-      for (auto k:argNames) std::cout<<k<<std::endl;
+      // std::cout<<"Called FunctiobObject with args"<<std::endl;
+      // for (auto k:args) std::cout<<k->str()<<std::endl;
+      // std::cout<<"ArgNames are"<<std::endl;
+      // for (auto k:argNames) std::cout<<k<<std::endl;
       Context local=*c;
       for (int i=0;i<args.size();i++){
         local.ns[argNames[i]]=args[i];
@@ -311,7 +311,7 @@ class FunctionObject:public BasicObj{
           code[i]->eval(local);
         }
         catch(const ReturnSig& s){
-          std::cout<<"Catched return val is "<<s.val<<std::endl;
+          // std::cout<<"Catched return val is "<<s.val<<std::endl;
           return s.val;
         }
       }
@@ -437,7 +437,7 @@ struct AsignNode:public Node{
   Node *l,*r;
   AsignNode(Node* a,Node* b):l(a),r(b){}
   BasicObj* eval(Context& c) override{
-    std::cout<<"l is "<<l->str()<<std::endl;
+    // std::cout<<"l is "<<l->str()<<std::endl;
     l->set(c,r);
     return nullptr;
   }
@@ -450,12 +450,12 @@ struct CallNode:public Node{
   Node* target;
   std::vector<Node*> args;
   CallNode(Node* a,std::vector<Node*> b):target(a),args(b){
-    std::cout<<"CallNode calls "<<target->str()<<std::endl;
+    // std::cout<<"CallNode calls "<<target->str()<<std::endl;
   }
   BasicObj* eval(Context& c){
     std::vector<BasicObj*> callArgs;
     for (auto i:args){ 
-      std::cout<<"Evaling node for func "<<i->str()<<std::endl;
+      // std::cout<<"Evaling node for func "<<i->str()<<std::endl;
       callArgs.push_back(i->eval(c));
     }
     return target->eval(c)->call(callArgs,&c);
@@ -471,7 +471,7 @@ struct FunctionNode:public Node{
   std::vector<std::string> argNames;
   FunctionNode(std::string n,std::vector<Node*> b,std::vector<std::string> a):name(n),body(b),argNames(a){}
   BasicObj* eval(Context& c) override{
-    std::cout<<"Evaled FunctionNode name "<<name<<std::endl;
+    // std::cout<<"Evaled FunctionNode name "<<name<<std::endl;
     c.ns[name]=new FunctionObject(argNames,body);
     return new NullObject();
   }
@@ -545,7 +545,7 @@ class BoundMethod:public BasicObj{
   BoundMethod(BasicObj* f,BasicObj* s):func(f),self(s){}
   BasicObj* call(std::vector<BasicObj*> a,Context* n) override{
     refcount++;
-    std::cout<<"Called BoundMethode with "<<a.size()<<" args"<<std::endl;
+    // std::cout<<"Called BoundMethode with "<<a.size()<<" args"<<std::endl;
     std::vector<BasicObj*> callArgs={self};
     for (auto i:a){
       callArgs.push_back(i);
@@ -568,7 +568,7 @@ public:
         klass = cls;
         this->args = args;
         if (klass->hasattr("__constructor__")) {
-          std::cout<<"Calling constructor"<<std::endl;
+          // std::cout<<"Calling constructor"<<std::endl;
             BasicObj* ctor = klass->getattr("__constructor__");
             std::vector<BasicObj*> callArgs = { this };
             for (auto* arg : args){ 
@@ -772,16 +772,16 @@ struct IfNode:public Node{
     BasicObj* var=cond->eval(c);
     if (!var) throw ValueError("Condition is null");
     if (var->asbool()){
-      std::cout<<"True branch"<<std::endl;
+      // std::cout<<"True branch"<<std::endl;
       for (auto i:action){ 
-        std::cout<<"Evalin if "<<i->str()<<std::endl;
+        // std::cout<<"Evalin if "<<i->str()<<std::endl;
         i->eval(c);
       }
     }
     else if (!actionElse.empty()){
-      std::cout<<"False branch"<<std::endl;
+      // std::cout<<"False branch"<<std::endl;
       for (auto i:actionElse){ 
-        std::cout<<"i is "<<i->str()<<std::endl;
+        // std::cout<<"i is "<<i->str()<<std::endl;
         i->eval(c);
       }
     }
@@ -793,11 +793,12 @@ struct IfNode:public Node{
 };
 
 struct ForNode:public Node{
-  Node* body;
   Node* init;
   Node* cond;
   Node* step;
-  ForNode(Node* c,Node* s,Node* b,Node* i):cond(c),step(s),body(b),init(i){}
+  std::vector<Node*> body;
+  ForNode(Node* c,Node* s,std::vector<Node*> b,Node* i)
+    :cond(c),step(s),body(b),init(i){}
   BasicObj* eval(Context& c) override{
     int i=0;
     if (init) {
@@ -812,10 +813,10 @@ struct ForNode:public Node{
       co->refcount++;
     }
     while (co->asbool()){
-      std::cout<<"Loop NO "<<i<<std::endl;
+      // std::cout<<"Loop NO "<<i<<std::endl;
       i++;
-      if (body) {
-        body->eval(c);
+      for (auto node : body) {
+        node->eval(c);
       }
       if (step) {
         step->eval(c);
@@ -859,7 +860,7 @@ struct BinaryNode:public Node{
 };
 
 Node* parse(std::string a,Context& c){
-  std::cout<<"source "<<a<<std::endl;
+  // std::cout<<"source "<<a<<std::endl;
     bool sheerName=true;
     bool isInt=true;
     bool hasOp=false;
@@ -884,7 +885,7 @@ Node* parse(std::string a,Context& c){
           if (a[i]=='"') {
             quoted=!quoted;
             if (!quoted && i==a.size()-1){
-              return new LiteralNode{new StringObject(a.substr(1,a.size()-2))};
+              return new LiteralNode{new StringObject(content)};
             }
             continue;
           }
@@ -976,7 +977,7 @@ Node* parse(std::string a,Context& c){
       }
     }
     if (a.substr(0,3)=="if("){
-      std::cout<<"if branch"<<std::endl;
+      // std::cout<<"if branch"<<std::endl;
       Node* cond;
       std::string acc;
       int depth=1;
@@ -1038,7 +1039,7 @@ Node* parse(std::string a,Context& c){
       return new IfNode(cond,elseBody,body);
     }
     else if(a.substr(0,4)=="for("){
-      std::cout<<"is for "<<std::endl;
+      // std::cout<<"is for "<<std::endl;
       int j=4;
       int depth=1;
       std::string acc;
@@ -1051,7 +1052,7 @@ Node* parse(std::string a,Context& c){
         }
         if (a[j]==';' && depth==1){
           exprs.push_back(parse(acc,c));
-          std::cout<<"ACC "<<acc<<std::endl;
+          // std::cout<<"ACC "<<acc<<std::endl;
           acc.clear();
           continue;
         }
@@ -1059,7 +1060,7 @@ Node* parse(std::string a,Context& c){
       }
       if (!acc.empty()){
         exprs.push_back(parse(acc,c));
-        std::cout<<"ACC "<<acc<<std::endl;
+        // std::cout<<"ACC "<<acc<<std::endl;
         acc.clear();
       }
       j+=2;
@@ -1073,8 +1074,8 @@ Node* parse(std::string a,Context& c){
         }
         acc+=a[j];
       }
-      std::cout<<"BODY "<<acc<<std::endl;
-      return new ForNode(exprs[1],exprs[2],parse(acc,c),exprs[0]);
+      // std::cout<<"BODY "<<acc<<std::endl;
+      return new ForNode(exprs[1],exprs[2],parseCode(acc,c),exprs[0]);
     }
     else if (a.substr(0,7)=="return("){
       int j=7;
@@ -1098,7 +1099,7 @@ Node* parse(std::string a,Context& c){
         if (a[j]==')') break;
         name+=a[j];
       }
-      std::cout<<"Class name "<<name<<std::endl;
+      // std::cout<<"Class name "<<name<<std::endl;
       j++;
       if (a[j]!='{') throw SyntaxError("'{' for class body");
       j++;
@@ -1112,7 +1113,7 @@ Node* parse(std::string a,Context& c){
         }
         body+=a[j];
       }
-      std::cout<<"Body is "<<body<<std::endl;
+      // std::cout<<"Body is "<<body<<std::endl;
       auto Body=parseCode(body,c);
       return new ClassNode(name,Body,nullptr);
     }
@@ -1159,12 +1160,12 @@ Node* parse(std::string a,Context& c){
         body+=a[j];
       }
       auto nodes=parseCode(body,c);
-      for (auto k:nodes) std::cout<<"Node is "<<k->str()<<std::endl;
+      for (auto k:nodes) /* std::cout<<"Node is "<<k->str()<<std::endl; */ (void)k;
       return new FunctionNode(funcName,nodes,argNames);
     }
     for (int ii=0;ii<a.size();ii++){
         char i=a[ii];
-        std::cout<<"i is "<<i<<std::endl;
+        // std::cout<<"i is "<<i<<std::endl;
         
         if (i<'0' || i>'9'){ 
           //std::cout<<"Not int due to "<<i<<std::endl;
@@ -1176,16 +1177,16 @@ Node* parse(std::string a,Context& c){
           continue;
         }
         if ((i=='+' || i=='-' || i=='<' || i=='>') && depth==0){
-            std::cout<<"Has op "<<i<<std::endl;
+            // std::cout<<"Has op "<<i<<std::endl;
             hasOp=true;
         }
         if ((i=='*' || i=='/') && depth==0){
-            std::cout<<"Has mul "<<i<<std::endl;
+            // std::cout<<"Has mul "<<i<<std::endl;
             hasMul=true;
         }
         if ((i=='(' || i=='[' || i=='=' || i=='.' ) && depth==0){ 
           Node* res=parse(name,c);
-          std::cout<<"Base is "<<name<<std::endl;
+          // std::cout<<"Base is "<<name<<std::endl;
           sheerName=false;
           for (;ii<a.size();ii++){
               char i=a[ii];
@@ -1196,19 +1197,19 @@ Node* parse(std::string a,Context& c){
                   return new BinaryNode(rightNode,res,op);
               }
               if (i=='='){
-                std::cout<<"Asigning "<<name<<std::endl;
-                std::cout<<"Left is "<<res->str()<<std::endl;
+                // std::cout<<"Asigning "<<name<<std::endl;
+                // std::cout<<"Left is "<<res->str()<<std::endl;
                 ii++;
                 std::string L;
                 for (;ii<a.size() && a[ii]!=';';ii++){
                   L+=a[ii];
                 }
                 Node* r=parse(L,c);
-                std::cout<<"Right is "<<L<<std::endl;
+                // std::cout<<"Right is "<<L<<std::endl;
                 return new AsignNode(res,r);
               }
               if (i=='('){
-                std::cout<<"Calling "<<name<<std::endl;
+                // std::cout<<"Calling "<<name<<std::endl;
                 std::vector<Node*> args;
                 std::string acc;
                 ii++;
@@ -1216,7 +1217,7 @@ Node* parse(std::string a,Context& c){
                 int depth2=0;
                 for (;ii<a.size();ii++){
                   i=a[ii];
-                  std::cout<<"Char "<<i<<std::endl;
+                  // std::cout<<"Char "<<i<<std::endl;
                   if (i=='(') depth1++;
                   if (i==')'){ 
                     depth1--;
@@ -1236,10 +1237,10 @@ Node* parse(std::string a,Context& c){
                 if(!acc.empty())
                   args.push_back(parse(acc,c));
                 for (auto i:args){
-                  std::cout<<"Arg is "<<i->str()<<std::endl;
+                  // std::cout<<"Arg is "<<i->str()<<std::endl;
                 }
                 res=new CallNode(res,args);
-                std::cout<<"Res is "<<res->str()<<std::endl;
+                // std::cout<<"Res is "<<res->str()<<std::endl;
               }
               if (i=='.'){
                 std::string attrName;
@@ -1278,7 +1279,7 @@ Node* parse(std::string a,Context& c){
                 }
               }
           }
-          std::cout<<"The final res is "<<res->str()<<std::endl;
+          // std::cout<<"The final res is "<<res->str()<<std::endl;
           return res;
         }
         if (i=='(') depth++;
@@ -1286,24 +1287,24 @@ Node* parse(std::string a,Context& c){
         name+=i;
     }
     if (hasMul && !hasOp){
-      std::cout<<"has mul"<<std::endl;
+      // std::cout<<"has mul"<<std::endl;
         int bracketDepth=0;
         bool side=false;
         Node *r=nullptr,*curr=nullptr;
         std::string acc;
         std::string op;
         for (auto i:a){
-            std::cout<<"ChAr "<<i<<std::endl;
+            // std::cout<<"ChAr "<<i<<std::endl;
             _Exit(0);
             if (i=='(') bracketDepth++;
             if (i==')') bracketDepth--;
             if ((i=='*' || i=='/') && bracketDepth==0){ 
                 if (!curr){
                   curr=parse(acc,c);
-                  std::cout<<"curr's first is "<<acc<<std::endl;
+                  // std::cout<<"curr's first is "<<acc<<std::endl;
                 }
                 else{
-                  std::cout<<"right is "<<acc<<std::endl;
+                  // std::cout<<"right is "<<acc<<std::endl;
                   r=parse(acc,c);
                   curr=new BinaryNode(r,curr,std::string(1,i));
                 }
@@ -1316,10 +1317,10 @@ Node* parse(std::string a,Context& c){
         if (!acc.empty()){
             if (!curr){
               curr=parse(acc,c);
-              std::cout<<"curr's first is "<<acc<<std::endl;
+              // std::cout<<"curr's first is "<<acc<<std::endl;
             }
             else{
-              std::cout<<"right is "<<acc<<std::endl;
+              // std::cout<<"right is "<<acc<<std::endl;
               r=parse(acc,c);
               curr=new BinaryNode(r,curr,op);
             }
@@ -1369,15 +1370,15 @@ Node* parse(std::string a,Context& c){
       return curr;
     }
     if (isInt){ 
-      std::cout<<"Int is "<<name<<std::endl;
+      // std::cout<<"Int is "<<name<<std::endl;
       return new LiteralNode{new IntObj(std::stoi(name))};
     }
     else if (sheerName){ 
-      std::cout<<"sheer name "<<name<<std::endl;
+      // std::cout<<"sheer name "<<name<<std::endl;
       return new IdentifierNode{name};
     }
     
-    std::cout<<"None of this"<<std::endl;
+    // std::cout<<"None of this"<<std::endl;
     return nullptr;
 }
 
@@ -1392,7 +1393,7 @@ std::vector<Node*> parseCode(std::string s,Context& c){
     else if(i=='}'){ 
       depth--;
       if (depth==0){
-        std::cout<<"parseCode is parsing "<<acc<<std::endl;
+        // std::cout<<"parseCode is parsing "<<acc<<std::endl;
         if (!acc.empty())
           res.push_back(parse(acc,c));
         acc.clear();
@@ -1438,14 +1439,15 @@ int main(){
         };
       };
       print("Declared class");
-      fn createMap(){
+      fn(createMap)(){
+        print("Creating map");
         res=[];
         for (i=0;i<10;i=i+1){
           row=[];
           for (j=0;j<10;j=j+1){
-            row[j]=".";
+            row.push_back(".");
           };
-          res[i]=row;
+          res.push_back(row);
         };
         return(res);
       };
@@ -1453,7 +1455,7 @@ int main(){
       m=createMap();
       for (i=0;i<10;i=i+1){
         for (j=0;j<10;j=j+1){
-          print(map[i][j]);
+          print(m[i][j]," ");
         };
         print("\n");
       };
