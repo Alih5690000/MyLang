@@ -877,6 +877,29 @@ Node* parse(std::string a,Context& c){
     if (a.back()==';') a.pop_back();
     if (a.substr(0,2)=="//") return new LiteralNode{new NullObject};
     if (a.empty()) return new LiteralNode{new NullObject};
+    if (a[0]=='"'){
+      bool quoted=false;
+      std::string content;
+      for (int i=0;i<a.size();i++){
+          if (a[i]=='"') {
+            quoted=!quoted;
+            if (!quoted && i==a.size()-1){
+              return new LiteralNode{new StringObject(a.substr(1,a.size()-2))};
+            }
+            continue;
+          }
+          if (a[i]=='\\' && quoted){
+            if (i+1<a.size()){
+              if (a[i+1]=='n') content+='\n';
+              else if (a[i+1]=='t') content+='\t';
+              else content+=a[i+1];
+              i++;
+            }
+          }
+          else
+            content+=a[i];
+      }
+    }
     if (a[0]=='('){
         int depth=0;
         for (int i=0;i<a.size();i++){
@@ -1039,7 +1062,7 @@ Node* parse(std::string a,Context& c){
         std::cout<<"ACC "<<acc<<std::endl;
         acc.clear();
       }
-      j++;
+      j+=2;
       depth=1;
       acc.clear();
       for (;j<a.size();j++){
@@ -1360,6 +1383,7 @@ Node* parse(std::string a,Context& c){
 
 std::vector<Node*> parseCode(std::string s,Context& c){
   int depth=0;
+  int depth2=0;
   std::string acc;
   std::vector<Node*> res;
   for (auto i:s){
@@ -1374,7 +1398,9 @@ std::vector<Node*> parseCode(std::string s,Context& c){
         acc.clear();
       }
     }
-    if (i==';' && depth==0){
+    if (i=='(') depth2++;
+    else if(i==')') depth2--;
+    if (i==';' && depth==0 && depth2==0){
       if (!acc.empty())
         res.push_back(parse(acc,c));
       acc.clear();
@@ -1391,9 +1417,8 @@ Context CreateContext(){
   Context c;
   c.ns["print"]=new FunctionNative([](std::vector<BasicObj*> args,Context* c){
     for (auto i:args){
-      std::cout<<i->str()<<" ";
+      std::cout<<i->str();
     }
-    std::cout<<std::endl;
     return new NullObject();
   });
   return c;
@@ -1402,19 +1427,36 @@ Context CreateContext(){
 int main(){
     Context c=CreateContext();
     auto a=parseCode(R"(
-      class(A){
+      class(Player){
         fn(__constructor__)(self){
-          print("Constructor called");
-          self.x=5;
+          self.x=0;
+          self.y=y;
         };
-        fn(inc)(self){
-          self.x=self.x+1;
+        fn(move)(self,dx,dy){
+          self.x=self.x+dx;
+          self.y=self.y+dy;
         };
       };
-      a=A();
-      print("Created object");
-      a.inc();
-      print(a.x);
+      print("Declared class");
+      fn createMap(){
+        res=[];
+        for (i=0;i<10;i=i+1){
+          row=[];
+          for (j=0;j<10;j=j+1){
+            row[j]=".";
+          };
+          res[i]=row;
+        };
+        return(res);
+      };
+      print("Decalred class and func");
+      m=createMap();
+      for (i=0;i<10;i=i+1){
+        for (j=0;j<10;j=j+1){
+          print(map[i][j]);
+        };
+        print("\n");
+      };
     )",c);
     for (auto i:a){
       i->eval(c);
