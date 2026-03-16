@@ -4,7 +4,7 @@
 #include <vector>
 #include <functional>
 
-//g++ new.cpp -o new && ./new
+//g++ -g -fsanitize=address new.cpp -o new && ./new
 
 int classes;
 
@@ -1295,7 +1295,6 @@ Node* parse(std::string a,Context& c){
         std::string op;
         for (auto i:a){
             // std::cout<<"ChAr "<<i<<std::endl;
-            _Exit(0);
             if (i=='(') bracketDepth++;
             if (i==')') bracketDepth--;
             if ((i=='*' || i=='/') && bracketDepth==0){ 
@@ -1422,6 +1421,11 @@ Context CreateContext(){
     }
     return new NullObject();
   });
+  c.ns["input"]=new FunctionNative([](std::vector<BasicObj*> args,Context* c){
+    std::string s;
+    std::cin>>s;
+    return new StringObject(s);
+  });
   return c;
 }
 
@@ -1451,13 +1455,31 @@ int main(){
         };
         return(res);
       };
+      fn(showMap)(m){
+        for (i=0;i<10;i=i+1){
+          for (j=0;j<10;j=j+1){
+            print(m[i][j]," ");
+          };
+        print("\n");
+        };
+      };
+      class(Player){
+        fn(__constructor__)(self,x,y){
+          self.x=x;
+          self.y=y;
+        };
+        fn(render)(self,m){
+          m[self.y][self.x]="$";
+        }
+      }
       print("Decalred class and func");
       m=createMap();
-      for (i=0;i<10;i=i+1){
-        for (j=0;j<10;j=j+1){
-          print(m[i][j]," ");
-        };
-        print("\n");
+      p=Player(0,0);
+      showMap(m);
+      for (i=0;i<1;i=i-1){
+        a=input();
+        p.render(m);
+        showMap(m);
       };
     )",c);
     for (auto i:a){
