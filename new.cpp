@@ -135,7 +135,6 @@ public:
     }
     BasicObj* clone() override{
       BasicObj* tmp = new StringObject(value);
-      tmp->refcount++;
       return tmp;
     }
     ~StringObject() override = default;
@@ -248,7 +247,6 @@ class IntObj:public BasicObj{
     }
     BasicObj* clone() override{
       BasicObj* tmp = new IntObj(a);
-      tmp->refcount++;
       return tmp;
     }
     ~IntObj() override = default;
@@ -266,7 +264,6 @@ class NullObject:public BasicObj{
   }
   BasicObj* clone() override{
     BasicObj* tmp = new NullObject();
-    tmp->refcount++;
     return tmp;
   }
 };
@@ -279,9 +276,10 @@ struct Node{
     public:
     virtual BasicObj* eval(Context&)=0;
     virtual void set(Context&,Node*){throw ValueError(("Can not asign:"+str()).c_str());}
-    virtual std::string str(){return "<Node>";}
+    virtual std::string str(){return "<Node>" ;}
     virtual ~Node()=default;
 };
+
 class FunctionObject:public BasicObj{
     public:
     std::vector<std::string> argNames;
@@ -296,26 +294,35 @@ class FunctionObject:public BasicObj{
         throw ValueError(("Function called with wrong number of arguments. "+
           std::to_string(args.size())+" instead of "+std::to_string(argNames.size())).c_str());
       }
-      // std::cout<<"Called FunctiobObject with args"<<std::endl;
+      // std::cout<<"Called FunctionObject with args"<<std::endl;
       // for (auto k:args) std::cout<<k->str()<<std::endl;
       // std::cout<<"ArgNames are"<<std::endl;
       // for (auto k:argNames) std::cout<<k<<std::endl;
       Context local=*c;
       for (int i=0;i<args.size();i++){
-        local.ns[argNames[i]]=args[i];
+        local.ns[argNames[i]]=args[i]->clone();
+        local.ns[argNames[i]]->refcount++;
       }
-      if (code.empty())
-        return new NullObject();
+      if (code.empty()){
+        BasicObj* r=new NullObject();
+        r->refcount++;
+        return r;
+      }
       for (int i=0;i<code.size();i++){ 
         try{
           code[i]->eval(local);
         }
         catch(const ReturnSig& s){
           // std::cout<<"Catched return val is "<<s.val<<std::endl;
+          for (int i=0;i<args.size();i++){
+            local.ns[argNames[i]]->refcount--;
+          }
           return s.val;
         }
+        BasicObj* r=new NullObject();
+        r->refcount++;
+        return r;
       }
-      return new NullObject();
     }
     std::string str() override{
       return "<FunctionObject>";
@@ -345,7 +352,10 @@ class FunctionNative:public BasicObj{
 struct LiteralNode:public Node{
     BasicObj* o;
     LiteralNode(BasicObj* l):o(l){l->refcount++;}
-    BasicObj* eval(Context&) override{return o;}
+    BasicObj* eval(Context&) override{
+      o->refcount++;
+      return o;
+    }
     std::string str() override{
       return "<LiteralNode>";
     }
@@ -354,11 +364,20 @@ struct LiteralNode:public Node{
 class ListObject:public BasicObj{
   public:
   std::vector<BasicObj*> items;
-  ListObject(const std::vector<BasicObj*>& items):items(items){
+  ListObject(const std::vector<BasicObj*>& items){
+    for (auto i:items){
+      BasicObj* curr=i->clone();
+      curr->refcount++;
+      this->items.push_back(curr);
+    }
     typeID=12;
     auto appendFunc = new FunctionNative([this](std::vector<BasicObj*> args,Context*) {
-      this->items.push_back(args[0]->clone());
-      return nullptr;
+      BasicObj* a=args[0]->clone();
+      a->refcount++;
+      this->items.push_back(a);
+      BasicObj* r = new NullObject();
+      r->refcount++;
+      return r;
     });
     appendFunc->refcount++;
     attrs["append"] = appendFunc;
@@ -376,7 +395,9 @@ class ListObject:public BasicObj{
       if (i->a<0 || i->a>=items.size()) throw ValueError(
         ("Index out of bounds (read) accesing to "+std::to_string(i->a)).c_str()
       );
-      return items[i->a];
+      BasicObj* h=items[i->a];
+      h->refcount++;
+      return h;
     }
     else{
       throw ValueError("Key is not an integer");
@@ -408,7 +429,6 @@ class ListObject:public BasicObj{
   }
   BasicObj* clone() override{
     BasicObj* tmp = new ListObject(items);
-    tmp->refcount++;
     return tmp;
   }
 };
@@ -419,13 +439,14 @@ struct IdentifierNode:public Node{
   IdentifierNode(std::string n):name(n){}
   BasicObj* eval(Context& c) override{
     if (!c.ns.count(name)) throw ValueError(("Name '"+name+"' not found").c_str());
-    return c.ns[name];
+    BasicObj* res = c.ns[name];
+    res->refcount++;
+    return res;
   }
   void set(Context& c,Node* e){
     if (c.ns[name])
       c.ns[name]->refcount--;
     BasicObj* res=e->eval(c);
-    res->refcount++;
     c.ns[name]=res;
   }
   std::string str() override{
@@ -456,9 +477,16 @@ struct CallNode:public Node{
     std::vector<BasicObj*> callArgs;
     for (auto i:args){ 
       // std::cout<<"Evaling node for func "<<i->str()<<std::endl;
-      callArgs.push_back(i->eval(c));
+      BasicObj* curr=i->eval(c);
+      callArgs.push_back(curr);
     }
-    return target->eval(c)->call(callArgs,&c);
+    BasicObj* func = target->eval(c);
+    BasicObj* res = func->call(callArgs,&c);
+    func->refcount--;
+    for (auto i:callArgs){ 
+      i->refcount--;
+    }
+    return res;
   }
   std::string str() override{
       return "<CallNode>";
@@ -473,7 +501,10 @@ struct FunctionNode:public Node{
   BasicObj* eval(Context& c) override{
     // std::cout<<"Evaled FunctionNode name "<<name<<std::endl;
     c.ns[name]=new FunctionObject(argNames,body);
-    return new NullObject();
+    c.ns[name]->refcount++;
+    BasicObj* ret=new NullObject();
+    ret->refcount++;
+    return ret;
   }
 };
 
@@ -511,7 +542,6 @@ class ClassObject:public BasicObj{
   }
   BasicObj* clone() override{
     BasicObj* tmp = new ClassObject(a,parent);
-    tmp->refcount++;
     return tmp;
   }
   bool hasattr(const std::string& name) override{
@@ -544,14 +574,12 @@ class BoundMethod:public BasicObj{
   BasicObj* self;
   BoundMethod(BasicObj* f,BasicObj* s):func(f),self(s){}
   BasicObj* call(std::vector<BasicObj*> a,Context* n) override{
-    refcount++;
     // std::cout<<"Called BoundMethode with "<<a.size()<<" args"<<std::endl;
     std::vector<BasicObj*> callArgs={self};
     for (auto i:a){
       callArgs.push_back(i);
     }
     BasicObj* res = func->call(callArgs,n);
-    refcount--;
     return res;
   }
   std::string str() override{
@@ -656,7 +684,9 @@ public:
     }
     BasicObj* getattr(const std::string& name) override {
       if (attrs.count(name)) {
-          return attrs[name];
+          BasicObj* res = attrs[name];
+          res->refcount++;
+          return res;
       }
 
           BasicObj* val = klass->getattr(name);
@@ -694,7 +724,8 @@ public:
     }
     BasicObj* getitem(BasicObj* key)override{
       Context dull;
-      return klass->getattr("__getitem__")->call({this,key},&dull);
+      BasicObj* a=klass->getattr("__getitem__")->call({this,key},&dull);
+      return a;
     }
     ~InstanceObject() override = default;
 
@@ -728,7 +759,15 @@ struct IndexNode:public Node{
   Node* arg;
   IndexNode(Node* a,Node* b):target(a),arg(b){}
   BasicObj* eval(Context& c){
-    return target->eval(c)->getitem(arg->eval(c));
+    BasicObj* t = target->eval(c);
+    BasicObj* k = arg->eval(c);
+
+    BasicObj* res = t->getitem(k);
+
+    t->refcount--;
+    k->refcount--;
+
+    return res;
   }
   void set(Context& c,Node* val) override{
     target->eval(c)->setitem(arg->eval(c),val->eval(c));
@@ -743,7 +782,10 @@ struct AttributeNode:public Node{
   std::string name;
   AttributeNode(Node* a,std::string b):target(a),name(b){}
   BasicObj* eval(Context& c){
-    return target->eval(c)->getattr(name);
+    BasicObj* t = target->eval(c);
+    BasicObj* res = t->getattr(name);
+    t->refcount--;
+    return res;
   }
   void set(Context& c,Node* val) override{
     target->eval(c)->setattr(name,val->eval(c));
@@ -757,7 +799,8 @@ struct ReturnNode:public Node{
   Node* val;
   ReturnNode(Node* r):val(r){}
   BasicObj* eval(Context& c) override{
-    throw ReturnSig(val->eval(c));
+    BasicObj* r = val->eval(c);
+    throw ReturnSig(r);
   }
   std::string str() override{
     return "<ReturnNode>";
@@ -835,24 +878,26 @@ struct BinaryNode:public Node{
     Node *right,*left;
     BinaryNode(Node* r,Node* l,std::string o):right(r),left(l),op(o){}
     BasicObj* eval(Context& a) override{
+        BasicObj* res=nullptr;
         BasicObj* r=right->eval(a);
         BasicObj* l=left->eval(a);
         if (op=="+"){
-            return l->add(r,false);
+            res=l->add(r,false);
         }
         if (op=="-"){
-            return l->sub(r,false);
+            res=l->sub(r,false);
         }
         if (op=="*"){
-            return l->mul(r,false);
+            res=l->mul(r,false);
         }
         if (op=="/"){
-            return l->div(r,false);
+            res=l->div(r,false);
         }
-        if (op=="<") return new IntObj(l->less(r,false));
-        if (op==">") return new IntObj(l->greater(r,false));
-        if (op=="==") return new IntObj(l->equal(r,false));
-        return nullptr;
+        if (op=="<") res=new IntObj(l->less(r,false));
+        if (op==">") res=new IntObj(l->greater(r,false));
+        if (op=="==") res=new IntObj(l->equal(r,false));
+        res->refcount++;
+        return res;
     }
     std::string str() override{
       return "<BinaryNode>";
@@ -1419,13 +1464,19 @@ Context CreateContext(){
     for (auto i:args){
       std::cout<<i->str();
     }
-    return new NullObject();
+    BasicObj* a=new NullObject();
+    a->refcount++;
+    return a;
   });
+  c.ns["print"]->refcount++;
   c.ns["input"]=new FunctionNative([](std::vector<BasicObj*> args,Context* c){
     std::string s;
     std::cin>>s;
-    return new StringObject(s);
+    BasicObj* a=new StringObject(s);
+    a->refcount++;
+    return a;
   });
+  c.ns["input"]->refcount++;
   return c;
 }
 
