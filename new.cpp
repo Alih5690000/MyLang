@@ -814,7 +814,11 @@ struct IfNode:public Node{
   BasicObj* eval(Context& c) override{
     BasicObj* var=cond->eval(c);
     if (!var) throw ValueError("Condition is null");
-    if (var->asbool()){
+
+    bool cc=var->asbool();
+    var->refcount--;
+
+    if (cc){
       // std::cout<<"True branch"<<std::endl;
       for (auto i:action){ 
         // std::cout<<"Evalin if "<<i->str()<<std::endl;
@@ -845,7 +849,8 @@ struct ForNode:public Node{
   BasicObj* eval(Context& c) override{
     int i=0;
     if (init) {
-      init->eval(c);
+      BasicObj* tmp=init->eval(c);
+      if (tmp) tmp->refcount--;
     }
     BasicObj* co = nullptr;
     if (cond) {
@@ -859,15 +864,19 @@ struct ForNode:public Node{
       // std::cout<<"Loop NO "<<i<<std::endl;
       i++;
       for (auto node : body) {
-        node->eval(c);
+        BasicObj* tmp=node->eval(c);
+        if (tmp) tmp->refcount--;
       }
       if (step) {
-        step->eval(c);
+        BasicObj* tmp=step->eval(c);
+        if (tmp) tmp->refcount--;
       }
       if (cond) {
+        co->refcount--;
         co = cond->eval(c);
       }
     }
+    co->refcount--;
     return nullptr;
   }
 };
