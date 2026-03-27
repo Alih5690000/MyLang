@@ -66,6 +66,9 @@ class BasicObj{
     public:
     int typeID=0;
     int refcount=0;
+    void check(){
+      if (refcount<=0) delete this;
+    }
     virtual BasicObj* add(BasicObj*,bool){throw NotAvailable("That is Base class (add)");};
     virtual BasicObj* sub(BasicObj*,bool){throw NotAvailable("That is Base class (sub)");};
     virtual BasicObj* mul(BasicObj*,bool){throw NotAvailable("That is Base class (mul)");};
@@ -89,6 +92,7 @@ class BasicObj{
     virtual void setattr(const std::string& s, BasicObj* value){
       if (attrs.count(s)) {
           attrs[s]->refcount--;
+          attrs[s]->check();
       }
 
       BasicObj* cloned = value->clone();
@@ -315,6 +319,7 @@ class FunctionObject:public BasicObj{
           // std::cout<<"Catched return val is "<<s.val<<std::endl;
           for (int i=0;i<args.size();i++){
             local.ns[argNames[i]]->refcount--;
+            local.ns[argNames[i]]->check();
           }
           return s.val;
         }
@@ -406,7 +411,10 @@ class ListObject:public BasicObj{
         ("Index out of bounds (write) accesing to "+std::to_string(i->a)).c_str()
       );;
       BasicObj* old = items[i->a];
-      if (old && old!=value) old->refcount--;
+      if (old && old!=value) {
+        old->refcount--;
+        old->check();
+      }
       value->refcount++;
       items[i->a] = value;
     }
@@ -441,8 +449,10 @@ struct IdentifierNode:public Node{
     return res;
   }
   void set(Context& c,Node* e){
-    if (c.ns[name])
+    if (c.ns[name]){
       c.ns[name]->refcount--;
+      c.ns[name]->check();
+    }
     BasicObj* res=e->eval(c);
     c.ns[name]=res;
   }
@@ -480,6 +490,7 @@ struct CallNode:public Node{
     BasicObj* func = target->eval(c);
     BasicObj* res = func->call(callArgs,&c);
     func->refcount--;
+    func->check();
     for (auto i:callArgs){ 
       i->refcount--;
     }
@@ -529,10 +540,8 @@ class ClassObject:public BasicObj{
       this->a=a;
   }
   BasicObj* call(std::vector<BasicObj*> args,Context* c) override{
-    refcount++;
     BasicObj* instance = InstanceObj(this,args,*c);
     instance->typeID=instanceID;
-    refcount--;
     return instance;
   }
   std::string str() override{
@@ -705,6 +714,7 @@ public:
         std::string attrName = s;
         if (attrs.count(attrName)) {
           attrs[attrName]->refcount--;
+          attrs[attrName]->check();
         }
         value->refcount++;
         attrs[attrName] = value;
@@ -763,7 +773,9 @@ struct IndexNode:public Node{
     BasicObj* res = t->getitem(k);
 
     t->refcount--;
+    t->check();
     k->refcount--;
+    k->check();
 
     return res;
   }
@@ -773,8 +785,11 @@ struct IndexNode:public Node{
     BasicObj* cc=val->eval(c);
     a->setitem(b,cc);
     a->refcount--;
+    a->check();
     b->refcount--;
+    b->check();
     cc->refcount--;
+    cc->check();
   }
   std::string str() override{
       return "<IndexNode>";
@@ -789,6 +804,7 @@ struct AttributeNode:public Node{
     BasicObj* t = target->eval(c);
     BasicObj* res = t->getattr(name);
     t->refcount--;
+    t->check();
     return res;
   }
   void set(Context& c,Node* val) override{
@@ -796,7 +812,9 @@ struct AttributeNode:public Node{
     BasicObj* b=val->eval(c);
     a->setattr(name,b);
     a->refcount--;
+    a->check();
     b->refcount--;
+    b->check();
   }
   std::string str() override{
       return "<AttributeNode>";
@@ -825,6 +843,7 @@ struct IfNode:public Node{
 
     bool cc=var->asbool();
     var->refcount--;
+    var->check();
 
     if (cc){
       // std::cout<<"True branch"<<std::endl;
@@ -858,7 +877,10 @@ struct ForNode:public Node{
     int i=0;
     if (init) {
       BasicObj* tmp=init->eval(c);
-      if (tmp) tmp->refcount--;
+      if (tmp) {
+        tmp->refcount--;
+        tmp->check();
+      }
     }
     BasicObj* co = nullptr;
     if (cond) {
@@ -873,18 +895,26 @@ struct ForNode:public Node{
       i++;
       for (auto node : body) {
         BasicObj* tmp=node->eval(c);
-        if (tmp) tmp->refcount--;
+        if (tmp) {
+          tmp->refcount--;
+          tmp->check();
+        }
       }
       if (step) {
         BasicObj* tmp=step->eval(c);
-        if (tmp) tmp->refcount--;
+        if (tmp) {
+          tmp->refcount--;
+          tmp->check();
+        }
       }
       if (cond) {
         co->refcount--;
+        co->check();
         co = cond->eval(c);
       }
     }
     co->refcount--;
+    co->check();
     return nullptr;
   }
 };
@@ -914,7 +944,9 @@ struct BinaryNode:public Node{
         if (op==">") res=new IntObj(l->greater(r,false));
         if (op=="==") res=new IntObj(l->equal(r,false));
         r->refcount--;
+        r->check();
         l->refcount--;
+        l->check();
         res->refcount++;
         return res;
     }
