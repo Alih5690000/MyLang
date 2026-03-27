@@ -92,7 +92,6 @@ class BasicObj{
       }
 
       BasicObj* cloned = value->clone();
-      cloned->refcount++;
       attrs[s] = cloned;
     }
     virtual BasicObj* getitem(BasicObj* key){throw NotAvailable("That is Base class (getitem)");};
@@ -366,8 +365,7 @@ class ListObject:public BasicObj{
   std::vector<BasicObj*> items;
   ListObject(const std::vector<BasicObj*>& items){
     for (auto i:items){
-      BasicObj* curr=i->clone();
-      curr->refcount++;
+      BasicObj* curr=i->clone;
       this->items.push_back(curr);
     }
     typeID=12;
@@ -384,7 +382,6 @@ class ListObject:public BasicObj{
     attrs["push_back"] = appendFunc;
     BasicObj* sizeFunc = new FunctionNative([this](std::vector<BasicObj*> args,Context* c){
       BasicObj* tmp = new IntObj(this->items.size());
-      tmp->refcount++;
       return tmp;
     });
     sizeFunc->refcount++;
@@ -500,6 +497,7 @@ struct FunctionNode:public Node{
   FunctionNode(std::string n,std::vector<Node*> b,std::vector<std::string> a):name(n),body(b),argNames(a){}
   BasicObj* eval(Context& c) override{
     // std::cout<<"Evaled FunctionNode name "<<name<<std::endl;
+    c.ns[name]->refcount--;
     c.ns[name]=new FunctionObject(argNames,body);
     c.ns[name]->refcount++;
     BasicObj* ret=new NullObject();
@@ -770,7 +768,13 @@ struct IndexNode:public Node{
     return res;
   }
   void set(Context& c,Node* val) override{
-    target->eval(c)->setitem(arg->eval(c),val->eval(c));
+    BasicObj* a=target->eval(c);
+    BasicObj* b=arg->eval(c);
+    BasicObj* cc=val->eval(c);
+    a->setitem(b,cc);
+    a->refcount--;
+    b->refcount--;
+    cc->refcount--;
   }
   std::string str() override{
       return "<IndexNode>";
@@ -788,7 +792,11 @@ struct AttributeNode:public Node{
     return res;
   }
   void set(Context& c,Node* val) override{
-    target->eval(c)->setattr(name,val->eval(c));
+    BasicObj* a=target->eval(c);
+    BasicObj* b=val->eval(c);
+    a->setattr(name,b);
+    a->refcount--;
+    b->refcount--;
   }
   std::string str() override{
       return "<AttributeNode>";
@@ -905,6 +913,8 @@ struct BinaryNode:public Node{
         if (op=="<") res=new IntObj(l->less(r,false));
         if (op==">") res=new IntObj(l->greater(r,false));
         if (op=="==") res=new IntObj(l->equal(r,false));
+        r->refcount--;
+        l->refcount--;
         res->refcount++;
         return res;
     }
