@@ -61,6 +61,11 @@ struct Context{
 };
 
 class Node;
+class BasicObj;
+
+// Forward declarations for reference counting helper functions
+inline void inc_ref(BasicObj* obj);
+inline void dec_ref(BasicObj* obj);
 
 class BasicObj{
     public:
@@ -83,12 +88,12 @@ class BasicObj{
       auto it = attrs.find(s);
       if (it==attrs.end()) throw ValueError(("Attribute "+s+" not found").c_str());
       BasicObj* res = it->second;
-      res->refcount++;
+      inc_ref(res);
       return res;
     };
     virtual void setattr(const std::string& s, BasicObj* value){
       if (attrs.count(s)) {
-          attrs[s]->refcount--;
+          dec_ref(attrs[s]);
       }
 
       BasicObj* cloned = value->clone();
@@ -102,6 +107,14 @@ class BasicObj{
     virtual ~BasicObj()=default;
     std::map<std::string,BasicObj*> attrs;
 };
+
+inline void inc_ref(BasicObj* obj) {
+    if (obj) obj->refcount++;
+}
+
+inline void dec_ref(BasicObj* obj) {
+    if (obj) obj->refcount--;
+}
 
 class StringObject : public BasicObj {
 public:
@@ -119,7 +132,7 @@ public:
         StringObject* o = dynamic_cast<StringObject*>(other);
         if (!o) throw NotAvailable("Cannot add non-string object to string");
       BasicObj* tmp = new StringObject(value + o->value);
-      tmp->refcount++;
+      inc_ref(tmp);
       return tmp;
     }
 
@@ -150,7 +163,7 @@ class IntObj:public BasicObj{
     BasicObj* add(BasicObj* b,bool swapped) override{
       if (auto i=dynamic_cast<IntObj*>(b)){
         BasicObj* tmp = new IntObj(this->a + i->a);
-        tmp->refcount++;
+        inc_ref(tmp);
         return tmp;
       }
       else{
@@ -163,7 +176,7 @@ class IntObj:public BasicObj{
     BasicObj* sub(BasicObj* b,bool swapped) override{
       if (auto i=dynamic_cast<IntObj*>(b)){
         BasicObj* tmp = new IntObj(this->a - i->a);
-        tmp->refcount++;
+        inc_ref(tmp);
         return tmp;
       }
       else{
@@ -176,7 +189,7 @@ class IntObj:public BasicObj{
     BasicObj* div(BasicObj* b,bool swapped) override{
       if (auto i=dynamic_cast<IntObj*>(b)){
         BasicObj* tmp = new IntObj(this->a / i->a);
-        tmp->refcount++;
+        inc_ref(tmp);
         return tmp;
       }
       else{
@@ -189,7 +202,7 @@ class IntObj:public BasicObj{
     BasicObj* mul(BasicObj* b,bool swapped) override{
       if (auto i=dynamic_cast<IntObj*>(b)){
         BasicObj* tmp = new IntObj(this->a * i->a);
-        tmp->refcount++;
+        inc_ref(tmp);
         return tmp;
       }
       else{
@@ -300,11 +313,11 @@ class FunctionObject:public BasicObj{
       Context local=*c;
       for (int i=0;i<args.size();i++){
         local.ns[argNames[i]]=args[i]->clone();
-        local.ns[argNames[i]]->refcount++;
+        inc_ref(local.ns[argNames[i]]);
       }
       if (code.empty()){
         BasicObj* r=new NullObject();
-        r->refcount++;
+        inc_ref(r);
         return r;
       }
       for (int i=0;i<code.size();i++){ 
@@ -314,14 +327,14 @@ class FunctionObject:public BasicObj{
         catch(const ReturnSig& s){
           // std::cout<<"Catched return val is "<<s.val<<std::endl;
           for (int i=0;i<args.size();i++){
-            local.ns[argNames[i]]->refcount--;
+            dec_ref(local.ns[argNames[i]]);
           }
           return s.val;
         }
-        BasicObj* r=new NullObject();
-        r->refcount++;
-        return r;
       }
+      BasicObj* r=new NullObject();
+      inc_ref(r);
+      return r;
     }
     std::string str() override{
       return "<FunctionObject>";
@@ -350,9 +363,9 @@ class FunctionNative:public BasicObj{
 
 struct LiteralNode:public Node{
     BasicObj* o;
-    LiteralNode(BasicObj* l):o(l){l->refcount++;}
+    LiteralNode(BasicObj* l):o(l){inc_ref(l);}
     BasicObj* eval(Context&) override{
-      o->refcount++;
+      inc_ref(o);
       return o;
     }
     std::string str() override{
@@ -365,26 +378,26 @@ class ListObject:public BasicObj{
   std::vector<BasicObj*> items;
   ListObject(const std::vector<BasicObj*>& items){
     for (auto i:items){
-      BasicObj* curr=i->clone;
+      BasicObj* curr=i->clone();
       this->items.push_back(curr);
     }
     typeID=12;
     auto appendFunc = new FunctionNative([this](std::vector<BasicObj*> args,Context*) {
       BasicObj* a=args[0]->clone();
-      a->refcount++;
+      inc_ref(a);
       this->items.push_back(a);
       BasicObj* r = new NullObject();
-      r->refcount++;
+      inc_ref(r);
       return r;
     });
-    appendFunc->refcount++;
+    inc_ref(appendFunc);
     attrs["append"] = appendFunc;
     attrs["push_back"] = appendFunc;
     BasicObj* sizeFunc = new FunctionNative([this](std::vector<BasicObj*> args,Context* c){
       BasicObj* tmp = new IntObj(this->items.size());
       return tmp;
     });
-    sizeFunc->refcount++;
+    inc_ref(sizeFunc);
     attrs["size"] = sizeFunc;
   }
   BasicObj* getitem(BasicObj* key) override{
@@ -393,7 +406,7 @@ class ListObject:public BasicObj{
         ("Index out of bounds (read) accesing to "+std::to_string(i->a)).c_str()
       );
       BasicObj* h=items[i->a];
-      h->refcount++;
+      inc_ref(h);
       return h;
     }
     else{
@@ -406,8 +419,8 @@ class ListObject:public BasicObj{
         ("Index out of bounds (write) accesing to "+std::to_string(i->a)).c_str()
       );;
       BasicObj* old = items[i->a];
-      if (old && old!=value) old->refcount--;
-      value->refcount++;
+      if (old && old!=value) dec_ref(old);
+      inc_ref(value);
       items[i->a] = value;
     }
     else{
@@ -437,12 +450,12 @@ struct IdentifierNode:public Node{
   BasicObj* eval(Context& c) override{
     if (!c.ns.count(name)) throw ValueError(("Name '"+name+"' not found").c_str());
     BasicObj* res = c.ns[name];
-    res->refcount++;
+    inc_ref(res);
     return res;
   }
   void set(Context& c,Node* e){
     if (c.ns[name])
-      c.ns[name]->refcount--;
+      dec_ref(c.ns[name]);
     BasicObj* res=e->eval(c);
     c.ns[name]=res;
   }
@@ -479,9 +492,9 @@ struct CallNode:public Node{
     }
     BasicObj* func = target->eval(c);
     BasicObj* res = func->call(callArgs,&c);
-    func->refcount--;
+    dec_ref(func);
     for (auto i:callArgs){ 
-      i->refcount--;
+      dec_ref(i);
     }
     return res;
   }
@@ -497,11 +510,11 @@ struct FunctionNode:public Node{
   FunctionNode(std::string n,std::vector<Node*> b,std::vector<std::string> a):name(n),body(b),argNames(a){}
   BasicObj* eval(Context& c) override{
     // std::cout<<"Evaled FunctionNode name "<<name<<std::endl;
-    c.ns[name]->refcount--;
+    dec_ref(c.ns[name]);
     c.ns[name]=new FunctionObject(argNames,body);
-    c.ns[name]->refcount++;
+    inc_ref(c.ns[name]);
     BasicObj* ret=new NullObject();
-    ret->refcount++;
+    inc_ref(ret);
     return ret;
   }
 };
@@ -529,10 +542,10 @@ class ClassObject:public BasicObj{
       this->a=a;
   }
   BasicObj* call(std::vector<BasicObj*> args,Context* c) override{
-    refcount++;
+    inc_ref(this);
     BasicObj* instance = InstanceObj(this,args,*c);
     instance->typeID=instanceID;
-    refcount--;
+    dec_ref(this);
     return instance;
   }
   std::string str() override{
@@ -557,7 +570,7 @@ class ClassObject:public BasicObj{
     while (cls){
       if (cls->attrs.count(str)){
         BasicObj* r=cls->attrs[str];
-        r->refcount++;
+        inc_ref(r);
         return r;
       }
       cls=cls->parent;
@@ -590,10 +603,10 @@ public:
     ClassObject* klass;
 
     std::vector<BasicObj*> args;
-    InstanceObject(ClassObject* cls, std::vector<BasicObj*> args,Namespace& n) {
+    InstanceObject(ClassObject* cls, std::vector<BasicObj*> args,Namespace& n, bool callCtor=true) {
         klass = cls;
         this->args = args;
-        if (klass->hasattr("__constructor__")) {
+        if (klass->hasattr("__constructor__") && callCtor) {
           // std::cout<<"Calling constructor"<<std::endl;
             BasicObj* ctor = klass->getattr("__constructor__");
             std::vector<BasicObj*> callArgs = { this };
@@ -613,7 +626,9 @@ public:
             auto* func = dynamic_cast<FunctionObject*>(klass->getattr("__add__"));
             std::vector<BasicObj*> args = { this, other };
             Context n;
-            return func->call(args,&n);
+            BasicObj* res = func->call(args,&n);
+            dec_ref(func);
+            return res;
         }
         throw NotAvailable("Cannot add non-object to object");
     }
@@ -623,7 +638,9 @@ public:
             auto* func = dynamic_cast<FunctionObject*>(klass->getattr("__sub__"));
             std::vector<BasicObj*> args = { this, other };
             Context n;
-            return func->call(args,&n);
+            BasicObj* res = func->call(args,&n);
+            dec_ref(func);
+            return res;
         }
         throw NotAvailable("Cannot subtract non-object from object");
     }
@@ -633,7 +650,9 @@ public:
             auto* func = dynamic_cast<FunctionObject*>(klass->getattr("__mul__"));
             std::vector<BasicObj*> args = { this, other };
             Context n;
-            return func->call(args,&n);
+            BasicObj* res = func->call(args,&n);
+            dec_ref(func);
+            return res;
         }
         throw NotAvailable("Cannot multiply non-object by object");
     }
@@ -643,7 +662,9 @@ public:
             auto* func = dynamic_cast<FunctionObject*>(klass->getattr("__div__"));
             std::vector<BasicObj*> args = { this, other };
             Context n;
-            return func->call(args,&n);
+            BasicObj* res = func->call(args,&n);
+            dec_ref(func);
+            return res;
         }
         throw NotAvailable("Cannot divide non-object by object");
     }
@@ -654,7 +675,9 @@ public:
             std::vector<BasicObj*> args = { this, other };
             Context n;
             auto* res = func->call(args,&n);
-            return res->asbool();
+            bool result = res->asbool();
+            dec_ref(func);
+            return result;
         }
         throw NotAvailable("Cannot compare non-object to object");
     }
@@ -665,7 +688,9 @@ public:
             std::vector<BasicObj*> args = { this };
             Context n;
             auto* res = func->call(args,&n);
-            return res->asbool();
+            bool result = res->asbool();
+            dec_ref(func);
+            return result;
         }
         return true;
     }
@@ -676,14 +701,16 @@ public:
             std::vector<BasicObj*> args = { this };
             Context n;
             auto* res = func->call(args,&n);
-            return res->str();
+            std::string result = res->str();
+            dec_ref(func);
+            return result;
         }
         return "<InstanceObject>";
     }
     BasicObj* getattr(const std::string& name) override {
       if (attrs.count(name)) {
           BasicObj* res = attrs[name];
-          res->refcount++;
+          inc_ref(res);
           return res;
       }
 
@@ -692,7 +719,7 @@ public:
           if (dynamic_cast<FunctionObject*>(val) ||
               dynamic_cast<FunctionNative*>(val)) {
                   BasicObj* tmp = new BoundMethod(val, this);
-                  tmp->refcount++;
+                  inc_ref(tmp);
                   return tmp;
                 }
 
@@ -704,16 +731,16 @@ public:
     void setattr(const std::string& s, BasicObj* value) override{
         std::string attrName = s;
         if (attrs.count(attrName)) {
-          attrs[attrName]->refcount--;
+          dec_ref(attrs[attrName]);
         }
-        value->refcount++;
+        inc_ref(value);
         attrs[attrName] = value;
     }
     BasicObj* clone() override{
       std::vector<BasicObj*> newArgs;
       for(auto* a : args) newArgs.push_back(a->clone());
-      BasicObj* tmp = new InstanceObject(klass, newArgs,attrs);
-      tmp->refcount++;
+      BasicObj* tmp = new InstanceObject(klass, newArgs,attrs,false);
+      inc_ref(tmp);
       return tmp;
     }
     void setitem(BasicObj* key,BasicObj* val)override{
@@ -762,8 +789,8 @@ struct IndexNode:public Node{
 
     BasicObj* res = t->getitem(k);
 
-    t->refcount--;
-    k->refcount--;
+    dec_ref(t);
+    dec_ref(k);
 
     return res;
   }
@@ -772,9 +799,9 @@ struct IndexNode:public Node{
     BasicObj* b=arg->eval(c);
     BasicObj* cc=val->eval(c);
     a->setitem(b,cc);
-    a->refcount--;
-    b->refcount--;
-    cc->refcount--;
+    dec_ref(a);
+    dec_ref(b);
+    dec_ref(cc);
   }
   std::string str() override{
       return "<IndexNode>";
@@ -795,8 +822,8 @@ struct AttributeNode:public Node{
     BasicObj* a=target->eval(c);
     BasicObj* b=val->eval(c);
     a->setattr(name,b);
-    a->refcount--;
-    b->refcount--;
+    dec_ref(a);
+    dec_ref(b);
   }
   std::string str() override{
       return "<AttributeNode>";
@@ -824,7 +851,7 @@ struct IfNode:public Node{
     if (!var) throw ValueError("Condition is null");
 
     bool cc=var->asbool();
-    var->refcount--;
+    dec_ref(var);
 
     if (cc){
       // std::cout<<"True branch"<<std::endl;
@@ -858,7 +885,7 @@ struct ForNode:public Node{
     int i=0;
     if (init) {
       BasicObj* tmp=init->eval(c);
-      if (tmp) tmp->refcount--;
+      if (tmp) dec_ref(tmp);
     }
     BasicObj* co = nullptr;
     if (cond) {
@@ -866,25 +893,25 @@ struct ForNode:public Node{
     }
     if (!co) {
       co = new IntObj(1);
-      co->refcount++;
+      inc_ref(co);
     }
     while (co->asbool()){
       // std::cout<<"Loop NO "<<i<<std::endl;
       i++;
       for (auto node : body) {
         BasicObj* tmp=node->eval(c);
-        if (tmp) tmp->refcount--;
+        if (tmp) dec_ref(tmp);
       }
       if (step) {
         BasicObj* tmp=step->eval(c);
-        if (tmp) tmp->refcount--;
+        if (tmp) dec_ref(tmp);
       }
       if (cond) {
-        co->refcount--;
+        dec_ref(co);
         co = cond->eval(c);
       }
     }
-    co->refcount--;
+    dec_ref(co);
     return nullptr;
   }
 };
@@ -913,9 +940,9 @@ struct BinaryNode:public Node{
         if (op=="<") res=new IntObj(l->less(r,false));
         if (op==">") res=new IntObj(l->greater(r,false));
         if (op=="==") res=new IntObj(l->equal(r,false));
-        r->refcount--;
-        l->refcount--;
-        res->refcount++;
+        dec_ref(r);
+        dec_ref(l);
+        inc_ref(res);
         return res;
     }
     std::string str() override{
@@ -1484,18 +1511,18 @@ Context CreateContext(){
       std::cout<<i->str();
     }
     BasicObj* a=new NullObject();
-    a->refcount++;
+    inc_ref(a);
     return a;
   });
-  c.ns["print"]->refcount++;
+  inc_ref(c.ns["print"]);
   c.ns["input"]=new FunctionNative([](std::vector<BasicObj*> args,Context* c){
     std::string s;
     std::cin>>s;
     BasicObj* a=new StringObject(s);
-    a->refcount++;
+    inc_ref(a);
     return a;
   });
-  c.ns["input"]->refcount++;
+  inc_ref(c.ns["input"]);
   return c;
 }
 
