@@ -1,0 +1,4017 @@
+INC 0x50e000000040/<NativeFunction> -> 1
+INC 0x50e000000120/<NativeFunction> -> 1
+source 
+      class(Player){
+        fn(__constructor__)(self){
+          self.x=0;
+          self.y=y;
+        };
+        fn(move)(self,dx,dy){
+          self.x=self.x+dx;
+          self.y=self.y+dy;
+        };
+      }
+Parsing class
+source fn(__constructor__)(self){self.x=0;self.y=y;}
+name is __constructor__
+source self.x=0;
+source self
+source 0
+INC 0x50c000000280/0 -> 1
+source self.y=y;
+source self
+source y
+source ;
+INC 0x50c000000340/<null> -> 1
+source fn(move)(self,dx,dy){self.x=self.x+dx;self.y=self.y+dy;}
+name is move
+source self.x=self.x+dx;
+source self
+source self.x+dx
+source self
+source dx
+source self.y=self.y+dy;
+source self
+source self.y+dy
+source self
+source dy
+source ;
+INC 0x50c0000004c0/<null> -> 1
+source ;
+INC 0x50c000000580/<null> -> 1
+source 
+      print("Declared class");
+source print
+source "Declared class"
+INC 0x50e000000200/Declared class -> 1
+source 
+      fn(createMap)(){
+        print("Creating map");
+        res=[];
+        for (i=0;i<10;i=i+1){
+          row=[];
+          for (j=0;j<10;j=j+1){
+            row.push_back(".");
+          };
+          res.push_back(row);
+        };
+        return(res);
+      }
+name is createMap
+source print("Creating map");
+source print
+source "Creating map"
+INC 0x50e0000002e0/Creating map -> 1
+source res=[];
+source res
+source []
+INC 0x50e0000003c0/<NativeFunction> -> 1
+INC 0x50e0000004a0/<NativeFunction> -> 1
+INC 0x50d000000110/[] -> 1
+source for(i=0;i<10;i=i+1){row=[];for(j=0;j<10;j=j+1){row.push_back(".");};res.push_back(row);}
+source i=0
+source i
+source 0
+INC 0x50c000000940/0 -> 1
+source i<10
+has op
+ChAr i
+ChAr <
+source i
+curr's first is i
+ChAr 1
+ChAr 0
+right is 10
+source 10
+INC 0x50c000000a00/10 -> 1
+source i=i+1
+source i
+source i+1
+has op
+ChAr i
+ChAr +
+source i
+curr's first is i
+ChAr 1
+right is 1
+source 1
+INC 0x50c000000ac0/1 -> 1
+source row=[];
+source row
+source []
+INC 0x50e000000580/<NativeFunction> -> 1
+INC 0x50e000000660/<NativeFunction> -> 1
+INC 0x50d0000001e0/[] -> 1
+source for(j=0;j<10;j=j+1){row.push_back(".");}
+source j=0
+source j
+source 0
+INC 0x50c000000c40/0 -> 1
+source j<10
+has op
+ChAr j
+ChAr <
+source j
+curr's first is j
+ChAr 1
+ChAr 0
+right is 10
+source 10
+INC 0x50c000000d00/10 -> 1
+source j=j+1
+source j
+source j+1
+has op
+ChAr j
+ChAr +
+source j
+curr's first is j
+ChAr 1
+right is 1
+source 1
+INC 0x50c000000dc0/1 -> 1
+source row.push_back(".");
+source row
+source "."
+INC 0x50e000000740/. -> 1
+source ;
+INC 0x50c000000e80/<null> -> 1
+source res.push_back(row);
+source res
+source row
+source ;
+INC 0x50c000000f40/<null> -> 1
+source return(res);
+source res
+source ;
+INC 0x50c000001000/<null> -> 1
+source 
+      fn(showMap)(m){
+        for (i=0;i<10;i=i+1){
+          for (j=0;j<10;j=j+1){
+            print(m[i][j]," ");
+          };
+        print("\n");
+        };
+      }
+name is showMap
+source for(i=0;i<10;i=i+1){for(j=0;j<10;j=j+1){print(m[i][j]," ");};print("\n");}
+source i=0
+source i
+source 0
+INC 0x50c0000013c0/0 -> 1
+source i<10
+has op
+ChAr i
+ChAr <
+source i
+curr's first is i
+ChAr 1
+ChAr 0
+right is 10
+source 10
+INC 0x50c000001480/10 -> 1
+source i=i+1
+source i
+source i+1
+has op
+ChAr i
+ChAr +
+source i
+curr's first is i
+ChAr 1
+right is 1
+source 1
+INC 0x50c000001540/1 -> 1
+source for(j=0;j<10;j=j+1){print(m[i][j]," ");}
+source j=0
+source j
+source 0
+INC 0x50c000001600/0 -> 1
+source j<10
+has op
+ChAr j
+ChAr <
+source j
+curr's first is j
+ChAr 1
+ChAr 0
+right is 10
+source 10
+INC 0x50c0000016c0/10 -> 1
+source j=j+1
+source j
+source j+1
+has op
+ChAr j
+ChAr +
+source j
+curr's first is j
+ChAr 1
+right is 1
+source 1
+INC 0x50c000001780/1 -> 1
+source print(m[i][j]," ");
+source print
+source m[i][j]
+source m
+source i
+source j
+source " "
+INC 0x50e000000820/  -> 1
+source ;
+INC 0x50c000001840/<null> -> 1
+source print("\n");
+source print
+source "\n"
+INC 0x50e000000900/
+ -> 1
+source ;
+INC 0x50c000001900/<null> -> 1
+source ;
+INC 0x50c0000019c0/<null> -> 1
+source 
+      class(Player){
+        fn(__constructor__)(self,x,y){
+          self.x=x;
+          self.y=y;
+        };
+        fn(render)(self,m){
+          m[self.y][self.x]="$";
+        }
+      }
+Parsing class
+source fn(__constructor__)(self,x,y){self.x=x;self.y=y;}
+name is __constructor__
+source self.x=x;
+source self
+source x
+source self.y=y;
+source self
+source y
+source ;
+INC 0x50c000001cc0/<null> -> 1
+source fn(render)(self,m){m[self.y][self.x]="$";}
+name is render
+source m[self.y][self.x]="$";
+source m
+source self.y
+source self
+source self.x
+source self
+source "$"
+INC 0x50e0000009e0/$ -> 1
+source 
+      print("Decalred class and func");
+source print
+source "Decalred class and func"
+INC 0x50e000000ac0/Decalred class and func -> 1
+source 
+      m=createMap();
+source m
+source createMap()
+source createMap
+source 
+      p=Player(1,0);
+source p
+source Player(1,0)
+source Player
+source 1
+INC 0x50c000001e40/1 -> 1
+source 0
+INC 0x50c000001f00/0 -> 1
+source 
+      showMap(m);
+source showMap
+source m
+source 
+      for (i=0;i<1;i=i-1){
+        a=input();
+        p.render(m);
+        showMap(m);
+      }
+source i=0
+source i
+source 0
+INC 0x50c000001fc0/0 -> 1
+source i<1
+has op
+ChAr i
+ChAr <
+source i
+curr's first is i
+ChAr 1
+right is 1
+source 1
+INC 0x50c000002080/1 -> 1
+source i=i-1
+source i
+source i-1
+has op
+ChAr i
+ChAr -
+source i
+curr's first is i
+ChAr 1
+right is 1
+source 1
+INC 0x50c000002140/1 -> 1
+source a=input();
+source a
+source input()
+source input
+source p.render(m);
+source p
+source m
+source showMap(m);
+source showMap
+source m
+source ;
+INC 0x50c000002200/<null> -> 1
+source 
+    
+INC 0x50c0000022c0/<null> -> 1
+INC 0x50f000000130/<FunctionObject> -> 1
+INC 0x50c000002380/<null> -> 1
+INC 0x50c000002440/<null> -> 1
+INC 0x50f000000220/<FunctionObject> -> 1
+INC 0x50c000002500/<null> -> 1
+INC 0x50c0000025c0/<null> -> 1
+INC 0x50f000000130/<FunctionObject> -> 2
+INC 0x50f000000220/<FunctionObject> -> 2
+INC 0x50e000000ba0/<ClassObject> -> 1
+INC 0x50c000002680/<null> -> 1
+INC 0x50e000000c80/Declared class -> 1
+INC 0x50e000000040/<NativeFunction> -> 2
+Declared classINC 0x50c000002740/<null> -> 1
+DEC 0x50e000000040/<NativeFunction> -> 1
+DEC 0x50e000000c80/Declared class -> 0
+DELETE 0x50e000000c80 Declared class
+INC 0x50f000000310/<FunctionObject> -> 1
+INC 0x50c000002800/<null> -> 1
+INC 0x50c0000028c0/<null> -> 1
+INC 0x50f000000400/<FunctionObject> -> 1
+INC 0x50c000002980/<null> -> 1
+INC 0x50c000002a40/<null> -> 1
+INC 0x50f0000004f0/<FunctionObject> -> 1
+INC 0x50c000002b00/<null> -> 1
+INC 0x50c000002bc0/<null> -> 1
+INC 0x50f0000005e0/<FunctionObject> -> 1
+INC 0x50c000002c80/<null> -> 1
+INC 0x50f0000004f0/<FunctionObject> -> 2
+INC 0x50f0000005e0/<FunctionObject> -> 2
+INC 0x50e000000d60/<ClassObject> -> 1
+INC 0x50e000000e40/Decalred class and func -> 1
+INC 0x50e000000040/<NativeFunction> -> 2
+Decalred class and funcINC 0x50c000002d40/<null> -> 1
+DEC 0x50e000000040/<NativeFunction> -> 1
+DEC 0x50e000000e40/Decalred class and func -> 0
+DELETE 0x50e000000e40 Decalred class and func
+INC 0x50f000000310/<FunctionObject> -> 2
+INC 0x50f0000006d0/<FunctionObject> -> 1
+INC 0x50c000002e00/<null> -> 1
+INC 0x50c000002ec0/<null> -> 1
+INC 0x50f0000007c0/<FunctionObject> -> 1
+INC 0x50c000002f80/<null> -> 1
+INC 0x50f0000006d0/<FunctionObject> -> 2
+INC 0x50f0000007c0/<FunctionObject> -> 2
+INC 0x50e000000f20/<ClassObject> -> 1
+INC 0x50f0000008b0/<FunctionObject> -> 1
+INC 0x50e000001000/<NativeFunction> -> 1
+INC 0x50e0000010e0/<NativeFunction> -> 1
+INC 0x50f0000009a0/<FunctionObject> -> 1
+INC 0x50e0000011c0/Creating map -> 1
+INC 0x50e0000010e0/<NativeFunction> -> 2
+Creating mapINC 0x50c000003040/<null> -> 1
+DEC 0x50e0000010e0/<NativeFunction> -> 1
+DEC 0x50e0000011c0/Creating map -> 0
+DELETE 0x50e0000011c0 Creating map
+INC 0x50e0000012a0/<NativeFunction> -> 1
+INC 0x50e000001380/<NativeFunction> -> 1
+INC 0x50d0000002b0/[] -> 1
+INC 0x50c000003100/0 -> 1
+INC 0x50c0000031c0/10 -> 1
+INC 0x50c000003100/0 -> 2
+INC 0x50c000003280/1 -> 1
+DEC 0x50c0000031c0/10 -> 0
+DELETE 0x50c0000031c0 10
+DEC 0x50c000003100/0 -> 1
+INC 0x50e000001460/<NativeFunction> -> 1
+INC 0x50e000001540/<NativeFunction> -> 1
+INC 0x50d000000380/[] -> 1
+INC 0x50c000003340/0 -> 1
+INC 0x50c000003400/10 -> 1
+INC 0x50c000003340/0 -> 2
+INC 0x50c0000034c0/1 -> 1
+DEC 0x50c000003400/10 -> 0
+DELETE 0x50c000003400 10
+DEC 0x50c000003340/0 -> 1
+INC 0x50e000001620/. -> 1
+INC 0x50d000000380/[] -> 2
+INC 0x50e000001460/<NativeFunction> -> 2
+DEC 0x50d000000380/[] -> 1
+INC 0x50e000001700/. -> 1
+INC 0x50c000003580/<null> -> 1
+DEC 0x50e000001460/<NativeFunction> -> 1
+DEC 0x50e000001620/. -> 0
+DELETE 0x50e000001620 .
+DEC 0x50c000003580/<null> -> 0
+DELETE 0x50c000003580 <null>
+INC 0x50c000003640/1 -> 1
+INC 0x50c000003340/0 -> 2
+INC 0x50c000003700/1 -> 1
+DEC 0x50c000003640/1 -> 0
+DELETE 0x50c000003640 1
+DEC 0x50c000003340/0 -> 1
+DEC 0x50c000003340/0 -> 0
+DELETE 0x50c000003340 0
+DEC 0x50c0000034c0/1 -> 0
+DELETE 0x50c0000034c0 1
+INC 0x50c0000037c0/10 -> 1
+INC 0x50c000003700/1 -> 2
+INC 0x50c000003880/1 -> 1
+DEC 0x50c0000037c0/10 -> 0
+DELETE 0x50c0000037c0 10
+DEC 0x50c000003700/1 -> 1
+INC 0x50e0000017e0/. -> 1
+INC 0x50d000000380/[.] -> 2
+INC 0x50e000001460/<NativeFunction> -> 2
+DEC 0x50d000000380/[.] -> 1
+INC 0x50e0000018c0/. -> 1
+INC 0x50c000003940/<null> -> 1
+DEC 0x50e000001460/<NativeFunction> -> 1
+DEC 0x50e0000017e0/. -> 0
+DELETE 0x50e0000017e0 .
+DEC 0x50c000003940/<null> -> 0
+DELETE 0x50c000003940 <null>
+INC 0x50c000003a00/1 -> 1
+INC 0x50c000003700/1 -> 2
+INC 0x50c000003ac0/2 -> 1
+DEC 0x50c000003a00/1 -> 0
+DELETE 0x50c000003a00 1
+DEC 0x50c000003700/1 -> 1
+DEC 0x50c000003700/1 -> 0
+DELETE 0x50c000003700 1
+DEC 0x50c000003880/1 -> 0
+DELETE 0x50c000003880 1
+INC 0x50c000003b80/10 -> 1
+INC 0x50c000003ac0/2 -> 2
+INC 0x50c000003c40/1 -> 1
+DEC 0x50c000003b80/10 -> 0
+DELETE 0x50c000003b80 10
+DEC 0x50c000003ac0/2 -> 1
+INC 0x50e0000019a0/. -> 1
+INC 0x50d000000380/[., .] -> 2
+INC 0x50e000001460/<NativeFunction> -> 2
+DEC 0x50d000000380/[., .] -> 1
+INC 0x50e000001a80/. -> 1
+INC 0x50c000003d00/<null> -> 1
+DEC 0x50e000001460/<NativeFunction> -> 1
+DEC 0x50e0000019a0/. -> 0
+DELETE 0x50e0000019a0 .
+DEC 0x50c000003d00/<null> -> 0
+DELETE 0x50c000003d00 <null>
+INC 0x50c000003dc0/1 -> 1
+INC 0x50c000003ac0/2 -> 2
+INC 0x50c000003e80/3 -> 1
+DEC 0x50c000003dc0/1 -> 0
+DELETE 0x50c000003dc0 1
+DEC 0x50c000003ac0/2 -> 1
+DEC 0x50c000003ac0/2 -> 0
+DELETE 0x50c000003ac0 2
+DEC 0x50c000003c40/1 -> 0
+DELETE 0x50c000003c40 1
+INC 0x50c000003f40/10 -> 1
+INC 0x50c000003e80/3 -> 2
+INC 0x50c000004000/1 -> 1
+DEC 0x50c000003f40/10 -> 0
+DELETE 0x50c000003f40 10
+DEC 0x50c000003e80/3 -> 1
+INC 0x50e000001b60/. -> 1
+INC 0x50d000000380/[., ., .] -> 2
+INC 0x50e000001460/<NativeFunction> -> 2
+DEC 0x50d000000380/[., ., .] -> 1
+INC 0x50e000001c40/. -> 1
+INC 0x50c0000040c0/<null> -> 1
+DEC 0x50e000001460/<NativeFunction> -> 1
+DEC 0x50e000001b60/. -> 0
+DELETE 0x50e000001b60 .
+DEC 0x50c0000040c0/<null> -> 0
+DELETE 0x50c0000040c0 <null>
+INC 0x50c000004180/1 -> 1
+INC 0x50c000003e80/3 -> 2
+INC 0x50c000004240/4 -> 1
+DEC 0x50c000004180/1 -> 0
+DELETE 0x50c000004180 1
+DEC 0x50c000003e80/3 -> 1
+DEC 0x50c000003e80/3 -> 0
+DELETE 0x50c000003e80 3
+DEC 0x50c000004000/1 -> 0
+DELETE 0x50c000004000 1
+INC 0x50c000004300/10 -> 1
+INC 0x50c000004240/4 -> 2
+INC 0x50c0000043c0/1 -> 1
+DEC 0x50c000004300/10 -> 0
+DELETE 0x50c000004300 10
+DEC 0x50c000004240/4 -> 1
+INC 0x50e000001d20/. -> 1
+INC 0x50d000000380/[., ., ., .] -> 2
+INC 0x50e000001460/<NativeFunction> -> 2
+DEC 0x50d000000380/[., ., ., .] -> 1
+INC 0x50e000001e00/. -> 1
+INC 0x50c000004480/<null> -> 1
+DEC 0x50e000001460/<NativeFunction> -> 1
+DEC 0x50e000001d20/. -> 0
+DELETE 0x50e000001d20 .
+DEC 0x50c000004480/<null> -> 0
+DELETE 0x50c000004480 <null>
+INC 0x50c000004540/1 -> 1
+INC 0x50c000004240/4 -> 2
+INC 0x50c000004600/5 -> 1
+DEC 0x50c000004540/1 -> 0
+DELETE 0x50c000004540 1
+DEC 0x50c000004240/4 -> 1
+DEC 0x50c000004240/4 -> 0
+DELETE 0x50c000004240 4
+DEC 0x50c0000043c0/1 -> 0
+DELETE 0x50c0000043c0 1
+INC 0x50c0000046c0/10 -> 1
+INC 0x50c000004600/5 -> 2
+INC 0x50c000004780/1 -> 1
+DEC 0x50c0000046c0/10 -> 0
+DELETE 0x50c0000046c0 10
+DEC 0x50c000004600/5 -> 1
+INC 0x50e000001ee0/. -> 1
+INC 0x50d000000380/[., ., ., ., .] -> 2
+INC 0x50e000001460/<NativeFunction> -> 2
+DEC 0x50d000000380/[., ., ., ., .] -> 1
+INC 0x50e000001fc0/. -> 1
+INC 0x50c000004840/<null> -> 1
+DEC 0x50e000001460/<NativeFunction> -> 1
+DEC 0x50e000001ee0/. -> 0
+DELETE 0x50e000001ee0 .
+DEC 0x50c000004840/<null> -> 0
+DELETE 0x50c000004840 <null>
+INC 0x50c000004900/1 -> 1
+INC 0x50c000004600/5 -> 2
+INC 0x50c0000049c0/6 -> 1
+DEC 0x50c000004900/1 -> 0
+DELETE 0x50c000004900 1
+DEC 0x50c000004600/5 -> 1
+DEC 0x50c000004600/5 -> 0
+DELETE 0x50c000004600 5
+DEC 0x50c000004780/1 -> 0
+DELETE 0x50c000004780 1
+INC 0x50c000004a80/10 -> 1
+INC 0x50c0000049c0/6 -> 2
+INC 0x50c000004b40/1 -> 1
+DEC 0x50c000004a80/10 -> 0
+DELETE 0x50c000004a80 10
+DEC 0x50c0000049c0/6 -> 1
+INC 0x50e0000020a0/. -> 1
+INC 0x50d000000380/[., ., ., ., ., .] -> 2
+INC 0x50e000001460/<NativeFunction> -> 2
+DEC 0x50d000000380/[., ., ., ., ., .] -> 1
+INC 0x50e000002180/. -> 1
+INC 0x50c000004c00/<null> -> 1
+DEC 0x50e000001460/<NativeFunction> -> 1
+DEC 0x50e0000020a0/. -> 0
+DELETE 0x50e0000020a0 .
+DEC 0x50c000004c00/<null> -> 0
+DELETE 0x50c000004c00 <null>
+INC 0x50c000004cc0/1 -> 1
+INC 0x50c0000049c0/6 -> 2
+INC 0x50c000004d80/7 -> 1
+DEC 0x50c000004cc0/1 -> 0
+DELETE 0x50c000004cc0 1
+DEC 0x50c0000049c0/6 -> 1
+DEC 0x50c0000049c0/6 -> 0
+DELETE 0x50c0000049c0 6
+DEC 0x50c000004b40/1 -> 0
+DELETE 0x50c000004b40 1
+INC 0x50c000004e40/10 -> 1
+INC 0x50c000004d80/7 -> 2
+INC 0x50c000004f00/1 -> 1
+DEC 0x50c000004e40/10 -> 0
+DELETE 0x50c000004e40 10
+DEC 0x50c000004d80/7 -> 1
+INC 0x50e000002260/. -> 1
+INC 0x50d000000380/[., ., ., ., ., ., .] -> 2
+INC 0x50e000001460/<NativeFunction> -> 2
+DEC 0x50d000000380/[., ., ., ., ., ., .] -> 1
+INC 0x50e000002340/. -> 1
+INC 0x50c000004fc0/<null> -> 1
+DEC 0x50e000001460/<NativeFunction> -> 1
+DEC 0x50e000002260/. -> 0
+DELETE 0x50e000002260 .
+DEC 0x50c000004fc0/<null> -> 0
+DELETE 0x50c000004fc0 <null>
+INC 0x50c000005080/1 -> 1
+INC 0x50c000004d80/7 -> 2
+INC 0x50c000005140/8 -> 1
+DEC 0x50c000005080/1 -> 0
+DELETE 0x50c000005080 1
+DEC 0x50c000004d80/7 -> 1
+DEC 0x50c000004d80/7 -> 0
+DELETE 0x50c000004d80 7
+DEC 0x50c000004f00/1 -> 0
+DELETE 0x50c000004f00 1
+INC 0x50c000005200/10 -> 1
+INC 0x50c000005140/8 -> 2
+INC 0x50c0000052c0/1 -> 1
+DEC 0x50c000005200/10 -> 0
+DELETE 0x50c000005200 10
+DEC 0x50c000005140/8 -> 1
+INC 0x50e000002420/. -> 1
+INC 0x50d000000380/[., ., ., ., ., ., ., .] -> 2
+INC 0x50e000001460/<NativeFunction> -> 2
+DEC 0x50d000000380/[., ., ., ., ., ., ., .] -> 1
+INC 0x50e000002500/. -> 1
+INC 0x50c000005440/<null> -> 1
+DEC 0x50e000001460/<NativeFunction> -> 1
+DEC 0x50e000002420/. -> 0
+DELETE 0x50e000002420 .
+DEC 0x50c000005440/<null> -> 0
+DELETE 0x50c000005440 <null>
+INC 0x50c000005500/1 -> 1
+INC 0x50c000005140/8 -> 2
+INC 0x50c0000055c0/9 -> 1
+DEC 0x50c000005500/1 -> 0
+DELETE 0x50c000005500 1
+DEC 0x50c000005140/8 -> 1
+DEC 0x50c000005140/8 -> 0
+DELETE 0x50c000005140 8
+DEC 0x50c0000052c0/1 -> 0
+DELETE 0x50c0000052c0 1
+INC 0x50c000005680/10 -> 1
+INC 0x50c0000055c0/9 -> 2
+INC 0x50c000005740/1 -> 1
+DEC 0x50c000005680/10 -> 0
+DELETE 0x50c000005680 10
+DEC 0x50c0000055c0/9 -> 1
+INC 0x50e0000025e0/. -> 1
+INC 0x50d000000380/[., ., ., ., ., ., ., ., .] -> 2
+INC 0x50e000001460/<NativeFunction> -> 2
+DEC 0x50d000000380/[., ., ., ., ., ., ., ., .] -> 1
+INC 0x50e0000026c0/. -> 1
+INC 0x50c000005800/<null> -> 1
+DEC 0x50e000001460/<NativeFunction> -> 1
+DEC 0x50e0000025e0/. -> 0
+DELETE 0x50e0000025e0 .
+DEC 0x50c000005800/<null> -> 0
+DELETE 0x50c000005800 <null>
+INC 0x50c0000058c0/1 -> 1
+INC 0x50c0000055c0/9 -> 2
+INC 0x50c000005980/10 -> 1
+DEC 0x50c0000058c0/1 -> 0
+DELETE 0x50c0000058c0 1
+DEC 0x50c0000055c0/9 -> 1
+DEC 0x50c0000055c0/9 -> 0
+DELETE 0x50c0000055c0 9
+DEC 0x50c000005740/1 -> 0
+DELETE 0x50c000005740 1
+INC 0x50c000005a40/10 -> 1
+INC 0x50c000005980/10 -> 2
+INC 0x50c000005b00/0 -> 1
+DEC 0x50c000005a40/10 -> 0
+DELETE 0x50c000005a40 10
+DEC 0x50c000005980/10 -> 1
+DEC 0x50c000005b00/0 -> 0
+DELETE 0x50c000005b00 0
+INC 0x50c000005bc0/<null> -> 1
+DEC 0x50c000005bc0/<null> -> 0
+DELETE 0x50c000005bc0 <null>
+INC 0x50d000000380/[., ., ., ., ., ., ., ., ., .] -> 2
+INC 0x50d0000002b0/[] -> 2
+INC 0x50e0000012a0/<NativeFunction> -> 2
+DEC 0x50d0000002b0/[] -> 1
+INC 0x50e0000027a0/. -> 1
+INC 0x50e000002880/. -> 1
+INC 0x50e000002960/. -> 1
+INC 0x50e000002a40/. -> 1
+INC 0x50e000002b20/. -> 1
+INC 0x50e000002c00/. -> 1
+INC 0x50e000002ce0/. -> 1
+INC 0x50e000002dc0/. -> 1
+INC 0x50e000002ea0/. -> 1
+INC 0x50e000002f80/. -> 1
+INC 0x50e000003060/<NativeFunction> -> 1
+INC 0x50e000003140/<NativeFunction> -> 1
+INC 0x50d000000450/[., ., ., ., ., ., ., ., ., .] -> 1
+INC 0x50c000005d40/<null> -> 1
+DEC 0x50e0000012a0/<NativeFunction> -> 1
+DEC 0x50d000000380/[., ., ., ., ., ., ., ., ., .] -> 1
+DEC 0x50c000005d40/<null> -> 0
+DELETE 0x50c000005d40 <null>
+INC 0x50c000005e00/1 -> 1
+INC 0x50c000003100/0 -> 2
+INC 0x50c000005ec0/1 -> 1
+DEC 0x50c000005e00/1 -> 0
+DELETE 0x50c000005e00 1
+DEC 0x50c000003100/0 -> 1
+DEC 0x50c000003100/0 -> 0
+DELETE 0x50c000003100 0
+DEC 0x50c000003280/1 -> 0
+DELETE 0x50c000003280 1
+INC 0x50c000005f80/10 -> 1
+INC 0x50c000005ec0/1 -> 2
+INC 0x50c000006040/1 -> 1
+DEC 0x50c000005f80/10 -> 0
+DELETE 0x50c000005f80 10
+DEC 0x50c000005ec0/1 -> 1
+INC 0x50e000003220/<NativeFunction> -> 1
+INC 0x50e000003300/<NativeFunction> -> 1
+INC 0x50d000000520/[] -> 1
+DEC 0x50d000000380/[., ., ., ., ., ., ., ., ., .] -> 0
+DELETE 0x50d000000380 [., ., ., ., ., ., ., ., ., .]
+DEC 0x50e000001700/. -> 0
+DELETE 0x50e000001700 .
+DEC 0x50e0000018c0/. -> 0
+DELETE 0x50e0000018c0 .
+DEC 0x50e000001a80/. -> 0
+DELETE 0x50e000001a80 .
+DEC 0x50e000001c40/. -> 0
+DELETE 0x50e000001c40 .
+DEC 0x50e000001e00/. -> 0
+DELETE 0x50e000001e00 .
+DEC 0x50e000001fc0/. -> 0
+DELETE 0x50e000001fc0 .
+DEC 0x50e000002180/. -> 0
+DELETE 0x50e000002180 .
+DEC 0x50e000002340/. -> 0
+DELETE 0x50e000002340 .
+DEC 0x50e000002500/. -> 0
+DELETE 0x50e000002500 .
+DEC 0x50e0000026c0/. -> 0
+DELETE 0x50e0000026c0 .
+INC 0x50c000006100/0 -> 1
+DEC 0x50c000005980/10 -> 0
+DELETE 0x50c000005980 10
+INC 0x50c0000061c0/10 -> 1
+INC 0x50c000006100/0 -> 2
+INC 0x50c000006280/1 -> 1
+DEC 0x50c0000061c0/10 -> 0
+DELETE 0x50c0000061c0 10
+DEC 0x50c000006100/0 -> 1
+INC 0x50e0000033e0/. -> 1
+INC 0x50d000000520/[] -> 2
+INC 0x50e000003220/<NativeFunction> -> 2
+DEC 0x50d000000520/[] -> 1
+INC 0x50e0000034c0/. -> 1
+INC 0x50c000006340/<null> -> 1
+DEC 0x50e000003220/<NativeFunction> -> 1
+DEC 0x50e0000033e0/. -> 0
+DELETE 0x50e0000033e0 .
+DEC 0x50c000006340/<null> -> 0
+DELETE 0x50c000006340 <null>
+INC 0x50c000006400/1 -> 1
+INC 0x50c000006100/0 -> 2
+INC 0x50c0000064c0/1 -> 1
+DEC 0x50c000006400/1 -> 0
+DELETE 0x50c000006400 1
+DEC 0x50c000006100/0 -> 1
+DEC 0x50c000006100/0 -> 0
+DELETE 0x50c000006100 0
+DEC 0x50c000006280/1 -> 0
+DELETE 0x50c000006280 1
+INC 0x50c000006580/10 -> 1
+INC 0x50c0000064c0/1 -> 2
+INC 0x50c000006640/1 -> 1
+DEC 0x50c000006580/10 -> 0
+DELETE 0x50c000006580 10
+DEC 0x50c0000064c0/1 -> 1
+INC 0x50e0000035a0/. -> 1
+INC 0x50d000000520/[.] -> 2
+INC 0x50e000003220/<NativeFunction> -> 2
+DEC 0x50d000000520/[.] -> 1
+INC 0x50e000003680/. -> 1
+INC 0x50c000006700/<null> -> 1
+DEC 0x50e000003220/<NativeFunction> -> 1
+DEC 0x50e0000035a0/. -> 0
+DELETE 0x50e0000035a0 .
+DEC 0x50c000006700/<null> -> 0
+DELETE 0x50c000006700 <null>
+INC 0x50c0000067c0/1 -> 1
+INC 0x50c0000064c0/1 -> 2
+INC 0x50c000006880/2 -> 1
+DEC 0x50c0000067c0/1 -> 0
+DELETE 0x50c0000067c0 1
+DEC 0x50c0000064c0/1 -> 1
+DEC 0x50c0000064c0/1 -> 0
+DELETE 0x50c0000064c0 1
+DEC 0x50c000006640/1 -> 0
+DELETE 0x50c000006640 1
+INC 0x50c000006940/10 -> 1
+INC 0x50c000006880/2 -> 2
+INC 0x50c000006a00/1 -> 1
+DEC 0x50c000006940/10 -> 0
+DELETE 0x50c000006940 10
+DEC 0x50c000006880/2 -> 1
+INC 0x50e000003760/. -> 1
+INC 0x50d000000520/[., .] -> 2
+INC 0x50e000003220/<NativeFunction> -> 2
+DEC 0x50d000000520/[., .] -> 1
+INC 0x50e000003840/. -> 1
+INC 0x50c000006ac0/<null> -> 1
+DEC 0x50e000003220/<NativeFunction> -> 1
+DEC 0x50e000003760/. -> 0
+DELETE 0x50e000003760 .
+DEC 0x50c000006ac0/<null> -> 0
+DELETE 0x50c000006ac0 <null>
+INC 0x50c000006b80/1 -> 1
+INC 0x50c000006880/2 -> 2
+INC 0x50c000006c40/3 -> 1
+DEC 0x50c000006b80/1 -> 0
+DELETE 0x50c000006b80 1
+DEC 0x50c000006880/2 -> 1
+DEC 0x50c000006880/2 -> 0
+DELETE 0x50c000006880 2
+DEC 0x50c000006a00/1 -> 0
+DELETE 0x50c000006a00 1
+INC 0x50c000006d00/10 -> 1
+INC 0x50c000006c40/3 -> 2
+INC 0x50c000006dc0/1 -> 1
+DEC 0x50c000006d00/10 -> 0
+DELETE 0x50c000006d00 10
+DEC 0x50c000006c40/3 -> 1
+INC 0x50e000003920/. -> 1
+INC 0x50d000000520/[., ., .] -> 2
+INC 0x50e000003220/<NativeFunction> -> 2
+DEC 0x50d000000520/[., ., .] -> 1
+INC 0x50e000003a00/. -> 1
+INC 0x50c000006e80/<null> -> 1
+DEC 0x50e000003220/<NativeFunction> -> 1
+DEC 0x50e000003920/. -> 0
+DELETE 0x50e000003920 .
+DEC 0x50c000006e80/<null> -> 0
+DELETE 0x50c000006e80 <null>
+INC 0x50c000006f40/1 -> 1
+INC 0x50c000006c40/3 -> 2
+INC 0x50c000007000/4 -> 1
+DEC 0x50c000006f40/1 -> 0
+DELETE 0x50c000006f40 1
+DEC 0x50c000006c40/3 -> 1
+DEC 0x50c000006c40/3 -> 0
+DELETE 0x50c000006c40 3
+DEC 0x50c000006dc0/1 -> 0
+DELETE 0x50c000006dc0 1
+INC 0x50c0000070c0/10 -> 1
+INC 0x50c000007000/4 -> 2
+INC 0x50c000007180/1 -> 1
+DEC 0x50c0000070c0/10 -> 0
+DELETE 0x50c0000070c0 10
+DEC 0x50c000007000/4 -> 1
+INC 0x50e000003ae0/. -> 1
+INC 0x50d000000520/[., ., ., .] -> 2
+INC 0x50e000003220/<NativeFunction> -> 2
+DEC 0x50d000000520/[., ., ., .] -> 1
+INC 0x50e000003bc0/. -> 1
+INC 0x50c000007240/<null> -> 1
+DEC 0x50e000003220/<NativeFunction> -> 1
+DEC 0x50e000003ae0/. -> 0
+DELETE 0x50e000003ae0 .
+DEC 0x50c000007240/<null> -> 0
+DELETE 0x50c000007240 <null>
+INC 0x50c000007300/1 -> 1
+INC 0x50c000007000/4 -> 2
+INC 0x50c0000073c0/5 -> 1
+DEC 0x50c000007300/1 -> 0
+DELETE 0x50c000007300 1
+DEC 0x50c000007000/4 -> 1
+DEC 0x50c000007000/4 -> 0
+DELETE 0x50c000007000 4
+DEC 0x50c000007180/1 -> 0
+DELETE 0x50c000007180 1
+INC 0x50c000007480/10 -> 1
+INC 0x50c0000073c0/5 -> 2
+INC 0x50c000007540/1 -> 1
+DEC 0x50c000007480/10 -> 0
+DELETE 0x50c000007480 10
+DEC 0x50c0000073c0/5 -> 1
+INC 0x50e000003ca0/. -> 1
+INC 0x50d000000520/[., ., ., ., .] -> 2
+INC 0x50e000003220/<NativeFunction> -> 2
+DEC 0x50d000000520/[., ., ., ., .] -> 1
+INC 0x50e000003d80/. -> 1
+INC 0x50c000007600/<null> -> 1
+DEC 0x50e000003220/<NativeFunction> -> 1
+DEC 0x50e000003ca0/. -> 0
+DELETE 0x50e000003ca0 .
+DEC 0x50c000007600/<null> -> 0
+DELETE 0x50c000007600 <null>
+INC 0x50c0000076c0/1 -> 1
+INC 0x50c0000073c0/5 -> 2
+INC 0x50c000007780/6 -> 1
+DEC 0x50c0000076c0/1 -> 0
+DELETE 0x50c0000076c0 1
+DEC 0x50c0000073c0/5 -> 1
+DEC 0x50c0000073c0/5 -> 0
+DELETE 0x50c0000073c0 5
+DEC 0x50c000007540/1 -> 0
+DELETE 0x50c000007540 1
+INC 0x50c000007840/10 -> 1
+INC 0x50c000007780/6 -> 2
+INC 0x50c000007900/1 -> 1
+DEC 0x50c000007840/10 -> 0
+DELETE 0x50c000007840 10
+DEC 0x50c000007780/6 -> 1
+INC 0x50e000003e60/. -> 1
+INC 0x50d000000520/[., ., ., ., ., .] -> 2
+INC 0x50e000003220/<NativeFunction> -> 2
+DEC 0x50d000000520/[., ., ., ., ., .] -> 1
+INC 0x50e000003f40/. -> 1
+INC 0x50c0000079c0/<null> -> 1
+DEC 0x50e000003220/<NativeFunction> -> 1
+DEC 0x50e000003e60/. -> 0
+DELETE 0x50e000003e60 .
+DEC 0x50c0000079c0/<null> -> 0
+DELETE 0x50c0000079c0 <null>
+INC 0x50c000007a80/1 -> 1
+INC 0x50c000007780/6 -> 2
+INC 0x50c000007b40/7 -> 1
+DEC 0x50c000007a80/1 -> 0
+DELETE 0x50c000007a80 1
+DEC 0x50c000007780/6 -> 1
+DEC 0x50c000007780/6 -> 0
+DELETE 0x50c000007780 6
+DEC 0x50c000007900/1 -> 0
+DELETE 0x50c000007900 1
+INC 0x50c000007c00/10 -> 1
+INC 0x50c000007b40/7 -> 2
+INC 0x50c000007cc0/1 -> 1
+DEC 0x50c000007c00/10 -> 0
+DELETE 0x50c000007c00 10
+DEC 0x50c000007b40/7 -> 1
+INC 0x50e000004020/. -> 1
+INC 0x50d000000520/[., ., ., ., ., ., .] -> 2
+INC 0x50e000003220/<NativeFunction> -> 2
+DEC 0x50d000000520/[., ., ., ., ., ., .] -> 1
+INC 0x50e000004100/. -> 1
+INC 0x50c000007d80/<null> -> 1
+DEC 0x50e000003220/<NativeFunction> -> 1
+DEC 0x50e000004020/. -> 0
+DELETE 0x50e000004020 .
+DEC 0x50c000007d80/<null> -> 0
+DELETE 0x50c000007d80 <null>
+INC 0x50c000007e40/1 -> 1
+INC 0x50c000007b40/7 -> 2
+INC 0x50c000007f00/8 -> 1
+DEC 0x50c000007e40/1 -> 0
+DELETE 0x50c000007e40 1
+DEC 0x50c000007b40/7 -> 1
+DEC 0x50c000007b40/7 -> 0
+DELETE 0x50c000007b40 7
+DEC 0x50c000007cc0/1 -> 0
+DELETE 0x50c000007cc0 1
+INC 0x50c000007fc0/10 -> 1
+INC 0x50c000007f00/8 -> 2
+INC 0x50c000008080/1 -> 1
+DEC 0x50c000007fc0/10 -> 0
+DELETE 0x50c000007fc0 10
+DEC 0x50c000007f00/8 -> 1
+INC 0x50e0000041e0/. -> 1
+INC 0x50d000000520/[., ., ., ., ., ., ., .] -> 2
+INC 0x50e000003220/<NativeFunction> -> 2
+DEC 0x50d000000520/[., ., ., ., ., ., ., .] -> 1
+INC 0x50e0000042c0/. -> 1
+INC 0x50c000008200/<null> -> 1
+DEC 0x50e000003220/<NativeFunction> -> 1
+DEC 0x50e0000041e0/. -> 0
+DELETE 0x50e0000041e0 .
+DEC 0x50c000008200/<null> -> 0
+DELETE 0x50c000008200 <null>
+INC 0x50c0000082c0/1 -> 1
+INC 0x50c000007f00/8 -> 2
+INC 0x50c000008380/9 -> 1
+DEC 0x50c0000082c0/1 -> 0
+DELETE 0x50c0000082c0 1
+DEC 0x50c000007f00/8 -> 1
+DEC 0x50c000007f00/8 -> 0
+DELETE 0x50c000007f00 8
+DEC 0x50c000008080/1 -> 0
+DELETE 0x50c000008080 1
+INC 0x50c000008440/10 -> 1
+INC 0x50c000008380/9 -> 2
+INC 0x50c000008500/1 -> 1
+DEC 0x50c000008440/10 -> 0
+DELETE 0x50c000008440 10
+DEC 0x50c000008380/9 -> 1
+INC 0x50e0000043a0/. -> 1
+INC 0x50d000000520/[., ., ., ., ., ., ., ., .] -> 2
+INC 0x50e000003220/<NativeFunction> -> 2
+DEC 0x50d000000520/[., ., ., ., ., ., ., ., .] -> 1
+INC 0x50e000004480/. -> 1
+INC 0x50c0000085c0/<null> -> 1
+DEC 0x50e000003220/<NativeFunction> -> 1
+DEC 0x50e0000043a0/. -> 0
+DELETE 0x50e0000043a0 .
+DEC 0x50c0000085c0/<null> -> 0
+DELETE 0x50c0000085c0 <null>
+INC 0x50c000008680/1 -> 1
+INC 0x50c000008380/9 -> 2
+INC 0x50c000008740/10 -> 1
+DEC 0x50c000008680/1 -> 0
+DELETE 0x50c000008680 1
+DEC 0x50c000008380/9 -> 1
+DEC 0x50c000008380/9 -> 0
+DELETE 0x50c000008380 9
+DEC 0x50c000008500/1 -> 0
+DELETE 0x50c000008500 1
+INC 0x50c000008800/10 -> 1
+INC 0x50c000008740/10 -> 2
+INC 0x50c0000088c0/0 -> 1
+DEC 0x50c000008800/10 -> 0
+DELETE 0x50c000008800 10
+DEC 0x50c000008740/10 -> 1
+DEC 0x50c0000088c0/0 -> 0
+DELETE 0x50c0000088c0 0
+INC 0x50c000008980/<null> -> 1
+DEC 0x50c000008980/<null> -> 0
+DELETE 0x50c000008980 <null>
+INC 0x50d000000520/[., ., ., ., ., ., ., ., ., .] -> 2
+INC 0x50d0000002b0/[[., ., ., ., ., ., ., ., ., .]] -> 2
+INC 0x50e0000012a0/<NativeFunction> -> 2
+DEC 0x50d0000002b0/[[., ., ., ., ., ., ., ., ., .]] -> 1
+INC 0x50e000004560/. -> 1
+INC 0x50e000004640/. -> 1
+INC 0x50e000004720/. -> 1
+INC 0x50e000004800/. -> 1
+INC 0x50e0000048e0/. -> 1
+INC 0x50e0000049c0/. -> 1
+INC 0x50e000004aa0/. -> 1
+INC 0x50e000004b80/. -> 1
+INC 0x50e000004c60/. -> 1
+INC 0x50e000004d40/. -> 1
+INC 0x50e000004e20/<NativeFunction> -> 1
+INC 0x50e000004f00/<NativeFunction> -> 1
+INC 0x50d0000005f0/[., ., ., ., ., ., ., ., ., .] -> 1
+INC 0x50c000008b00/<null> -> 1
+DEC 0x50e0000012a0/<NativeFunction> -> 1
+DEC 0x50d000000520/[., ., ., ., ., ., ., ., ., .] -> 1
+DEC 0x50c000008b00/<null> -> 0
+DELETE 0x50c000008b00 <null>
+INC 0x50c000008bc0/1 -> 1
+INC 0x50c000005ec0/1 -> 2
+INC 0x50c000008c80/2 -> 1
+DEC 0x50c000008bc0/1 -> 0
+DELETE 0x50c000008bc0 1
+DEC 0x50c000005ec0/1 -> 1
+DEC 0x50c000005ec0/1 -> 0
+DELETE 0x50c000005ec0 1
+DEC 0x50c000006040/1 -> 0
+DELETE 0x50c000006040 1
+INC 0x50c000008d40/10 -> 1
+INC 0x50c000008c80/2 -> 2
+INC 0x50c000008e00/1 -> 1
+DEC 0x50c000008d40/10 -> 0
+DELETE 0x50c000008d40 10
+DEC 0x50c000008c80/2 -> 1
+INC 0x50e000004fe0/<NativeFunction> -> 1
+INC 0x50e0000050c0/<NativeFunction> -> 1
+INC 0x50d0000006c0/[] -> 1
+DEC 0x50d000000520/[., ., ., ., ., ., ., ., ., .] -> 0
+DELETE 0x50d000000520 [., ., ., ., ., ., ., ., ., .]
+DEC 0x50e0000034c0/. -> 0
+DELETE 0x50e0000034c0 .
+DEC 0x50e000003680/. -> 0
+DELETE 0x50e000003680 .
+DEC 0x50e000003840/. -> 0
+DELETE 0x50e000003840 .
+DEC 0x50e000003a00/. -> 0
+DELETE 0x50e000003a00 .
+DEC 0x50e000003bc0/. -> 0
+DELETE 0x50e000003bc0 .
+DEC 0x50e000003d80/. -> 0
+DELETE 0x50e000003d80 .
+DEC 0x50e000003f40/. -> 0
+DELETE 0x50e000003f40 .
+DEC 0x50e000004100/. -> 0
+DELETE 0x50e000004100 .
+DEC 0x50e0000042c0/. -> 0
+DELETE 0x50e0000042c0 .
+DEC 0x50e000004480/. -> 0
+DELETE 0x50e000004480 .
+INC 0x50c000008ec0/0 -> 1
+DEC 0x50c000008740/10 -> 0
+DELETE 0x50c000008740 10
+INC 0x50c000008f80/10 -> 1
+INC 0x50c000008ec0/0 -> 2
+INC 0x50c000009040/1 -> 1
+DEC 0x50c000008f80/10 -> 0
+DELETE 0x50c000008f80 10
+DEC 0x50c000008ec0/0 -> 1
+INC 0x50e0000051a0/. -> 1
+INC 0x50d0000006c0/[] -> 2
+INC 0x50e000004fe0/<NativeFunction> -> 2
+DEC 0x50d0000006c0/[] -> 1
+INC 0x50e000005280/. -> 1
+INC 0x50c000009100/<null> -> 1
+DEC 0x50e000004fe0/<NativeFunction> -> 1
+DEC 0x50e0000051a0/. -> 0
+DELETE 0x50e0000051a0 .
+DEC 0x50c000009100/<null> -> 0
+DELETE 0x50c000009100 <null>
+INC 0x50c0000091c0/1 -> 1
+INC 0x50c000008ec0/0 -> 2
+INC 0x50c000009280/1 -> 1
+DEC 0x50c0000091c0/1 -> 0
+DELETE 0x50c0000091c0 1
+DEC 0x50c000008ec0/0 -> 1
+DEC 0x50c000008ec0/0 -> 0
+DELETE 0x50c000008ec0 0
+DEC 0x50c000009040/1 -> 0
+DELETE 0x50c000009040 1
+INC 0x50c000009340/10 -> 1
+INC 0x50c000009280/1 -> 2
+INC 0x50c000009400/1 -> 1
+DEC 0x50c000009340/10 -> 0
+DELETE 0x50c000009340 10
+DEC 0x50c000009280/1 -> 1
+INC 0x50e000005360/. -> 1
+INC 0x50d0000006c0/[.] -> 2
+INC 0x50e000004fe0/<NativeFunction> -> 2
+DEC 0x50d0000006c0/[.] -> 1
+INC 0x50e000005440/. -> 1
+INC 0x50c0000094c0/<null> -> 1
+DEC 0x50e000004fe0/<NativeFunction> -> 1
+DEC 0x50e000005360/. -> 0
+DELETE 0x50e000005360 .
+DEC 0x50c0000094c0/<null> -> 0
+DELETE 0x50c0000094c0 <null>
+INC 0x50c000009580/1 -> 1
+INC 0x50c000009280/1 -> 2
+INC 0x50c000009640/2 -> 1
+DEC 0x50c000009580/1 -> 0
+DELETE 0x50c000009580 1
+DEC 0x50c000009280/1 -> 1
+DEC 0x50c000009280/1 -> 0
+DELETE 0x50c000009280 1
+DEC 0x50c000009400/1 -> 0
+DELETE 0x50c000009400 1
+INC 0x50c000009700/10 -> 1
+INC 0x50c000009640/2 -> 2
+INC 0x50c0000097c0/1 -> 1
+DEC 0x50c000009700/10 -> 0
+DELETE 0x50c000009700 10
+DEC 0x50c000009640/2 -> 1
+INC 0x50e000005520/. -> 1
+INC 0x50d0000006c0/[., .] -> 2
+INC 0x50e000004fe0/<NativeFunction> -> 2
+DEC 0x50d0000006c0/[., .] -> 1
+INC 0x50e000005600/. -> 1
+INC 0x50c000009880/<null> -> 1
+DEC 0x50e000004fe0/<NativeFunction> -> 1
+DEC 0x50e000005520/. -> 0
+DELETE 0x50e000005520 .
+DEC 0x50c000009880/<null> -> 0
+DELETE 0x50c000009880 <null>
+INC 0x50c000009940/1 -> 1
+INC 0x50c000009640/2 -> 2
+INC 0x50c000009a00/3 -> 1
+DEC 0x50c000009940/1 -> 0
+DELETE 0x50c000009940 1
+DEC 0x50c000009640/2 -> 1
+DEC 0x50c000009640/2 -> 0
+DELETE 0x50c000009640 2
+DEC 0x50c0000097c0/1 -> 0
+DELETE 0x50c0000097c0 1
+INC 0x50c000009ac0/10 -> 1
+INC 0x50c000009a00/3 -> 2
+INC 0x50c000009b80/1 -> 1
+DEC 0x50c000009ac0/10 -> 0
+DELETE 0x50c000009ac0 10
+DEC 0x50c000009a00/3 -> 1
+INC 0x50e0000056e0/. -> 1
+INC 0x50d0000006c0/[., ., .] -> 2
+INC 0x50e000004fe0/<NativeFunction> -> 2
+DEC 0x50d0000006c0/[., ., .] -> 1
+INC 0x50e0000057c0/. -> 1
+INC 0x50c000009c40/<null> -> 1
+DEC 0x50e000004fe0/<NativeFunction> -> 1
+DEC 0x50e0000056e0/. -> 0
+DELETE 0x50e0000056e0 .
+DEC 0x50c000009c40/<null> -> 0
+DELETE 0x50c000009c40 <null>
+INC 0x50c000009d00/1 -> 1
+INC 0x50c000009a00/3 -> 2
+INC 0x50c000009dc0/4 -> 1
+DEC 0x50c000009d00/1 -> 0
+DELETE 0x50c000009d00 1
+DEC 0x50c000009a00/3 -> 1
+DEC 0x50c000009a00/3 -> 0
+DELETE 0x50c000009a00 3
+DEC 0x50c000009b80/1 -> 0
+DELETE 0x50c000009b80 1
+INC 0x50c000009e80/10 -> 1
+INC 0x50c000009dc0/4 -> 2
+INC 0x50c000009f40/1 -> 1
+DEC 0x50c000009e80/10 -> 0
+DELETE 0x50c000009e80 10
+DEC 0x50c000009dc0/4 -> 1
+INC 0x50e0000058a0/. -> 1
+INC 0x50d0000006c0/[., ., ., .] -> 2
+INC 0x50e000004fe0/<NativeFunction> -> 2
+DEC 0x50d0000006c0/[., ., ., .] -> 1
+INC 0x50e000005980/. -> 1
+INC 0x50c00000a000/<null> -> 1
+DEC 0x50e000004fe0/<NativeFunction> -> 1
+DEC 0x50e0000058a0/. -> 0
+DELETE 0x50e0000058a0 .
+DEC 0x50c00000a000/<null> -> 0
+DELETE 0x50c00000a000 <null>
+INC 0x50c00000a0c0/1 -> 1
+INC 0x50c000009dc0/4 -> 2
+INC 0x50c00000a180/5 -> 1
+DEC 0x50c00000a0c0/1 -> 0
+DELETE 0x50c00000a0c0 1
+DEC 0x50c000009dc0/4 -> 1
+DEC 0x50c000009dc0/4 -> 0
+DELETE 0x50c000009dc0 4
+DEC 0x50c000009f40/1 -> 0
+DELETE 0x50c000009f40 1
+INC 0x50c00000a240/10 -> 1
+INC 0x50c00000a180/5 -> 2
+INC 0x50c00000a300/1 -> 1
+DEC 0x50c00000a240/10 -> 0
+DELETE 0x50c00000a240 10
+DEC 0x50c00000a180/5 -> 1
+INC 0x50e000005a60/. -> 1
+INC 0x50d0000006c0/[., ., ., ., .] -> 2
+INC 0x50e000004fe0/<NativeFunction> -> 2
+DEC 0x50d0000006c0/[., ., ., ., .] -> 1
+INC 0x50e000005b40/. -> 1
+INC 0x50c00000a3c0/<null> -> 1
+DEC 0x50e000004fe0/<NativeFunction> -> 1
+DEC 0x50e000005a60/. -> 0
+DELETE 0x50e000005a60 .
+DEC 0x50c00000a3c0/<null> -> 0
+DELETE 0x50c00000a3c0 <null>
+INC 0x50c00000a480/1 -> 1
+INC 0x50c00000a180/5 -> 2
+INC 0x50c00000a540/6 -> 1
+DEC 0x50c00000a480/1 -> 0
+DELETE 0x50c00000a480 1
+DEC 0x50c00000a180/5 -> 1
+DEC 0x50c00000a180/5 -> 0
+DELETE 0x50c00000a180 5
+DEC 0x50c00000a300/1 -> 0
+DELETE 0x50c00000a300 1
+INC 0x50c00000a600/10 -> 1
+INC 0x50c00000a540/6 -> 2
+INC 0x50c00000a6c0/1 -> 1
+DEC 0x50c00000a600/10 -> 0
+DELETE 0x50c00000a600 10
+DEC 0x50c00000a540/6 -> 1
+INC 0x50e000005c20/. -> 1
+INC 0x50d0000006c0/[., ., ., ., ., .] -> 2
+INC 0x50e000004fe0/<NativeFunction> -> 2
+DEC 0x50d0000006c0/[., ., ., ., ., .] -> 1
+INC 0x50e000005d00/. -> 1
+INC 0x50c00000a780/<null> -> 1
+DEC 0x50e000004fe0/<NativeFunction> -> 1
+DEC 0x50e000005c20/. -> 0
+DELETE 0x50e000005c20 .
+DEC 0x50c00000a780/<null> -> 0
+DELETE 0x50c00000a780 <null>
+INC 0x50c00000a840/1 -> 1
+INC 0x50c00000a540/6 -> 2
+INC 0x50c00000a900/7 -> 1
+DEC 0x50c00000a840/1 -> 0
+DELETE 0x50c00000a840 1
+DEC 0x50c00000a540/6 -> 1
+DEC 0x50c00000a540/6 -> 0
+DELETE 0x50c00000a540 6
+DEC 0x50c00000a6c0/1 -> 0
+DELETE 0x50c00000a6c0 1
+INC 0x50c00000a9c0/10 -> 1
+INC 0x50c00000a900/7 -> 2
+INC 0x50c00000aa80/1 -> 1
+DEC 0x50c00000a9c0/10 -> 0
+DELETE 0x50c00000a9c0 10
+DEC 0x50c00000a900/7 -> 1
+INC 0x50e000005de0/. -> 1
+INC 0x50d0000006c0/[., ., ., ., ., ., .] -> 2
+INC 0x50e000004fe0/<NativeFunction> -> 2
+DEC 0x50d0000006c0/[., ., ., ., ., ., .] -> 1
+INC 0x50e000005ec0/. -> 1
+INC 0x50c00000ab40/<null> -> 1
+DEC 0x50e000004fe0/<NativeFunction> -> 1
+DEC 0x50e000005de0/. -> 0
+DELETE 0x50e000005de0 .
+DEC 0x50c00000ab40/<null> -> 0
+DELETE 0x50c00000ab40 <null>
+INC 0x50c00000ac00/1 -> 1
+INC 0x50c00000a900/7 -> 2
+INC 0x50c00000acc0/8 -> 1
+DEC 0x50c00000ac00/1 -> 0
+DELETE 0x50c00000ac00 1
+DEC 0x50c00000a900/7 -> 1
+DEC 0x50c00000a900/7 -> 0
+DELETE 0x50c00000a900 7
+DEC 0x50c00000aa80/1 -> 0
+DELETE 0x50c00000aa80 1
+INC 0x50c00000ad80/10 -> 1
+INC 0x50c00000acc0/8 -> 2
+INC 0x50c00000ae40/1 -> 1
+DEC 0x50c00000ad80/10 -> 0
+DELETE 0x50c00000ad80 10
+DEC 0x50c00000acc0/8 -> 1
+INC 0x50e000005fa0/. -> 1
+INC 0x50d0000006c0/[., ., ., ., ., ., ., .] -> 2
+INC 0x50e000004fe0/<NativeFunction> -> 2
+DEC 0x50d0000006c0/[., ., ., ., ., ., ., .] -> 1
+INC 0x50e000006080/. -> 1
+INC 0x50c00000afc0/<null> -> 1
+DEC 0x50e000004fe0/<NativeFunction> -> 1
+DEC 0x50e000005fa0/. -> 0
+DELETE 0x50e000005fa0 .
+DEC 0x50c00000afc0/<null> -> 0
+DELETE 0x50c00000afc0 <null>
+INC 0x50c00000b080/1 -> 1
+INC 0x50c00000acc0/8 -> 2
+INC 0x50c00000b140/9 -> 1
+DEC 0x50c00000b080/1 -> 0
+DELETE 0x50c00000b080 1
+DEC 0x50c00000acc0/8 -> 1
+DEC 0x50c00000acc0/8 -> 0
+DELETE 0x50c00000acc0 8
+DEC 0x50c00000ae40/1 -> 0
+DELETE 0x50c00000ae40 1
+INC 0x50c00000b200/10 -> 1
+INC 0x50c00000b140/9 -> 2
+INC 0x50c00000b2c0/1 -> 1
+DEC 0x50c00000b200/10 -> 0
+DELETE 0x50c00000b200 10
+DEC 0x50c00000b140/9 -> 1
+INC 0x50e000006160/. -> 1
+INC 0x50d0000006c0/[., ., ., ., ., ., ., ., .] -> 2
+INC 0x50e000004fe0/<NativeFunction> -> 2
+DEC 0x50d0000006c0/[., ., ., ., ., ., ., ., .] -> 1
+INC 0x50e000006240/. -> 1
+INC 0x50c00000b380/<null> -> 1
+DEC 0x50e000004fe0/<NativeFunction> -> 1
+DEC 0x50e000006160/. -> 0
+DELETE 0x50e000006160 .
+DEC 0x50c00000b380/<null> -> 0
+DELETE 0x50c00000b380 <null>
+INC 0x50c00000b440/1 -> 1
+INC 0x50c00000b140/9 -> 2
+INC 0x50c00000b500/10 -> 1
+DEC 0x50c00000b440/1 -> 0
+DELETE 0x50c00000b440 1
+DEC 0x50c00000b140/9 -> 1
+DEC 0x50c00000b140/9 -> 0
+DELETE 0x50c00000b140 9
+DEC 0x50c00000b2c0/1 -> 0
+DELETE 0x50c00000b2c0 1
+INC 0x50c00000b5c0/10 -> 1
+INC 0x50c00000b500/10 -> 2
+INC 0x50c00000b680/0 -> 1
+DEC 0x50c00000b5c0/10 -> 0
+DELETE 0x50c00000b5c0 10
+DEC 0x50c00000b500/10 -> 1
+DEC 0x50c00000b680/0 -> 0
+DELETE 0x50c00000b680 0
+INC 0x50c00000b740/<null> -> 1
+DEC 0x50c00000b740/<null> -> 0
+DELETE 0x50c00000b740 <null>
+INC 0x50d0000006c0/[., ., ., ., ., ., ., ., ., .] -> 2
+INC 0x50d0000002b0/[[., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .]] -> 2
+INC 0x50e0000012a0/<NativeFunction> -> 2
+DEC 0x50d0000002b0/[[., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .]] -> 1
+INC 0x50e000006320/. -> 1
+INC 0x50e000006400/. -> 1
+INC 0x50e0000064e0/. -> 1
+INC 0x50e0000065c0/. -> 1
+INC 0x50e0000066a0/. -> 1
+INC 0x50e000006780/. -> 1
+INC 0x50e000006860/. -> 1
+INC 0x50e000006940/. -> 1
+INC 0x50e000006a20/. -> 1
+INC 0x50e000006b00/. -> 1
+INC 0x50e000006be0/<NativeFunction> -> 1
+INC 0x50e000006cc0/<NativeFunction> -> 1
+INC 0x50d000000790/[., ., ., ., ., ., ., ., ., .] -> 1
+INC 0x50c00000ba40/<null> -> 1
+DEC 0x50e0000012a0/<NativeFunction> -> 1
+DEC 0x50d0000006c0/[., ., ., ., ., ., ., ., ., .] -> 1
+DEC 0x50c00000ba40/<null> -> 0
+DELETE 0x50c00000ba40 <null>
+INC 0x50c00000bb00/1 -> 1
+INC 0x50c000008c80/2 -> 2
+INC 0x50c00000bbc0/3 -> 1
+DEC 0x50c00000bb00/1 -> 0
+DELETE 0x50c00000bb00 1
+DEC 0x50c000008c80/2 -> 1
+DEC 0x50c000008c80/2 -> 0
+DELETE 0x50c000008c80 2
+DEC 0x50c000008e00/1 -> 0
+DELETE 0x50c000008e00 1
+INC 0x50c00000bc80/10 -> 1
+INC 0x50c00000bbc0/3 -> 2
+INC 0x50c00000bd40/1 -> 1
+DEC 0x50c00000bc80/10 -> 0
+DELETE 0x50c00000bc80 10
+DEC 0x50c00000bbc0/3 -> 1
+INC 0x50e000006da0/<NativeFunction> -> 1
+INC 0x50e000006e80/<NativeFunction> -> 1
+INC 0x50d000000860/[] -> 1
+DEC 0x50d0000006c0/[., ., ., ., ., ., ., ., ., .] -> 0
+DELETE 0x50d0000006c0 [., ., ., ., ., ., ., ., ., .]
+DEC 0x50e000005280/. -> 0
+DELETE 0x50e000005280 .
+DEC 0x50e000005440/. -> 0
+DELETE 0x50e000005440 .
+DEC 0x50e000005600/. -> 0
+DELETE 0x50e000005600 .
+DEC 0x50e0000057c0/. -> 0
+DELETE 0x50e0000057c0 .
+DEC 0x50e000005980/. -> 0
+DELETE 0x50e000005980 .
+DEC 0x50e000005b40/. -> 0
+DELETE 0x50e000005b40 .
+DEC 0x50e000005d00/. -> 0
+DELETE 0x50e000005d00 .
+DEC 0x50e000005ec0/. -> 0
+DELETE 0x50e000005ec0 .
+DEC 0x50e000006080/. -> 0
+DELETE 0x50e000006080 .
+DEC 0x50e000006240/. -> 0
+DELETE 0x50e000006240 .
+INC 0x50c00000be00/0 -> 1
+DEC 0x50c00000b500/10 -> 0
+DELETE 0x50c00000b500 10
+INC 0x50c00000bec0/10 -> 1
+INC 0x50c00000be00/0 -> 2
+INC 0x50c00000bf80/1 -> 1
+DEC 0x50c00000bec0/10 -> 0
+DELETE 0x50c00000bec0 10
+DEC 0x50c00000be00/0 -> 1
+INC 0x50e000006f60/. -> 1
+INC 0x50d000000860/[] -> 2
+INC 0x50e000006da0/<NativeFunction> -> 2
+DEC 0x50d000000860/[] -> 1
+INC 0x50e000007040/. -> 1
+INC 0x50c000010000/<null> -> 1
+DEC 0x50e000006da0/<NativeFunction> -> 1
+DEC 0x50e000006f60/. -> 0
+DELETE 0x50e000006f60 .
+DEC 0x50c000010000/<null> -> 0
+DELETE 0x50c000010000 <null>
+INC 0x50c0000100c0/1 -> 1
+INC 0x50c00000be00/0 -> 2
+INC 0x50c000010180/1 -> 1
+DEC 0x50c0000100c0/1 -> 0
+DELETE 0x50c0000100c0 1
+DEC 0x50c00000be00/0 -> 1
+DEC 0x50c00000be00/0 -> 0
+DELETE 0x50c00000be00 0
+DEC 0x50c00000bf80/1 -> 0
+DELETE 0x50c00000bf80 1
+INC 0x50c000010240/10 -> 1
+INC 0x50c000010180/1 -> 2
+INC 0x50c000010300/1 -> 1
+DEC 0x50c000010240/10 -> 0
+DELETE 0x50c000010240 10
+DEC 0x50c000010180/1 -> 1
+INC 0x50e000007120/. -> 1
+INC 0x50d000000860/[.] -> 2
+INC 0x50e000006da0/<NativeFunction> -> 2
+DEC 0x50d000000860/[.] -> 1
+INC 0x50e000007200/. -> 1
+INC 0x50c0000103c0/<null> -> 1
+DEC 0x50e000006da0/<NativeFunction> -> 1
+DEC 0x50e000007120/. -> 0
+DELETE 0x50e000007120 .
+DEC 0x50c0000103c0/<null> -> 0
+DELETE 0x50c0000103c0 <null>
+INC 0x50c000010480/1 -> 1
+INC 0x50c000010180/1 -> 2
+INC 0x50c000010540/2 -> 1
+DEC 0x50c000010480/1 -> 0
+DELETE 0x50c000010480 1
+DEC 0x50c000010180/1 -> 1
+DEC 0x50c000010180/1 -> 0
+DELETE 0x50c000010180 1
+DEC 0x50c000010300/1 -> 0
+DELETE 0x50c000010300 1
+INC 0x50c000010600/10 -> 1
+INC 0x50c000010540/2 -> 2
+INC 0x50c0000106c0/1 -> 1
+DEC 0x50c000010600/10 -> 0
+DELETE 0x50c000010600 10
+DEC 0x50c000010540/2 -> 1
+INC 0x50e0000072e0/. -> 1
+INC 0x50d000000860/[., .] -> 2
+INC 0x50e000006da0/<NativeFunction> -> 2
+DEC 0x50d000000860/[., .] -> 1
+INC 0x50e0000073c0/. -> 1
+INC 0x50c000010780/<null> -> 1
+DEC 0x50e000006da0/<NativeFunction> -> 1
+DEC 0x50e0000072e0/. -> 0
+DELETE 0x50e0000072e0 .
+DEC 0x50c000010780/<null> -> 0
+DELETE 0x50c000010780 <null>
+INC 0x50c000010840/1 -> 1
+INC 0x50c000010540/2 -> 2
+INC 0x50c000010900/3 -> 1
+DEC 0x50c000010840/1 -> 0
+DELETE 0x50c000010840 1
+DEC 0x50c000010540/2 -> 1
+DEC 0x50c000010540/2 -> 0
+DELETE 0x50c000010540 2
+DEC 0x50c0000106c0/1 -> 0
+DELETE 0x50c0000106c0 1
+INC 0x50c0000109c0/10 -> 1
+INC 0x50c000010900/3 -> 2
+INC 0x50c000010a80/1 -> 1
+DEC 0x50c0000109c0/10 -> 0
+DELETE 0x50c0000109c0 10
+DEC 0x50c000010900/3 -> 1
+INC 0x50e0000074a0/. -> 1
+INC 0x50d000000860/[., ., .] -> 2
+INC 0x50e000006da0/<NativeFunction> -> 2
+DEC 0x50d000000860/[., ., .] -> 1
+INC 0x50e000007580/. -> 1
+INC 0x50c000010b40/<null> -> 1
+DEC 0x50e000006da0/<NativeFunction> -> 1
+DEC 0x50e0000074a0/. -> 0
+DELETE 0x50e0000074a0 .
+DEC 0x50c000010b40/<null> -> 0
+DELETE 0x50c000010b40 <null>
+INC 0x50c000010c00/1 -> 1
+INC 0x50c000010900/3 -> 2
+INC 0x50c000010cc0/4 -> 1
+DEC 0x50c000010c00/1 -> 0
+DELETE 0x50c000010c00 1
+DEC 0x50c000010900/3 -> 1
+DEC 0x50c000010900/3 -> 0
+DELETE 0x50c000010900 3
+DEC 0x50c000010a80/1 -> 0
+DELETE 0x50c000010a80 1
+INC 0x50c000010d80/10 -> 1
+INC 0x50c000010cc0/4 -> 2
+INC 0x50c000010e40/1 -> 1
+DEC 0x50c000010d80/10 -> 0
+DELETE 0x50c000010d80 10
+DEC 0x50c000010cc0/4 -> 1
+INC 0x50e000007660/. -> 1
+INC 0x50d000000860/[., ., ., .] -> 2
+INC 0x50e000006da0/<NativeFunction> -> 2
+DEC 0x50d000000860/[., ., ., .] -> 1
+INC 0x50e000007740/. -> 1
+INC 0x50c000010f00/<null> -> 1
+DEC 0x50e000006da0/<NativeFunction> -> 1
+DEC 0x50e000007660/. -> 0
+DELETE 0x50e000007660 .
+DEC 0x50c000010f00/<null> -> 0
+DELETE 0x50c000010f00 <null>
+INC 0x50c000010fc0/1 -> 1
+INC 0x50c000010cc0/4 -> 2
+INC 0x50c000011080/5 -> 1
+DEC 0x50c000010fc0/1 -> 0
+DELETE 0x50c000010fc0 1
+DEC 0x50c000010cc0/4 -> 1
+DEC 0x50c000010cc0/4 -> 0
+DELETE 0x50c000010cc0 4
+DEC 0x50c000010e40/1 -> 0
+DELETE 0x50c000010e40 1
+INC 0x50c000011140/10 -> 1
+INC 0x50c000011080/5 -> 2
+INC 0x50c000011200/1 -> 1
+DEC 0x50c000011140/10 -> 0
+DELETE 0x50c000011140 10
+DEC 0x50c000011080/5 -> 1
+INC 0x50e000007820/. -> 1
+INC 0x50d000000860/[., ., ., ., .] -> 2
+INC 0x50e000006da0/<NativeFunction> -> 2
+DEC 0x50d000000860/[., ., ., ., .] -> 1
+INC 0x50e000007900/. -> 1
+INC 0x50c0000112c0/<null> -> 1
+DEC 0x50e000006da0/<NativeFunction> -> 1
+DEC 0x50e000007820/. -> 0
+DELETE 0x50e000007820 .
+DEC 0x50c0000112c0/<null> -> 0
+DELETE 0x50c0000112c0 <null>
+INC 0x50c000011380/1 -> 1
+INC 0x50c000011080/5 -> 2
+INC 0x50c000011440/6 -> 1
+DEC 0x50c000011380/1 -> 0
+DELETE 0x50c000011380 1
+DEC 0x50c000011080/5 -> 1
+DEC 0x50c000011080/5 -> 0
+DELETE 0x50c000011080 5
+DEC 0x50c000011200/1 -> 0
+DELETE 0x50c000011200 1
+INC 0x50c000011500/10 -> 1
+INC 0x50c000011440/6 -> 2
+INC 0x50c0000115c0/1 -> 1
+DEC 0x50c000011500/10 -> 0
+DELETE 0x50c000011500 10
+DEC 0x50c000011440/6 -> 1
+INC 0x50e0000079e0/. -> 1
+INC 0x50d000000860/[., ., ., ., ., .] -> 2
+INC 0x50e000006da0/<NativeFunction> -> 2
+DEC 0x50d000000860/[., ., ., ., ., .] -> 1
+INC 0x50e000007ac0/. -> 1
+INC 0x50c000011680/<null> -> 1
+DEC 0x50e000006da0/<NativeFunction> -> 1
+DEC 0x50e0000079e0/. -> 0
+DELETE 0x50e0000079e0 .
+DEC 0x50c000011680/<null> -> 0
+DELETE 0x50c000011680 <null>
+INC 0x50c000011740/1 -> 1
+INC 0x50c000011440/6 -> 2
+INC 0x50c000011800/7 -> 1
+DEC 0x50c000011740/1 -> 0
+DELETE 0x50c000011740 1
+DEC 0x50c000011440/6 -> 1
+DEC 0x50c000011440/6 -> 0
+DELETE 0x50c000011440 6
+DEC 0x50c0000115c0/1 -> 0
+DELETE 0x50c0000115c0 1
+INC 0x50c0000118c0/10 -> 1
+INC 0x50c000011800/7 -> 2
+INC 0x50c000011980/1 -> 1
+DEC 0x50c0000118c0/10 -> 0
+DELETE 0x50c0000118c0 10
+DEC 0x50c000011800/7 -> 1
+INC 0x50e000007ba0/. -> 1
+INC 0x50d000000860/[., ., ., ., ., ., .] -> 2
+INC 0x50e000006da0/<NativeFunction> -> 2
+DEC 0x50d000000860/[., ., ., ., ., ., .] -> 1
+INC 0x50e000007c80/. -> 1
+INC 0x50c000011a40/<null> -> 1
+DEC 0x50e000006da0/<NativeFunction> -> 1
+DEC 0x50e000007ba0/. -> 0
+DELETE 0x50e000007ba0 .
+DEC 0x50c000011a40/<null> -> 0
+DELETE 0x50c000011a40 <null>
+INC 0x50c000011b00/1 -> 1
+INC 0x50c000011800/7 -> 2
+INC 0x50c000011bc0/8 -> 1
+DEC 0x50c000011b00/1 -> 0
+DELETE 0x50c000011b00 1
+DEC 0x50c000011800/7 -> 1
+DEC 0x50c000011800/7 -> 0
+DELETE 0x50c000011800 7
+DEC 0x50c000011980/1 -> 0
+DELETE 0x50c000011980 1
+INC 0x50c000011c80/10 -> 1
+INC 0x50c000011bc0/8 -> 2
+INC 0x50c000011d40/1 -> 1
+DEC 0x50c000011c80/10 -> 0
+DELETE 0x50c000011c80 10
+DEC 0x50c000011bc0/8 -> 1
+INC 0x50e000007d60/. -> 1
+INC 0x50d000000860/[., ., ., ., ., ., ., .] -> 2
+INC 0x50e000006da0/<NativeFunction> -> 2
+DEC 0x50d000000860/[., ., ., ., ., ., ., .] -> 1
+INC 0x50e000007e40/. -> 1
+INC 0x50c000011ec0/<null> -> 1
+DEC 0x50e000006da0/<NativeFunction> -> 1
+DEC 0x50e000007d60/. -> 0
+DELETE 0x50e000007d60 .
+DEC 0x50c000011ec0/<null> -> 0
+DELETE 0x50c000011ec0 <null>
+INC 0x50c000011f80/1 -> 1
+INC 0x50c000011bc0/8 -> 2
+INC 0x50c000012040/9 -> 1
+DEC 0x50c000011f80/1 -> 0
+DELETE 0x50c000011f80 1
+DEC 0x50c000011bc0/8 -> 1
+DEC 0x50c000011bc0/8 -> 0
+DELETE 0x50c000011bc0 8
+DEC 0x50c000011d40/1 -> 0
+DELETE 0x50c000011d40 1
+INC 0x50c000012100/10 -> 1
+INC 0x50c000012040/9 -> 2
+INC 0x50c0000121c0/1 -> 1
+DEC 0x50c000012100/10 -> 0
+DELETE 0x50c000012100 10
+DEC 0x50c000012040/9 -> 1
+INC 0x50e000007f20/. -> 1
+INC 0x50d000000860/[., ., ., ., ., ., ., ., .] -> 2
+INC 0x50e000006da0/<NativeFunction> -> 2
+DEC 0x50d000000860/[., ., ., ., ., ., ., ., .] -> 1
+INC 0x50e000008000/. -> 1
+INC 0x50c000012280/<null> -> 1
+DEC 0x50e000006da0/<NativeFunction> -> 1
+DEC 0x50e000007f20/. -> 0
+DELETE 0x50e000007f20 .
+DEC 0x50c000012280/<null> -> 0
+DELETE 0x50c000012280 <null>
+INC 0x50c000012340/1 -> 1
+INC 0x50c000012040/9 -> 2
+INC 0x50c000012400/10 -> 1
+DEC 0x50c000012340/1 -> 0
+DELETE 0x50c000012340 1
+DEC 0x50c000012040/9 -> 1
+DEC 0x50c000012040/9 -> 0
+DELETE 0x50c000012040 9
+DEC 0x50c0000121c0/1 -> 0
+DELETE 0x50c0000121c0 1
+INC 0x50c0000124c0/10 -> 1
+INC 0x50c000012400/10 -> 2
+INC 0x50c000012580/0 -> 1
+DEC 0x50c0000124c0/10 -> 0
+DELETE 0x50c0000124c0 10
+DEC 0x50c000012400/10 -> 1
+DEC 0x50c000012580/0 -> 0
+DELETE 0x50c000012580 0
+INC 0x50c000012640/<null> -> 1
+DEC 0x50c000012640/<null> -> 0
+DELETE 0x50c000012640 <null>
+INC 0x50d000000860/[., ., ., ., ., ., ., ., ., .] -> 2
+INC 0x50d0000002b0/[[., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .]] -> 2
+INC 0x50e0000012a0/<NativeFunction> -> 2
+DEC 0x50d0000002b0/[[., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .]] -> 1
+INC 0x50e0000080e0/. -> 1
+INC 0x50e0000081c0/. -> 1
+INC 0x50e0000082a0/. -> 1
+INC 0x50e000008380/. -> 1
+INC 0x50e000008460/. -> 1
+INC 0x50e000008540/. -> 1
+INC 0x50e000008620/. -> 1
+INC 0x50e000008700/. -> 1
+INC 0x50e0000087e0/. -> 1
+INC 0x50e0000088c0/. -> 1
+INC 0x50e0000089a0/<NativeFunction> -> 1
+INC 0x50e000008a80/<NativeFunction> -> 1
+INC 0x50d000000930/[., ., ., ., ., ., ., ., ., .] -> 1
+INC 0x50c000012940/<null> -> 1
+DEC 0x50e0000012a0/<NativeFunction> -> 1
+DEC 0x50d000000860/[., ., ., ., ., ., ., ., ., .] -> 1
+DEC 0x50c000012940/<null> -> 0
+DELETE 0x50c000012940 <null>
+INC 0x50c000012a00/1 -> 1
+INC 0x50c00000bbc0/3 -> 2
+INC 0x50c000012ac0/4 -> 1
+DEC 0x50c000012a00/1 -> 0
+DELETE 0x50c000012a00 1
+DEC 0x50c00000bbc0/3 -> 1
+DEC 0x50c00000bbc0/3 -> 0
+DELETE 0x50c00000bbc0 3
+DEC 0x50c00000bd40/1 -> 0
+DELETE 0x50c00000bd40 1
+INC 0x50c000012b80/10 -> 1
+INC 0x50c000012ac0/4 -> 2
+INC 0x50c000012c40/1 -> 1
+DEC 0x50c000012b80/10 -> 0
+DELETE 0x50c000012b80 10
+DEC 0x50c000012ac0/4 -> 1
+INC 0x50e000008b60/<NativeFunction> -> 1
+INC 0x50e000008c40/<NativeFunction> -> 1
+INC 0x50d000000a00/[] -> 1
+DEC 0x50d000000860/[., ., ., ., ., ., ., ., ., .] -> 0
+DELETE 0x50d000000860 [., ., ., ., ., ., ., ., ., .]
+DEC 0x50e000007040/. -> 0
+DELETE 0x50e000007040 .
+DEC 0x50e000007200/. -> 0
+DELETE 0x50e000007200 .
+DEC 0x50e0000073c0/. -> 0
+DELETE 0x50e0000073c0 .
+DEC 0x50e000007580/. -> 0
+DELETE 0x50e000007580 .
+DEC 0x50e000007740/. -> 0
+DELETE 0x50e000007740 .
+DEC 0x50e000007900/. -> 0
+DELETE 0x50e000007900 .
+DEC 0x50e000007ac0/. -> 0
+DELETE 0x50e000007ac0 .
+DEC 0x50e000007c80/. -> 0
+DELETE 0x50e000007c80 .
+DEC 0x50e000007e40/. -> 0
+DELETE 0x50e000007e40 .
+DEC 0x50e000008000/. -> 0
+DELETE 0x50e000008000 .
+INC 0x50c000012d00/0 -> 1
+DEC 0x50c000012400/10 -> 0
+DELETE 0x50c000012400 10
+INC 0x50c000012dc0/10 -> 1
+INC 0x50c000012d00/0 -> 2
+INC 0x50c000012e80/1 -> 1
+DEC 0x50c000012dc0/10 -> 0
+DELETE 0x50c000012dc0 10
+DEC 0x50c000012d00/0 -> 1
+INC 0x50e000008d20/. -> 1
+INC 0x50d000000a00/[] -> 2
+INC 0x50e000008b60/<NativeFunction> -> 2
+DEC 0x50d000000a00/[] -> 1
+INC 0x50e000008e00/. -> 1
+INC 0x50c000012f40/<null> -> 1
+DEC 0x50e000008b60/<NativeFunction> -> 1
+DEC 0x50e000008d20/. -> 0
+DELETE 0x50e000008d20 .
+DEC 0x50c000012f40/<null> -> 0
+DELETE 0x50c000012f40 <null>
+INC 0x50c000013000/1 -> 1
+INC 0x50c000012d00/0 -> 2
+INC 0x50c0000130c0/1 -> 1
+DEC 0x50c000013000/1 -> 0
+DELETE 0x50c000013000 1
+DEC 0x50c000012d00/0 -> 1
+DEC 0x50c000012d00/0 -> 0
+DELETE 0x50c000012d00 0
+DEC 0x50c000012e80/1 -> 0
+DELETE 0x50c000012e80 1
+INC 0x50c000013180/10 -> 1
+INC 0x50c0000130c0/1 -> 2
+INC 0x50c000013240/1 -> 1
+DEC 0x50c000013180/10 -> 0
+DELETE 0x50c000013180 10
+DEC 0x50c0000130c0/1 -> 1
+INC 0x50e000008ee0/. -> 1
+INC 0x50d000000a00/[.] -> 2
+INC 0x50e000008b60/<NativeFunction> -> 2
+DEC 0x50d000000a00/[.] -> 1
+INC 0x50e000008fc0/. -> 1
+INC 0x50c000013300/<null> -> 1
+DEC 0x50e000008b60/<NativeFunction> -> 1
+DEC 0x50e000008ee0/. -> 0
+DELETE 0x50e000008ee0 .
+DEC 0x50c000013300/<null> -> 0
+DELETE 0x50c000013300 <null>
+INC 0x50c0000133c0/1 -> 1
+INC 0x50c0000130c0/1 -> 2
+INC 0x50c000013480/2 -> 1
+DEC 0x50c0000133c0/1 -> 0
+DELETE 0x50c0000133c0 1
+DEC 0x50c0000130c0/1 -> 1
+DEC 0x50c0000130c0/1 -> 0
+DELETE 0x50c0000130c0 1
+DEC 0x50c000013240/1 -> 0
+DELETE 0x50c000013240 1
+INC 0x50c000013540/10 -> 1
+INC 0x50c000013480/2 -> 2
+INC 0x50c000013600/1 -> 1
+DEC 0x50c000013540/10 -> 0
+DELETE 0x50c000013540 10
+DEC 0x50c000013480/2 -> 1
+INC 0x50e0000090a0/. -> 1
+INC 0x50d000000a00/[., .] -> 2
+INC 0x50e000008b60/<NativeFunction> -> 2
+DEC 0x50d000000a00/[., .] -> 1
+INC 0x50e000009180/. -> 1
+INC 0x50c0000136c0/<null> -> 1
+DEC 0x50e000008b60/<NativeFunction> -> 1
+DEC 0x50e0000090a0/. -> 0
+DELETE 0x50e0000090a0 .
+DEC 0x50c0000136c0/<null> -> 0
+DELETE 0x50c0000136c0 <null>
+INC 0x50c000013780/1 -> 1
+INC 0x50c000013480/2 -> 2
+INC 0x50c000013840/3 -> 1
+DEC 0x50c000013780/1 -> 0
+DELETE 0x50c000013780 1
+DEC 0x50c000013480/2 -> 1
+DEC 0x50c000013480/2 -> 0
+DELETE 0x50c000013480 2
+DEC 0x50c000013600/1 -> 0
+DELETE 0x50c000013600 1
+INC 0x50c000013900/10 -> 1
+INC 0x50c000013840/3 -> 2
+INC 0x50c0000139c0/1 -> 1
+DEC 0x50c000013900/10 -> 0
+DELETE 0x50c000013900 10
+DEC 0x50c000013840/3 -> 1
+INC 0x50e000009260/. -> 1
+INC 0x50d000000a00/[., ., .] -> 2
+INC 0x50e000008b60/<NativeFunction> -> 2
+DEC 0x50d000000a00/[., ., .] -> 1
+INC 0x50e000009340/. -> 1
+INC 0x50c000013a80/<null> -> 1
+DEC 0x50e000008b60/<NativeFunction> -> 1
+DEC 0x50e000009260/. -> 0
+DELETE 0x50e000009260 .
+DEC 0x50c000013a80/<null> -> 0
+DELETE 0x50c000013a80 <null>
+INC 0x50c000013b40/1 -> 1
+INC 0x50c000013840/3 -> 2
+INC 0x50c000013c00/4 -> 1
+DEC 0x50c000013b40/1 -> 0
+DELETE 0x50c000013b40 1
+DEC 0x50c000013840/3 -> 1
+DEC 0x50c000013840/3 -> 0
+DELETE 0x50c000013840 3
+DEC 0x50c0000139c0/1 -> 0
+DELETE 0x50c0000139c0 1
+INC 0x50c000013cc0/10 -> 1
+INC 0x50c000013c00/4 -> 2
+INC 0x50c000013d80/1 -> 1
+DEC 0x50c000013cc0/10 -> 0
+DELETE 0x50c000013cc0 10
+DEC 0x50c000013c00/4 -> 1
+INC 0x50e000009420/. -> 1
+INC 0x50d000000a00/[., ., ., .] -> 2
+INC 0x50e000008b60/<NativeFunction> -> 2
+DEC 0x50d000000a00/[., ., ., .] -> 1
+INC 0x50e000009500/. -> 1
+INC 0x50c000013e40/<null> -> 1
+DEC 0x50e000008b60/<NativeFunction> -> 1
+DEC 0x50e000009420/. -> 0
+DELETE 0x50e000009420 .
+DEC 0x50c000013e40/<null> -> 0
+DELETE 0x50c000013e40 <null>
+INC 0x50c000013f00/1 -> 1
+INC 0x50c000013c00/4 -> 2
+INC 0x50c000013fc0/5 -> 1
+DEC 0x50c000013f00/1 -> 0
+DELETE 0x50c000013f00 1
+DEC 0x50c000013c00/4 -> 1
+DEC 0x50c000013c00/4 -> 0
+DELETE 0x50c000013c00 4
+DEC 0x50c000013d80/1 -> 0
+DELETE 0x50c000013d80 1
+INC 0x50c000014080/10 -> 1
+INC 0x50c000013fc0/5 -> 2
+INC 0x50c000014140/1 -> 1
+DEC 0x50c000014080/10 -> 0
+DELETE 0x50c000014080 10
+DEC 0x50c000013fc0/5 -> 1
+INC 0x50e0000095e0/. -> 1
+INC 0x50d000000a00/[., ., ., ., .] -> 2
+INC 0x50e000008b60/<NativeFunction> -> 2
+DEC 0x50d000000a00/[., ., ., ., .] -> 1
+INC 0x50e0000096c0/. -> 1
+INC 0x50c000014200/<null> -> 1
+DEC 0x50e000008b60/<NativeFunction> -> 1
+DEC 0x50e0000095e0/. -> 0
+DELETE 0x50e0000095e0 .
+DEC 0x50c000014200/<null> -> 0
+DELETE 0x50c000014200 <null>
+INC 0x50c0000142c0/1 -> 1
+INC 0x50c000013fc0/5 -> 2
+INC 0x50c000014380/6 -> 1
+DEC 0x50c0000142c0/1 -> 0
+DELETE 0x50c0000142c0 1
+DEC 0x50c000013fc0/5 -> 1
+DEC 0x50c000013fc0/5 -> 0
+DELETE 0x50c000013fc0 5
+DEC 0x50c000014140/1 -> 0
+DELETE 0x50c000014140 1
+INC 0x50c000014440/10 -> 1
+INC 0x50c000014380/6 -> 2
+INC 0x50c000014500/1 -> 1
+DEC 0x50c000014440/10 -> 0
+DELETE 0x50c000014440 10
+DEC 0x50c000014380/6 -> 1
+INC 0x50e0000097a0/. -> 1
+INC 0x50d000000a00/[., ., ., ., ., .] -> 2
+INC 0x50e000008b60/<NativeFunction> -> 2
+DEC 0x50d000000a00/[., ., ., ., ., .] -> 1
+INC 0x50e000009880/. -> 1
+INC 0x50c0000145c0/<null> -> 1
+DEC 0x50e000008b60/<NativeFunction> -> 1
+DEC 0x50e0000097a0/. -> 0
+DELETE 0x50e0000097a0 .
+DEC 0x50c0000145c0/<null> -> 0
+DELETE 0x50c0000145c0 <null>
+INC 0x50c000014680/1 -> 1
+INC 0x50c000014380/6 -> 2
+INC 0x50c000014740/7 -> 1
+DEC 0x50c000014680/1 -> 0
+DELETE 0x50c000014680 1
+DEC 0x50c000014380/6 -> 1
+DEC 0x50c000014380/6 -> 0
+DELETE 0x50c000014380 6
+DEC 0x50c000014500/1 -> 0
+DELETE 0x50c000014500 1
+INC 0x50c000014800/10 -> 1
+INC 0x50c000014740/7 -> 2
+INC 0x50c0000148c0/1 -> 1
+DEC 0x50c000014800/10 -> 0
+DELETE 0x50c000014800 10
+DEC 0x50c000014740/7 -> 1
+INC 0x50e000009960/. -> 1
+INC 0x50d000000a00/[., ., ., ., ., ., .] -> 2
+INC 0x50e000008b60/<NativeFunction> -> 2
+DEC 0x50d000000a00/[., ., ., ., ., ., .] -> 1
+INC 0x50e000009a40/. -> 1
+INC 0x50c000014980/<null> -> 1
+DEC 0x50e000008b60/<NativeFunction> -> 1
+DEC 0x50e000009960/. -> 0
+DELETE 0x50e000009960 .
+DEC 0x50c000014980/<null> -> 0
+DELETE 0x50c000014980 <null>
+INC 0x50c000014a40/1 -> 1
+INC 0x50c000014740/7 -> 2
+INC 0x50c000014b00/8 -> 1
+DEC 0x50c000014a40/1 -> 0
+DELETE 0x50c000014a40 1
+DEC 0x50c000014740/7 -> 1
+DEC 0x50c000014740/7 -> 0
+DELETE 0x50c000014740 7
+DEC 0x50c0000148c0/1 -> 0
+DELETE 0x50c0000148c0 1
+INC 0x50c000014bc0/10 -> 1
+INC 0x50c000014b00/8 -> 2
+INC 0x50c000014c80/1 -> 1
+DEC 0x50c000014bc0/10 -> 0
+DELETE 0x50c000014bc0 10
+DEC 0x50c000014b00/8 -> 1
+INC 0x50e000009b20/. -> 1
+INC 0x50d000000a00/[., ., ., ., ., ., ., .] -> 2
+INC 0x50e000008b60/<NativeFunction> -> 2
+DEC 0x50d000000a00/[., ., ., ., ., ., ., .] -> 1
+INC 0x50e000009c00/. -> 1
+INC 0x50c000014e00/<null> -> 1
+DEC 0x50e000008b60/<NativeFunction> -> 1
+DEC 0x50e000009b20/. -> 0
+DELETE 0x50e000009b20 .
+DEC 0x50c000014e00/<null> -> 0
+DELETE 0x50c000014e00 <null>
+INC 0x50c000014ec0/1 -> 1
+INC 0x50c000014b00/8 -> 2
+INC 0x50c000014f80/9 -> 1
+DEC 0x50c000014ec0/1 -> 0
+DELETE 0x50c000014ec0 1
+DEC 0x50c000014b00/8 -> 1
+DEC 0x50c000014b00/8 -> 0
+DELETE 0x50c000014b00 8
+DEC 0x50c000014c80/1 -> 0
+DELETE 0x50c000014c80 1
+INC 0x50c000015040/10 -> 1
+INC 0x50c000014f80/9 -> 2
+INC 0x50c000015100/1 -> 1
+DEC 0x50c000015040/10 -> 0
+DELETE 0x50c000015040 10
+DEC 0x50c000014f80/9 -> 1
+INC 0x50e000009ce0/. -> 1
+INC 0x50d000000a00/[., ., ., ., ., ., ., ., .] -> 2
+INC 0x50e000008b60/<NativeFunction> -> 2
+DEC 0x50d000000a00/[., ., ., ., ., ., ., ., .] -> 1
+INC 0x50e000009dc0/. -> 1
+INC 0x50c0000151c0/<null> -> 1
+DEC 0x50e000008b60/<NativeFunction> -> 1
+DEC 0x50e000009ce0/. -> 0
+DELETE 0x50e000009ce0 .
+DEC 0x50c0000151c0/<null> -> 0
+DELETE 0x50c0000151c0 <null>
+INC 0x50c000015280/1 -> 1
+INC 0x50c000014f80/9 -> 2
+INC 0x50c000015340/10 -> 1
+DEC 0x50c000015280/1 -> 0
+DELETE 0x50c000015280 1
+DEC 0x50c000014f80/9 -> 1
+DEC 0x50c000014f80/9 -> 0
+DELETE 0x50c000014f80 9
+DEC 0x50c000015100/1 -> 0
+DELETE 0x50c000015100 1
+INC 0x50c000015400/10 -> 1
+INC 0x50c000015340/10 -> 2
+INC 0x50c0000154c0/0 -> 1
+DEC 0x50c000015400/10 -> 0
+DELETE 0x50c000015400 10
+DEC 0x50c000015340/10 -> 1
+DEC 0x50c0000154c0/0 -> 0
+DELETE 0x50c0000154c0 0
+INC 0x50c000015580/<null> -> 1
+DEC 0x50c000015580/<null> -> 0
+DELETE 0x50c000015580 <null>
+INC 0x50d000000a00/[., ., ., ., ., ., ., ., ., .] -> 2
+INC 0x50d0000002b0/[[., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .]] -> 2
+INC 0x50e0000012a0/<NativeFunction> -> 2
+DEC 0x50d0000002b0/[[., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .]] -> 1
+INC 0x50e000009ea0/. -> 1
+INC 0x50e000009f80/. -> 1
+INC 0x50e00000a060/. -> 1
+INC 0x50e00000a140/. -> 1
+INC 0x50e00000a220/. -> 1
+INC 0x50e00000a300/. -> 1
+INC 0x50e00000a3e0/. -> 1
+INC 0x50e00000a4c0/. -> 1
+INC 0x50e00000a5a0/. -> 1
+INC 0x50e00000a680/. -> 1
+INC 0x50e00000a760/<NativeFunction> -> 1
+INC 0x50e00000a840/<NativeFunction> -> 1
+INC 0x50d000000ad0/[., ., ., ., ., ., ., ., ., .] -> 1
+INC 0x50c000015880/<null> -> 1
+DEC 0x50e0000012a0/<NativeFunction> -> 1
+DEC 0x50d000000a00/[., ., ., ., ., ., ., ., ., .] -> 1
+DEC 0x50c000015880/<null> -> 0
+DELETE 0x50c000015880 <null>
+INC 0x50c000015940/1 -> 1
+INC 0x50c000012ac0/4 -> 2
+INC 0x50c000015a00/5 -> 1
+DEC 0x50c000015940/1 -> 0
+DELETE 0x50c000015940 1
+DEC 0x50c000012ac0/4 -> 1
+DEC 0x50c000012ac0/4 -> 0
+DELETE 0x50c000012ac0 4
+DEC 0x50c000012c40/1 -> 0
+DELETE 0x50c000012c40 1
+INC 0x50c000015ac0/10 -> 1
+INC 0x50c000015a00/5 -> 2
+INC 0x50c000015b80/1 -> 1
+DEC 0x50c000015ac0/10 -> 0
+DELETE 0x50c000015ac0 10
+DEC 0x50c000015a00/5 -> 1
+INC 0x50e00000a920/<NativeFunction> -> 1
+INC 0x50e00000aa00/<NativeFunction> -> 1
+INC 0x50d000000ba0/[] -> 1
+DEC 0x50d000000a00/[., ., ., ., ., ., ., ., ., .] -> 0
+DELETE 0x50d000000a00 [., ., ., ., ., ., ., ., ., .]
+DEC 0x50e000008e00/. -> 0
+DELETE 0x50e000008e00 .
+DEC 0x50e000008fc0/. -> 0
+DELETE 0x50e000008fc0 .
+DEC 0x50e000009180/. -> 0
+DELETE 0x50e000009180 .
+DEC 0x50e000009340/. -> 0
+DELETE 0x50e000009340 .
+DEC 0x50e000009500/. -> 0
+DELETE 0x50e000009500 .
+DEC 0x50e0000096c0/. -> 0
+DELETE 0x50e0000096c0 .
+DEC 0x50e000009880/. -> 0
+DELETE 0x50e000009880 .
+DEC 0x50e000009a40/. -> 0
+DELETE 0x50e000009a40 .
+DEC 0x50e000009c00/. -> 0
+DELETE 0x50e000009c00 .
+DEC 0x50e000009dc0/. -> 0
+DELETE 0x50e000009dc0 .
+INC 0x50c000015c40/0 -> 1
+DEC 0x50c000015340/10 -> 0
+DELETE 0x50c000015340 10
+INC 0x50c000015d00/10 -> 1
+INC 0x50c000015c40/0 -> 2
+INC 0x50c000015dc0/1 -> 1
+DEC 0x50c000015d00/10 -> 0
+DELETE 0x50c000015d00 10
+DEC 0x50c000015c40/0 -> 1
+INC 0x50e00000aae0/. -> 1
+INC 0x50d000000ba0/[] -> 2
+INC 0x50e00000a920/<NativeFunction> -> 2
+DEC 0x50d000000ba0/[] -> 1
+INC 0x50e00000abc0/. -> 1
+INC 0x50c000015e80/<null> -> 1
+DEC 0x50e00000a920/<NativeFunction> -> 1
+DEC 0x50e00000aae0/. -> 0
+DELETE 0x50e00000aae0 .
+DEC 0x50c000015e80/<null> -> 0
+DELETE 0x50c000015e80 <null>
+INC 0x50c000015f40/1 -> 1
+INC 0x50c000015c40/0 -> 2
+INC 0x50c000016000/1 -> 1
+DEC 0x50c000015f40/1 -> 0
+DELETE 0x50c000015f40 1
+DEC 0x50c000015c40/0 -> 1
+DEC 0x50c000015c40/0 -> 0
+DELETE 0x50c000015c40 0
+DEC 0x50c000015dc0/1 -> 0
+DELETE 0x50c000015dc0 1
+INC 0x50c0000160c0/10 -> 1
+INC 0x50c000016000/1 -> 2
+INC 0x50c000016180/1 -> 1
+DEC 0x50c0000160c0/10 -> 0
+DELETE 0x50c0000160c0 10
+DEC 0x50c000016000/1 -> 1
+INC 0x50e00000aca0/. -> 1
+INC 0x50d000000ba0/[.] -> 2
+INC 0x50e00000a920/<NativeFunction> -> 2
+DEC 0x50d000000ba0/[.] -> 1
+INC 0x50e00000ad80/. -> 1
+INC 0x50c000016240/<null> -> 1
+DEC 0x50e00000a920/<NativeFunction> -> 1
+DEC 0x50e00000aca0/. -> 0
+DELETE 0x50e00000aca0 .
+DEC 0x50c000016240/<null> -> 0
+DELETE 0x50c000016240 <null>
+INC 0x50c000016300/1 -> 1
+INC 0x50c000016000/1 -> 2
+INC 0x50c0000163c0/2 -> 1
+DEC 0x50c000016300/1 -> 0
+DELETE 0x50c000016300 1
+DEC 0x50c000016000/1 -> 1
+DEC 0x50c000016000/1 -> 0
+DELETE 0x50c000016000 1
+DEC 0x50c000016180/1 -> 0
+DELETE 0x50c000016180 1
+INC 0x50c000016480/10 -> 1
+INC 0x50c0000163c0/2 -> 2
+INC 0x50c000016540/1 -> 1
+DEC 0x50c000016480/10 -> 0
+DELETE 0x50c000016480 10
+DEC 0x50c0000163c0/2 -> 1
+INC 0x50e00000ae60/. -> 1
+INC 0x50d000000ba0/[., .] -> 2
+INC 0x50e00000a920/<NativeFunction> -> 2
+DEC 0x50d000000ba0/[., .] -> 1
+INC 0x50e00000af40/. -> 1
+INC 0x50c000016600/<null> -> 1
+DEC 0x50e00000a920/<NativeFunction> -> 1
+DEC 0x50e00000ae60/. -> 0
+DELETE 0x50e00000ae60 .
+DEC 0x50c000016600/<null> -> 0
+DELETE 0x50c000016600 <null>
+INC 0x50c0000166c0/1 -> 1
+INC 0x50c0000163c0/2 -> 2
+INC 0x50c000016780/3 -> 1
+DEC 0x50c0000166c0/1 -> 0
+DELETE 0x50c0000166c0 1
+DEC 0x50c0000163c0/2 -> 1
+DEC 0x50c0000163c0/2 -> 0
+DELETE 0x50c0000163c0 2
+DEC 0x50c000016540/1 -> 0
+DELETE 0x50c000016540 1
+INC 0x50c000016840/10 -> 1
+INC 0x50c000016780/3 -> 2
+INC 0x50c000016900/1 -> 1
+DEC 0x50c000016840/10 -> 0
+DELETE 0x50c000016840 10
+DEC 0x50c000016780/3 -> 1
+INC 0x50e00000b020/. -> 1
+INC 0x50d000000ba0/[., ., .] -> 2
+INC 0x50e00000a920/<NativeFunction> -> 2
+DEC 0x50d000000ba0/[., ., .] -> 1
+INC 0x50e00000b100/. -> 1
+INC 0x50c0000169c0/<null> -> 1
+DEC 0x50e00000a920/<NativeFunction> -> 1
+DEC 0x50e00000b020/. -> 0
+DELETE 0x50e00000b020 .
+DEC 0x50c0000169c0/<null> -> 0
+DELETE 0x50c0000169c0 <null>
+INC 0x50c000016a80/1 -> 1
+INC 0x50c000016780/3 -> 2
+INC 0x50c000016b40/4 -> 1
+DEC 0x50c000016a80/1 -> 0
+DELETE 0x50c000016a80 1
+DEC 0x50c000016780/3 -> 1
+DEC 0x50c000016780/3 -> 0
+DELETE 0x50c000016780 3
+DEC 0x50c000016900/1 -> 0
+DELETE 0x50c000016900 1
+INC 0x50c000016c00/10 -> 1
+INC 0x50c000016b40/4 -> 2
+INC 0x50c000016cc0/1 -> 1
+DEC 0x50c000016c00/10 -> 0
+DELETE 0x50c000016c00 10
+DEC 0x50c000016b40/4 -> 1
+INC 0x50e00000b1e0/. -> 1
+INC 0x50d000000ba0/[., ., ., .] -> 2
+INC 0x50e00000a920/<NativeFunction> -> 2
+DEC 0x50d000000ba0/[., ., ., .] -> 1
+INC 0x50e00000b2c0/. -> 1
+INC 0x50c000016d80/<null> -> 1
+DEC 0x50e00000a920/<NativeFunction> -> 1
+DEC 0x50e00000b1e0/. -> 0
+DELETE 0x50e00000b1e0 .
+DEC 0x50c000016d80/<null> -> 0
+DELETE 0x50c000016d80 <null>
+INC 0x50c000016e40/1 -> 1
+INC 0x50c000016b40/4 -> 2
+INC 0x50c000016f00/5 -> 1
+DEC 0x50c000016e40/1 -> 0
+DELETE 0x50c000016e40 1
+DEC 0x50c000016b40/4 -> 1
+DEC 0x50c000016b40/4 -> 0
+DELETE 0x50c000016b40 4
+DEC 0x50c000016cc0/1 -> 0
+DELETE 0x50c000016cc0 1
+INC 0x50c000016fc0/10 -> 1
+INC 0x50c000016f00/5 -> 2
+INC 0x50c000017080/1 -> 1
+DEC 0x50c000016fc0/10 -> 0
+DELETE 0x50c000016fc0 10
+DEC 0x50c000016f00/5 -> 1
+INC 0x50e00000b3a0/. -> 1
+INC 0x50d000000ba0/[., ., ., ., .] -> 2
+INC 0x50e00000a920/<NativeFunction> -> 2
+DEC 0x50d000000ba0/[., ., ., ., .] -> 1
+INC 0x50e00000b480/. -> 1
+INC 0x50c000017140/<null> -> 1
+DEC 0x50e00000a920/<NativeFunction> -> 1
+DEC 0x50e00000b3a0/. -> 0
+DELETE 0x50e00000b3a0 .
+DEC 0x50c000017140/<null> -> 0
+DELETE 0x50c000017140 <null>
+INC 0x50c000017200/1 -> 1
+INC 0x50c000016f00/5 -> 2
+INC 0x50c0000172c0/6 -> 1
+DEC 0x50c000017200/1 -> 0
+DELETE 0x50c000017200 1
+DEC 0x50c000016f00/5 -> 1
+DEC 0x50c000016f00/5 -> 0
+DELETE 0x50c000016f00 5
+DEC 0x50c000017080/1 -> 0
+DELETE 0x50c000017080 1
+INC 0x50c000017380/10 -> 1
+INC 0x50c0000172c0/6 -> 2
+INC 0x50c000017440/1 -> 1
+DEC 0x50c000017380/10 -> 0
+DELETE 0x50c000017380 10
+DEC 0x50c0000172c0/6 -> 1
+INC 0x50e00000b560/. -> 1
+INC 0x50d000000ba0/[., ., ., ., ., .] -> 2
+INC 0x50e00000a920/<NativeFunction> -> 2
+DEC 0x50d000000ba0/[., ., ., ., ., .] -> 1
+INC 0x50e00000b640/. -> 1
+INC 0x50c000017500/<null> -> 1
+DEC 0x50e00000a920/<NativeFunction> -> 1
+DEC 0x50e00000b560/. -> 0
+DELETE 0x50e00000b560 .
+DEC 0x50c000017500/<null> -> 0
+DELETE 0x50c000017500 <null>
+INC 0x50c0000175c0/1 -> 1
+INC 0x50c0000172c0/6 -> 2
+INC 0x50c000017680/7 -> 1
+DEC 0x50c0000175c0/1 -> 0
+DELETE 0x50c0000175c0 1
+DEC 0x50c0000172c0/6 -> 1
+DEC 0x50c0000172c0/6 -> 0
+DELETE 0x50c0000172c0 6
+DEC 0x50c000017440/1 -> 0
+DELETE 0x50c000017440 1
+INC 0x50c000017740/10 -> 1
+INC 0x50c000017680/7 -> 2
+INC 0x50c000017800/1 -> 1
+DEC 0x50c000017740/10 -> 0
+DELETE 0x50c000017740 10
+DEC 0x50c000017680/7 -> 1
+INC 0x50e00000b720/. -> 1
+INC 0x50d000000ba0/[., ., ., ., ., ., .] -> 2
+INC 0x50e00000a920/<NativeFunction> -> 2
+DEC 0x50d000000ba0/[., ., ., ., ., ., .] -> 1
+INC 0x50e00000b800/. -> 1
+INC 0x50c0000178c0/<null> -> 1
+DEC 0x50e00000a920/<NativeFunction> -> 1
+DEC 0x50e00000b720/. -> 0
+DELETE 0x50e00000b720 .
+DEC 0x50c0000178c0/<null> -> 0
+DELETE 0x50c0000178c0 <null>
+INC 0x50c000017980/1 -> 1
+INC 0x50c000017680/7 -> 2
+INC 0x50c000017a40/8 -> 1
+DEC 0x50c000017980/1 -> 0
+DELETE 0x50c000017980 1
+DEC 0x50c000017680/7 -> 1
+DEC 0x50c000017680/7 -> 0
+DELETE 0x50c000017680 7
+DEC 0x50c000017800/1 -> 0
+DELETE 0x50c000017800 1
+INC 0x50c000017b00/10 -> 1
+INC 0x50c000017a40/8 -> 2
+INC 0x50c000017bc0/1 -> 1
+DEC 0x50c000017b00/10 -> 0
+DELETE 0x50c000017b00 10
+DEC 0x50c000017a40/8 -> 1
+INC 0x50e00000b8e0/. -> 1
+INC 0x50d000000ba0/[., ., ., ., ., ., ., .] -> 2
+INC 0x50e00000a920/<NativeFunction> -> 2
+DEC 0x50d000000ba0/[., ., ., ., ., ., ., .] -> 1
+INC 0x50e00000b9c0/. -> 1
+INC 0x50c000017d40/<null> -> 1
+DEC 0x50e00000a920/<NativeFunction> -> 1
+DEC 0x50e00000b8e0/. -> 0
+DELETE 0x50e00000b8e0 .
+DEC 0x50c000017d40/<null> -> 0
+DELETE 0x50c000017d40 <null>
+INC 0x50c000017e00/1 -> 1
+INC 0x50c000017a40/8 -> 2
+INC 0x50c000017ec0/9 -> 1
+DEC 0x50c000017e00/1 -> 0
+DELETE 0x50c000017e00 1
+DEC 0x50c000017a40/8 -> 1
+DEC 0x50c000017a40/8 -> 0
+DELETE 0x50c000017a40 8
+DEC 0x50c000017bc0/1 -> 0
+DELETE 0x50c000017bc0 1
+INC 0x50c000017f80/10 -> 1
+INC 0x50c000017ec0/9 -> 2
+INC 0x50c000018040/1 -> 1
+DEC 0x50c000017f80/10 -> 0
+DELETE 0x50c000017f80 10
+DEC 0x50c000017ec0/9 -> 1
+INC 0x50e00000baa0/. -> 1
+INC 0x50d000000ba0/[., ., ., ., ., ., ., ., .] -> 2
+INC 0x50e00000a920/<NativeFunction> -> 2
+DEC 0x50d000000ba0/[., ., ., ., ., ., ., ., .] -> 1
+INC 0x50e00000bb80/. -> 1
+INC 0x50c000018100/<null> -> 1
+DEC 0x50e00000a920/<NativeFunction> -> 1
+DEC 0x50e00000baa0/. -> 0
+DELETE 0x50e00000baa0 .
+DEC 0x50c000018100/<null> -> 0
+DELETE 0x50c000018100 <null>
+INC 0x50c0000181c0/1 -> 1
+INC 0x50c000017ec0/9 -> 2
+INC 0x50c000018280/10 -> 1
+DEC 0x50c0000181c0/1 -> 0
+DELETE 0x50c0000181c0 1
+DEC 0x50c000017ec0/9 -> 1
+DEC 0x50c000017ec0/9 -> 0
+DELETE 0x50c000017ec0 9
+DEC 0x50c000018040/1 -> 0
+DELETE 0x50c000018040 1
+INC 0x50c000018340/10 -> 1
+INC 0x50c000018280/10 -> 2
+INC 0x50c000018400/0 -> 1
+DEC 0x50c000018340/10 -> 0
+DELETE 0x50c000018340 10
+DEC 0x50c000018280/10 -> 1
+DEC 0x50c000018400/0 -> 0
+DELETE 0x50c000018400 0
+INC 0x50c0000184c0/<null> -> 1
+DEC 0x50c0000184c0/<null> -> 0
+DELETE 0x50c0000184c0 <null>
+INC 0x50d000000ba0/[., ., ., ., ., ., ., ., ., .] -> 2
+INC 0x50d0000002b0/[[., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .]] -> 2
+INC 0x50e0000012a0/<NativeFunction> -> 2
+DEC 0x50d0000002b0/[[., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .]] -> 1
+INC 0x50e00000bc60/. -> 1
+INC 0x50e00000bd40/. -> 1
+INC 0x50e00000be20/. -> 1
+INC 0x50e00000bf00/. -> 1
+INC 0x50e00000bfe0/. -> 1
+INC 0x50e00000c0c0/. -> 1
+INC 0x50e00000c1a0/. -> 1
+INC 0x50e00000c280/. -> 1
+INC 0x50e00000c360/. -> 1
+INC 0x50e00000c440/. -> 1
+INC 0x50e00000c520/<NativeFunction> -> 1
+INC 0x50e00000c600/<NativeFunction> -> 1
+INC 0x50d000000c70/[., ., ., ., ., ., ., ., ., .] -> 1
+INC 0x50c0000187c0/<null> -> 1
+DEC 0x50e0000012a0/<NativeFunction> -> 1
+DEC 0x50d000000ba0/[., ., ., ., ., ., ., ., ., .] -> 1
+DEC 0x50c0000187c0/<null> -> 0
+DELETE 0x50c0000187c0 <null>
+INC 0x50c000018880/1 -> 1
+INC 0x50c000015a00/5 -> 2
+INC 0x50c000018940/6 -> 1
+DEC 0x50c000018880/1 -> 0
+DELETE 0x50c000018880 1
+DEC 0x50c000015a00/5 -> 1
+DEC 0x50c000015a00/5 -> 0
+DELETE 0x50c000015a00 5
+DEC 0x50c000015b80/1 -> 0
+DELETE 0x50c000015b80 1
+INC 0x50c000018a00/10 -> 1
+INC 0x50c000018940/6 -> 2
+INC 0x50c000018ac0/1 -> 1
+DEC 0x50c000018a00/10 -> 0
+DELETE 0x50c000018a00 10
+DEC 0x50c000018940/6 -> 1
+INC 0x50e00000c6e0/<NativeFunction> -> 1
+INC 0x50e00000c7c0/<NativeFunction> -> 1
+INC 0x50d000000d40/[] -> 1
+DEC 0x50d000000ba0/[., ., ., ., ., ., ., ., ., .] -> 0
+DELETE 0x50d000000ba0 [., ., ., ., ., ., ., ., ., .]
+DEC 0x50e00000abc0/. -> 0
+DELETE 0x50e00000abc0 .
+DEC 0x50e00000ad80/. -> 0
+DELETE 0x50e00000ad80 .
+DEC 0x50e00000af40/. -> 0
+DELETE 0x50e00000af40 .
+DEC 0x50e00000b100/. -> 0
+DELETE 0x50e00000b100 .
+DEC 0x50e00000b2c0/. -> 0
+DELETE 0x50e00000b2c0 .
+DEC 0x50e00000b480/. -> 0
+DELETE 0x50e00000b480 .
+DEC 0x50e00000b640/. -> 0
+DELETE 0x50e00000b640 .
+DEC 0x50e00000b800/. -> 0
+DELETE 0x50e00000b800 .
+DEC 0x50e00000b9c0/. -> 0
+DELETE 0x50e00000b9c0 .
+DEC 0x50e00000bb80/. -> 0
+DELETE 0x50e00000bb80 .
+INC 0x50c000018b80/0 -> 1
+DEC 0x50c000018280/10 -> 0
+DELETE 0x50c000018280 10
+INC 0x50c000018c40/10 -> 1
+INC 0x50c000018b80/0 -> 2
+INC 0x50c000018d00/1 -> 1
+DEC 0x50c000018c40/10 -> 0
+DELETE 0x50c000018c40 10
+DEC 0x50c000018b80/0 -> 1
+INC 0x50e00000c8a0/. -> 1
+INC 0x50d000000d40/[] -> 2
+INC 0x50e00000c6e0/<NativeFunction> -> 2
+DEC 0x50d000000d40/[] -> 1
+INC 0x50e00000c980/. -> 1
+INC 0x50c000018dc0/<null> -> 1
+DEC 0x50e00000c6e0/<NativeFunction> -> 1
+DEC 0x50e00000c8a0/. -> 0
+DELETE 0x50e00000c8a0 .
+DEC 0x50c000018dc0/<null> -> 0
+DELETE 0x50c000018dc0 <null>
+INC 0x50c000018e80/1 -> 1
+INC 0x50c000018b80/0 -> 2
+INC 0x50c000018f40/1 -> 1
+DEC 0x50c000018e80/1 -> 0
+DELETE 0x50c000018e80 1
+DEC 0x50c000018b80/0 -> 1
+DEC 0x50c000018b80/0 -> 0
+DELETE 0x50c000018b80 0
+DEC 0x50c000018d00/1 -> 0
+DELETE 0x50c000018d00 1
+INC 0x50c000019000/10 -> 1
+INC 0x50c000018f40/1 -> 2
+INC 0x50c0000190c0/1 -> 1
+DEC 0x50c000019000/10 -> 0
+DELETE 0x50c000019000 10
+DEC 0x50c000018f40/1 -> 1
+INC 0x50e00000ca60/. -> 1
+INC 0x50d000000d40/[.] -> 2
+INC 0x50e00000c6e0/<NativeFunction> -> 2
+DEC 0x50d000000d40/[.] -> 1
+INC 0x50e00000cb40/. -> 1
+INC 0x50c000019180/<null> -> 1
+DEC 0x50e00000c6e0/<NativeFunction> -> 1
+DEC 0x50e00000ca60/. -> 0
+DELETE 0x50e00000ca60 .
+DEC 0x50c000019180/<null> -> 0
+DELETE 0x50c000019180 <null>
+INC 0x50c000019240/1 -> 1
+INC 0x50c000018f40/1 -> 2
+INC 0x50c000019300/2 -> 1
+DEC 0x50c000019240/1 -> 0
+DELETE 0x50c000019240 1
+DEC 0x50c000018f40/1 -> 1
+DEC 0x50c000018f40/1 -> 0
+DELETE 0x50c000018f40 1
+DEC 0x50c0000190c0/1 -> 0
+DELETE 0x50c0000190c0 1
+INC 0x50c0000193c0/10 -> 1
+INC 0x50c000019300/2 -> 2
+INC 0x50c000019480/1 -> 1
+DEC 0x50c0000193c0/10 -> 0
+DELETE 0x50c0000193c0 10
+DEC 0x50c000019300/2 -> 1
+INC 0x50e00000cc20/. -> 1
+INC 0x50d000000d40/[., .] -> 2
+INC 0x50e00000c6e0/<NativeFunction> -> 2
+DEC 0x50d000000d40/[., .] -> 1
+INC 0x50e00000cd00/. -> 1
+INC 0x50c000019540/<null> -> 1
+DEC 0x50e00000c6e0/<NativeFunction> -> 1
+DEC 0x50e00000cc20/. -> 0
+DELETE 0x50e00000cc20 .
+DEC 0x50c000019540/<null> -> 0
+DELETE 0x50c000019540 <null>
+INC 0x50c000019600/1 -> 1
+INC 0x50c000019300/2 -> 2
+INC 0x50c0000196c0/3 -> 1
+DEC 0x50c000019600/1 -> 0
+DELETE 0x50c000019600 1
+DEC 0x50c000019300/2 -> 1
+DEC 0x50c000019300/2 -> 0
+DELETE 0x50c000019300 2
+DEC 0x50c000019480/1 -> 0
+DELETE 0x50c000019480 1
+INC 0x50c000019780/10 -> 1
+INC 0x50c0000196c0/3 -> 2
+INC 0x50c000019840/1 -> 1
+DEC 0x50c000019780/10 -> 0
+DELETE 0x50c000019780 10
+DEC 0x50c0000196c0/3 -> 1
+INC 0x50e00000cde0/. -> 1
+INC 0x50d000000d40/[., ., .] -> 2
+INC 0x50e00000c6e0/<NativeFunction> -> 2
+DEC 0x50d000000d40/[., ., .] -> 1
+INC 0x50e00000cec0/. -> 1
+INC 0x50c000019900/<null> -> 1
+DEC 0x50e00000c6e0/<NativeFunction> -> 1
+DEC 0x50e00000cde0/. -> 0
+DELETE 0x50e00000cde0 .
+DEC 0x50c000019900/<null> -> 0
+DELETE 0x50c000019900 <null>
+INC 0x50c0000199c0/1 -> 1
+INC 0x50c0000196c0/3 -> 2
+INC 0x50c000019a80/4 -> 1
+DEC 0x50c0000199c0/1 -> 0
+DELETE 0x50c0000199c0 1
+DEC 0x50c0000196c0/3 -> 1
+DEC 0x50c0000196c0/3 -> 0
+DELETE 0x50c0000196c0 3
+DEC 0x50c000019840/1 -> 0
+DELETE 0x50c000019840 1
+INC 0x50c000019b40/10 -> 1
+INC 0x50c000019a80/4 -> 2
+INC 0x50c000019c00/1 -> 1
+DEC 0x50c000019b40/10 -> 0
+DELETE 0x50c000019b40 10
+DEC 0x50c000019a80/4 -> 1
+INC 0x50e00000cfa0/. -> 1
+INC 0x50d000000d40/[., ., ., .] -> 2
+INC 0x50e00000c6e0/<NativeFunction> -> 2
+DEC 0x50d000000d40/[., ., ., .] -> 1
+INC 0x50e00000d080/. -> 1
+INC 0x50c000019cc0/<null> -> 1
+DEC 0x50e00000c6e0/<NativeFunction> -> 1
+DEC 0x50e00000cfa0/. -> 0
+DELETE 0x50e00000cfa0 .
+DEC 0x50c000019cc0/<null> -> 0
+DELETE 0x50c000019cc0 <null>
+INC 0x50c000019d80/1 -> 1
+INC 0x50c000019a80/4 -> 2
+INC 0x50c000019e40/5 -> 1
+DEC 0x50c000019d80/1 -> 0
+DELETE 0x50c000019d80 1
+DEC 0x50c000019a80/4 -> 1
+DEC 0x50c000019a80/4 -> 0
+DELETE 0x50c000019a80 4
+DEC 0x50c000019c00/1 -> 0
+DELETE 0x50c000019c00 1
+INC 0x50c000019f00/10 -> 1
+INC 0x50c000019e40/5 -> 2
+INC 0x50c000019fc0/1 -> 1
+DEC 0x50c000019f00/10 -> 0
+DELETE 0x50c000019f00 10
+DEC 0x50c000019e40/5 -> 1
+INC 0x50e00000d160/. -> 1
+INC 0x50d000000d40/[., ., ., ., .] -> 2
+INC 0x50e00000c6e0/<NativeFunction> -> 2
+DEC 0x50d000000d40/[., ., ., ., .] -> 1
+INC 0x50e00000d240/. -> 1
+INC 0x50c00001a080/<null> -> 1
+DEC 0x50e00000c6e0/<NativeFunction> -> 1
+DEC 0x50e00000d160/. -> 0
+DELETE 0x50e00000d160 .
+DEC 0x50c00001a080/<null> -> 0
+DELETE 0x50c00001a080 <null>
+INC 0x50c00001a140/1 -> 1
+INC 0x50c000019e40/5 -> 2
+INC 0x50c00001a200/6 -> 1
+DEC 0x50c00001a140/1 -> 0
+DELETE 0x50c00001a140 1
+DEC 0x50c000019e40/5 -> 1
+DEC 0x50c000019e40/5 -> 0
+DELETE 0x50c000019e40 5
+DEC 0x50c000019fc0/1 -> 0
+DELETE 0x50c000019fc0 1
+INC 0x50c00001a2c0/10 -> 1
+INC 0x50c00001a200/6 -> 2
+INC 0x50c00001a380/1 -> 1
+DEC 0x50c00001a2c0/10 -> 0
+DELETE 0x50c00001a2c0 10
+DEC 0x50c00001a200/6 -> 1
+INC 0x50e00000d320/. -> 1
+INC 0x50d000000d40/[., ., ., ., ., .] -> 2
+INC 0x50e00000c6e0/<NativeFunction> -> 2
+DEC 0x50d000000d40/[., ., ., ., ., .] -> 1
+INC 0x50e00000d400/. -> 1
+INC 0x50c00001a440/<null> -> 1
+DEC 0x50e00000c6e0/<NativeFunction> -> 1
+DEC 0x50e00000d320/. -> 0
+DELETE 0x50e00000d320 .
+DEC 0x50c00001a440/<null> -> 0
+DELETE 0x50c00001a440 <null>
+INC 0x50c00001a500/1 -> 1
+INC 0x50c00001a200/6 -> 2
+INC 0x50c00001a5c0/7 -> 1
+DEC 0x50c00001a500/1 -> 0
+DELETE 0x50c00001a500 1
+DEC 0x50c00001a200/6 -> 1
+DEC 0x50c00001a200/6 -> 0
+DELETE 0x50c00001a200 6
+DEC 0x50c00001a380/1 -> 0
+DELETE 0x50c00001a380 1
+INC 0x50c00001a680/10 -> 1
+INC 0x50c00001a5c0/7 -> 2
+INC 0x50c00001a740/1 -> 1
+DEC 0x50c00001a680/10 -> 0
+DELETE 0x50c00001a680 10
+DEC 0x50c00001a5c0/7 -> 1
+INC 0x50e00000d4e0/. -> 1
+INC 0x50d000000d40/[., ., ., ., ., ., .] -> 2
+INC 0x50e00000c6e0/<NativeFunction> -> 2
+DEC 0x50d000000d40/[., ., ., ., ., ., .] -> 1
+INC 0x50e00000d5c0/. -> 1
+INC 0x50c00001a800/<null> -> 1
+DEC 0x50e00000c6e0/<NativeFunction> -> 1
+DEC 0x50e00000d4e0/. -> 0
+DELETE 0x50e00000d4e0 .
+DEC 0x50c00001a800/<null> -> 0
+DELETE 0x50c00001a800 <null>
+INC 0x50c00001a8c0/1 -> 1
+INC 0x50c00001a5c0/7 -> 2
+INC 0x50c00001a980/8 -> 1
+DEC 0x50c00001a8c0/1 -> 0
+DELETE 0x50c00001a8c0 1
+DEC 0x50c00001a5c0/7 -> 1
+DEC 0x50c00001a5c0/7 -> 0
+DELETE 0x50c00001a5c0 7
+DEC 0x50c00001a740/1 -> 0
+DELETE 0x50c00001a740 1
+INC 0x50c00001aa40/10 -> 1
+INC 0x50c00001a980/8 -> 2
+INC 0x50c00001ab00/1 -> 1
+DEC 0x50c00001aa40/10 -> 0
+DELETE 0x50c00001aa40 10
+DEC 0x50c00001a980/8 -> 1
+INC 0x50e00000d6a0/. -> 1
+INC 0x50d000000d40/[., ., ., ., ., ., ., .] -> 2
+INC 0x50e00000c6e0/<NativeFunction> -> 2
+DEC 0x50d000000d40/[., ., ., ., ., ., ., .] -> 1
+INC 0x50e00000d780/. -> 1
+INC 0x50c00001ac80/<null> -> 1
+DEC 0x50e00000c6e0/<NativeFunction> -> 1
+DEC 0x50e00000d6a0/. -> 0
+DELETE 0x50e00000d6a0 .
+DEC 0x50c00001ac80/<null> -> 0
+DELETE 0x50c00001ac80 <null>
+INC 0x50c00001ad40/1 -> 1
+INC 0x50c00001a980/8 -> 2
+INC 0x50c00001ae00/9 -> 1
+DEC 0x50c00001ad40/1 -> 0
+DELETE 0x50c00001ad40 1
+DEC 0x50c00001a980/8 -> 1
+DEC 0x50c00001a980/8 -> 0
+DELETE 0x50c00001a980 8
+DEC 0x50c00001ab00/1 -> 0
+DELETE 0x50c00001ab00 1
+INC 0x50c00001aec0/10 -> 1
+INC 0x50c00001ae00/9 -> 2
+INC 0x50c00001af80/1 -> 1
+DEC 0x50c00001aec0/10 -> 0
+DELETE 0x50c00001aec0 10
+DEC 0x50c00001ae00/9 -> 1
+INC 0x50e00000d860/. -> 1
+INC 0x50d000000d40/[., ., ., ., ., ., ., ., .] -> 2
+INC 0x50e00000c6e0/<NativeFunction> -> 2
+DEC 0x50d000000d40/[., ., ., ., ., ., ., ., .] -> 1
+INC 0x50e00000d940/. -> 1
+INC 0x50c00001b040/<null> -> 1
+DEC 0x50e00000c6e0/<NativeFunction> -> 1
+DEC 0x50e00000d860/. -> 0
+DELETE 0x50e00000d860 .
+DEC 0x50c00001b040/<null> -> 0
+DELETE 0x50c00001b040 <null>
+INC 0x50c00001b100/1 -> 1
+INC 0x50c00001ae00/9 -> 2
+INC 0x50c00001b1c0/10 -> 1
+DEC 0x50c00001b100/1 -> 0
+DELETE 0x50c00001b100 1
+DEC 0x50c00001ae00/9 -> 1
+DEC 0x50c00001ae00/9 -> 0
+DELETE 0x50c00001ae00 9
+DEC 0x50c00001af80/1 -> 0
+DELETE 0x50c00001af80 1
+INC 0x50c00001b280/10 -> 1
+INC 0x50c00001b1c0/10 -> 2
+INC 0x50c00001b340/0 -> 1
+DEC 0x50c00001b280/10 -> 0
+DELETE 0x50c00001b280 10
+DEC 0x50c00001b1c0/10 -> 1
+DEC 0x50c00001b340/0 -> 0
+DELETE 0x50c00001b340 0
+INC 0x50c00001b400/<null> -> 1
+DEC 0x50c00001b400/<null> -> 0
+DELETE 0x50c00001b400 <null>
+INC 0x50d000000d40/[., ., ., ., ., ., ., ., ., .] -> 2
+INC 0x50d0000002b0/[[., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .]] -> 2
+INC 0x50e0000012a0/<NativeFunction> -> 2
+DEC 0x50d0000002b0/[[., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .]] -> 1
+INC 0x50e00000da20/. -> 1
+INC 0x50e00000db00/. -> 1
+INC 0x50e00000dbe0/. -> 1
+INC 0x50e00000dcc0/. -> 1
+INC 0x50e00000dda0/. -> 1
+INC 0x50e00000de80/. -> 1
+INC 0x50e00000df60/. -> 1
+INC 0x50e00000ffc0/. -> 1
+INC 0x50e0000100a0/. -> 1
+INC 0x50e000010180/. -> 1
+INC 0x50e000010260/<NativeFunction> -> 1
+INC 0x50e000010340/<NativeFunction> -> 1
+INC 0x50d000000e10/[., ., ., ., ., ., ., ., ., .] -> 1
+INC 0x50c00001b700/<null> -> 1
+DEC 0x50e0000012a0/<NativeFunction> -> 1
+DEC 0x50d000000d40/[., ., ., ., ., ., ., ., ., .] -> 1
+DEC 0x50c00001b700/<null> -> 0
+DELETE 0x50c00001b700 <null>
+INC 0x50c00001b7c0/1 -> 1
+INC 0x50c000018940/6 -> 2
+INC 0x50c00001b880/7 -> 1
+DEC 0x50c00001b7c0/1 -> 0
+DELETE 0x50c00001b7c0 1
+DEC 0x50c000018940/6 -> 1
+DEC 0x50c000018940/6 -> 0
+DELETE 0x50c000018940 6
+DEC 0x50c000018ac0/1 -> 0
+DELETE 0x50c000018ac0 1
+INC 0x50c00001b940/10 -> 1
+INC 0x50c00001b880/7 -> 2
+INC 0x50c00001ba00/1 -> 1
+DEC 0x50c00001b940/10 -> 0
+DELETE 0x50c00001b940 10
+DEC 0x50c00001b880/7 -> 1
+INC 0x50e000010420/<NativeFunction> -> 1
+INC 0x50e000010500/<NativeFunction> -> 1
+INC 0x50d000000ee0/[] -> 1
+DEC 0x50d000000d40/[., ., ., ., ., ., ., ., ., .] -> 0
+DELETE 0x50d000000d40 [., ., ., ., ., ., ., ., ., .]
+DEC 0x50e00000c980/. -> 0
+DELETE 0x50e00000c980 .
+DEC 0x50e00000cb40/. -> 0
+DELETE 0x50e00000cb40 .
+DEC 0x50e00000cd00/. -> 0
+DELETE 0x50e00000cd00 .
+DEC 0x50e00000cec0/. -> 0
+DELETE 0x50e00000cec0 .
+DEC 0x50e00000d080/. -> 0
+DELETE 0x50e00000d080 .
+DEC 0x50e00000d240/. -> 0
+DELETE 0x50e00000d240 .
+DEC 0x50e00000d400/. -> 0
+DELETE 0x50e00000d400 .
+DEC 0x50e00000d5c0/. -> 0
+DELETE 0x50e00000d5c0 .
+DEC 0x50e00000d780/. -> 0
+DELETE 0x50e00000d780 .
+DEC 0x50e00000d940/. -> 0
+DELETE 0x50e00000d940 .
+INC 0x50c00001bac0/0 -> 1
+DEC 0x50c00001b1c0/10 -> 0
+DELETE 0x50c00001b1c0 10
+INC 0x50c00001bb80/10 -> 1
+INC 0x50c00001bac0/0 -> 2
+INC 0x50c00001bc40/1 -> 1
+DEC 0x50c00001bb80/10 -> 0
+DELETE 0x50c00001bb80 10
+DEC 0x50c00001bac0/0 -> 1
+INC 0x50e0000105e0/. -> 1
+INC 0x50d000000ee0/[] -> 2
+INC 0x50e000010420/<NativeFunction> -> 2
+DEC 0x50d000000ee0/[] -> 1
+INC 0x50e0000106c0/. -> 1
+INC 0x50c00001bd00/<null> -> 1
+DEC 0x50e000010420/<NativeFunction> -> 1
+DEC 0x50e0000105e0/. -> 0
+DELETE 0x50e0000105e0 .
+DEC 0x50c00001bd00/<null> -> 0
+DELETE 0x50c00001bd00 <null>
+INC 0x50c00001bdc0/1 -> 1
+INC 0x50c00001bac0/0 -> 2
+INC 0x50c00001be80/1 -> 1
+DEC 0x50c00001bdc0/1 -> 0
+DELETE 0x50c00001bdc0 1
+DEC 0x50c00001bac0/0 -> 1
+DEC 0x50c00001bac0/0 -> 0
+DELETE 0x50c00001bac0 0
+DEC 0x50c00001bc40/1 -> 0
+DELETE 0x50c00001bc40 1
+INC 0x50c00001bf40/10 -> 1
+INC 0x50c00001be80/1 -> 2
+INC 0x50c00001c000/1 -> 1
+DEC 0x50c00001bf40/10 -> 0
+DELETE 0x50c00001bf40 10
+DEC 0x50c00001be80/1 -> 1
+INC 0x50e0000107a0/. -> 1
+INC 0x50d000000ee0/[.] -> 2
+INC 0x50e000010420/<NativeFunction> -> 2
+DEC 0x50d000000ee0/[.] -> 1
+INC 0x50e000010880/. -> 1
+INC 0x50c00001c0c0/<null> -> 1
+DEC 0x50e000010420/<NativeFunction> -> 1
+DEC 0x50e0000107a0/. -> 0
+DELETE 0x50e0000107a0 .
+DEC 0x50c00001c0c0/<null> -> 0
+DELETE 0x50c00001c0c0 <null>
+INC 0x50c00001c180/1 -> 1
+INC 0x50c00001be80/1 -> 2
+INC 0x50c00001c240/2 -> 1
+DEC 0x50c00001c180/1 -> 0
+DELETE 0x50c00001c180 1
+DEC 0x50c00001be80/1 -> 1
+DEC 0x50c00001be80/1 -> 0
+DELETE 0x50c00001be80 1
+DEC 0x50c00001c000/1 -> 0
+DELETE 0x50c00001c000 1
+INC 0x50c00001c300/10 -> 1
+INC 0x50c00001c240/2 -> 2
+INC 0x50c00001c3c0/1 -> 1
+DEC 0x50c00001c300/10 -> 0
+DELETE 0x50c00001c300 10
+DEC 0x50c00001c240/2 -> 1
+INC 0x50e000010960/. -> 1
+INC 0x50d000000ee0/[., .] -> 2
+INC 0x50e000010420/<NativeFunction> -> 2
+DEC 0x50d000000ee0/[., .] -> 1
+INC 0x50e000010a40/. -> 1
+INC 0x50c00001c480/<null> -> 1
+DEC 0x50e000010420/<NativeFunction> -> 1
+DEC 0x50e000010960/. -> 0
+DELETE 0x50e000010960 .
+DEC 0x50c00001c480/<null> -> 0
+DELETE 0x50c00001c480 <null>
+INC 0x50c00001c540/1 -> 1
+INC 0x50c00001c240/2 -> 2
+INC 0x50c00001c600/3 -> 1
+DEC 0x50c00001c540/1 -> 0
+DELETE 0x50c00001c540 1
+DEC 0x50c00001c240/2 -> 1
+DEC 0x50c00001c240/2 -> 0
+DELETE 0x50c00001c240 2
+DEC 0x50c00001c3c0/1 -> 0
+DELETE 0x50c00001c3c0 1
+INC 0x50c00001c6c0/10 -> 1
+INC 0x50c00001c600/3 -> 2
+INC 0x50c00001c780/1 -> 1
+DEC 0x50c00001c6c0/10 -> 0
+DELETE 0x50c00001c6c0 10
+DEC 0x50c00001c600/3 -> 1
+INC 0x50e000010b20/. -> 1
+INC 0x50d000000ee0/[., ., .] -> 2
+INC 0x50e000010420/<NativeFunction> -> 2
+DEC 0x50d000000ee0/[., ., .] -> 1
+INC 0x50e000010c00/. -> 1
+INC 0x50c00001c840/<null> -> 1
+DEC 0x50e000010420/<NativeFunction> -> 1
+DEC 0x50e000010b20/. -> 0
+DELETE 0x50e000010b20 .
+DEC 0x50c00001c840/<null> -> 0
+DELETE 0x50c00001c840 <null>
+INC 0x50c00001c900/1 -> 1
+INC 0x50c00001c600/3 -> 2
+INC 0x50c00001c9c0/4 -> 1
+DEC 0x50c00001c900/1 -> 0
+DELETE 0x50c00001c900 1
+DEC 0x50c00001c600/3 -> 1
+DEC 0x50c00001c600/3 -> 0
+DELETE 0x50c00001c600 3
+DEC 0x50c00001c780/1 -> 0
+DELETE 0x50c00001c780 1
+INC 0x50c00001ca80/10 -> 1
+INC 0x50c00001c9c0/4 -> 2
+INC 0x50c00001cb40/1 -> 1
+DEC 0x50c00001ca80/10 -> 0
+DELETE 0x50c00001ca80 10
+DEC 0x50c00001c9c0/4 -> 1
+INC 0x50e000010ce0/. -> 1
+INC 0x50d000000ee0/[., ., ., .] -> 2
+INC 0x50e000010420/<NativeFunction> -> 2
+DEC 0x50d000000ee0/[., ., ., .] -> 1
+INC 0x50e000010dc0/. -> 1
+INC 0x50c00001cc00/<null> -> 1
+DEC 0x50e000010420/<NativeFunction> -> 1
+DEC 0x50e000010ce0/. -> 0
+DELETE 0x50e000010ce0 .
+DEC 0x50c00001cc00/<null> -> 0
+DELETE 0x50c00001cc00 <null>
+INC 0x50c00001ccc0/1 -> 1
+INC 0x50c00001c9c0/4 -> 2
+INC 0x50c00001cd80/5 -> 1
+DEC 0x50c00001ccc0/1 -> 0
+DELETE 0x50c00001ccc0 1
+DEC 0x50c00001c9c0/4 -> 1
+DEC 0x50c00001c9c0/4 -> 0
+DELETE 0x50c00001c9c0 4
+DEC 0x50c00001cb40/1 -> 0
+DELETE 0x50c00001cb40 1
+INC 0x50c00001ce40/10 -> 1
+INC 0x50c00001cd80/5 -> 2
+INC 0x50c00001cf00/1 -> 1
+DEC 0x50c00001ce40/10 -> 0
+DELETE 0x50c00001ce40 10
+DEC 0x50c00001cd80/5 -> 1
+INC 0x50e000010ea0/. -> 1
+INC 0x50d000000ee0/[., ., ., ., .] -> 2
+INC 0x50e000010420/<NativeFunction> -> 2
+DEC 0x50d000000ee0/[., ., ., ., .] -> 1
+INC 0x50e000010f80/. -> 1
+INC 0x50c00001cfc0/<null> -> 1
+DEC 0x50e000010420/<NativeFunction> -> 1
+DEC 0x50e000010ea0/. -> 0
+DELETE 0x50e000010ea0 .
+DEC 0x50c00001cfc0/<null> -> 0
+DELETE 0x50c00001cfc0 <null>
+INC 0x50c00001d080/1 -> 1
+INC 0x50c00001cd80/5 -> 2
+INC 0x50c00001d140/6 -> 1
+DEC 0x50c00001d080/1 -> 0
+DELETE 0x50c00001d080 1
+DEC 0x50c00001cd80/5 -> 1
+DEC 0x50c00001cd80/5 -> 0
+DELETE 0x50c00001cd80 5
+DEC 0x50c00001cf00/1 -> 0
+DELETE 0x50c00001cf00 1
+INC 0x50c00001d200/10 -> 1
+INC 0x50c00001d140/6 -> 2
+INC 0x50c00001d2c0/1 -> 1
+DEC 0x50c00001d200/10 -> 0
+DELETE 0x50c00001d200 10
+DEC 0x50c00001d140/6 -> 1
+INC 0x50e000011060/. -> 1
+INC 0x50d000000ee0/[., ., ., ., ., .] -> 2
+INC 0x50e000010420/<NativeFunction> -> 2
+DEC 0x50d000000ee0/[., ., ., ., ., .] -> 1
+INC 0x50e000011140/. -> 1
+INC 0x50c00001d380/<null> -> 1
+DEC 0x50e000010420/<NativeFunction> -> 1
+DEC 0x50e000011060/. -> 0
+DELETE 0x50e000011060 .
+DEC 0x50c00001d380/<null> -> 0
+DELETE 0x50c00001d380 <null>
+INC 0x50c00001d440/1 -> 1
+INC 0x50c00001d140/6 -> 2
+INC 0x50c00001d500/7 -> 1
+DEC 0x50c00001d440/1 -> 0
+DELETE 0x50c00001d440 1
+DEC 0x50c00001d140/6 -> 1
+DEC 0x50c00001d140/6 -> 0
+DELETE 0x50c00001d140 6
+DEC 0x50c00001d2c0/1 -> 0
+DELETE 0x50c00001d2c0 1
+INC 0x50c00001d5c0/10 -> 1
+INC 0x50c00001d500/7 -> 2
+INC 0x50c00001d680/1 -> 1
+DEC 0x50c00001d5c0/10 -> 0
+DELETE 0x50c00001d5c0 10
+DEC 0x50c00001d500/7 -> 1
+INC 0x50e000011220/. -> 1
+INC 0x50d000000ee0/[., ., ., ., ., ., .] -> 2
+INC 0x50e000010420/<NativeFunction> -> 2
+DEC 0x50d000000ee0/[., ., ., ., ., ., .] -> 1
+INC 0x50e000011300/. -> 1
+INC 0x50c00001d740/<null> -> 1
+DEC 0x50e000010420/<NativeFunction> -> 1
+DEC 0x50e000011220/. -> 0
+DELETE 0x50e000011220 .
+DEC 0x50c00001d740/<null> -> 0
+DELETE 0x50c00001d740 <null>
+INC 0x50c00001d800/1 -> 1
+INC 0x50c00001d500/7 -> 2
+INC 0x50c00001d8c0/8 -> 1
+DEC 0x50c00001d800/1 -> 0
+DELETE 0x50c00001d800 1
+DEC 0x50c00001d500/7 -> 1
+DEC 0x50c00001d500/7 -> 0
+DELETE 0x50c00001d500 7
+DEC 0x50c00001d680/1 -> 0
+DELETE 0x50c00001d680 1
+INC 0x50c00001d980/10 -> 1
+INC 0x50c00001d8c0/8 -> 2
+INC 0x50c00001da40/1 -> 1
+DEC 0x50c00001d980/10 -> 0
+DELETE 0x50c00001d980 10
+DEC 0x50c00001d8c0/8 -> 1
+INC 0x50e0000113e0/. -> 1
+INC 0x50d000000ee0/[., ., ., ., ., ., ., .] -> 2
+INC 0x50e000010420/<NativeFunction> -> 2
+DEC 0x50d000000ee0/[., ., ., ., ., ., ., .] -> 1
+INC 0x50e0000114c0/. -> 1
+INC 0x50c00001dbc0/<null> -> 1
+DEC 0x50e000010420/<NativeFunction> -> 1
+DEC 0x50e0000113e0/. -> 0
+DELETE 0x50e0000113e0 .
+DEC 0x50c00001dbc0/<null> -> 0
+DELETE 0x50c00001dbc0 <null>
+INC 0x50c00001dc80/1 -> 1
+INC 0x50c00001d8c0/8 -> 2
+INC 0x50c00001dd40/9 -> 1
+DEC 0x50c00001dc80/1 -> 0
+DELETE 0x50c00001dc80 1
+DEC 0x50c00001d8c0/8 -> 1
+DEC 0x50c00001d8c0/8 -> 0
+DELETE 0x50c00001d8c0 8
+DEC 0x50c00001da40/1 -> 0
+DELETE 0x50c00001da40 1
+INC 0x50c00001de00/10 -> 1
+INC 0x50c00001dd40/9 -> 2
+INC 0x50c00001dec0/1 -> 1
+DEC 0x50c00001de00/10 -> 0
+DELETE 0x50c00001de00 10
+DEC 0x50c00001dd40/9 -> 1
+INC 0x50e0000115a0/. -> 1
+INC 0x50d000000ee0/[., ., ., ., ., ., ., ., .] -> 2
+INC 0x50e000010420/<NativeFunction> -> 2
+DEC 0x50d000000ee0/[., ., ., ., ., ., ., ., .] -> 1
+INC 0x50e000011680/. -> 1
+INC 0x50c00001df80/<null> -> 1
+DEC 0x50e000010420/<NativeFunction> -> 1
+DEC 0x50e0000115a0/. -> 0
+DELETE 0x50e0000115a0 .
+DEC 0x50c00001df80/<null> -> 0
+DELETE 0x50c00001df80 <null>
+INC 0x50c00001e040/1 -> 1
+INC 0x50c00001dd40/9 -> 2
+INC 0x50c00001e100/10 -> 1
+DEC 0x50c00001e040/1 -> 0
+DELETE 0x50c00001e040 1
+DEC 0x50c00001dd40/9 -> 1
+DEC 0x50c00001dd40/9 -> 0
+DELETE 0x50c00001dd40 9
+DEC 0x50c00001dec0/1 -> 0
+DELETE 0x50c00001dec0 1
+INC 0x50c00001e1c0/10 -> 1
+INC 0x50c00001e100/10 -> 2
+INC 0x50c00001e280/0 -> 1
+DEC 0x50c00001e1c0/10 -> 0
+DELETE 0x50c00001e1c0 10
+DEC 0x50c00001e100/10 -> 1
+DEC 0x50c00001e280/0 -> 0
+DELETE 0x50c00001e280 0
+INC 0x50c00001e340/<null> -> 1
+DEC 0x50c00001e340/<null> -> 0
+DELETE 0x50c00001e340 <null>
+INC 0x50d000000ee0/[., ., ., ., ., ., ., ., ., .] -> 2
+INC 0x50d0000002b0/[[., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .]] -> 2
+INC 0x50e0000012a0/<NativeFunction> -> 2
+DEC 0x50d0000002b0/[[., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .]] -> 1
+INC 0x50e000011760/. -> 1
+INC 0x50e000011840/. -> 1
+INC 0x50e000011920/. -> 1
+INC 0x50e000011a00/. -> 1
+INC 0x50e000011ae0/. -> 1
+INC 0x50e000011bc0/. -> 1
+INC 0x50e000011ca0/. -> 1
+INC 0x50e000011d80/. -> 1
+INC 0x50e000011e60/. -> 1
+INC 0x50e000011f40/. -> 1
+INC 0x50e000012020/<NativeFunction> -> 1
+INC 0x50e000012100/<NativeFunction> -> 1
+INC 0x50d000000fb0/[., ., ., ., ., ., ., ., ., .] -> 1
+INC 0x50c00001e640/<null> -> 1
+DEC 0x50e0000012a0/<NativeFunction> -> 1
+DEC 0x50d000000ee0/[., ., ., ., ., ., ., ., ., .] -> 1
+DEC 0x50c00001e640/<null> -> 0
+DELETE 0x50c00001e640 <null>
+INC 0x50c00001e700/1 -> 1
+INC 0x50c00001b880/7 -> 2
+INC 0x50c00001e7c0/8 -> 1
+DEC 0x50c00001e700/1 -> 0
+DELETE 0x50c00001e700 1
+DEC 0x50c00001b880/7 -> 1
+DEC 0x50c00001b880/7 -> 0
+DELETE 0x50c00001b880 7
+DEC 0x50c00001ba00/1 -> 0
+DELETE 0x50c00001ba00 1
+INC 0x50c00001e880/10 -> 1
+INC 0x50c00001e7c0/8 -> 2
+INC 0x50c00001e940/1 -> 1
+DEC 0x50c00001e880/10 -> 0
+DELETE 0x50c00001e880 10
+DEC 0x50c00001e7c0/8 -> 1
+INC 0x50e0000121e0/<NativeFunction> -> 1
+INC 0x50e0000122c0/<NativeFunction> -> 1
+INC 0x50d000001080/[] -> 1
+DEC 0x50d000000ee0/[., ., ., ., ., ., ., ., ., .] -> 0
+DELETE 0x50d000000ee0 [., ., ., ., ., ., ., ., ., .]
+DEC 0x50e0000106c0/. -> 0
+DELETE 0x50e0000106c0 .
+DEC 0x50e000010880/. -> 0
+DELETE 0x50e000010880 .
+DEC 0x50e000010a40/. -> 0
+DELETE 0x50e000010a40 .
+DEC 0x50e000010c00/. -> 0
+DELETE 0x50e000010c00 .
+DEC 0x50e000010dc0/. -> 0
+DELETE 0x50e000010dc0 .
+DEC 0x50e000010f80/. -> 0
+DELETE 0x50e000010f80 .
+DEC 0x50e000011140/. -> 0
+DELETE 0x50e000011140 .
+DEC 0x50e000011300/. -> 0
+DELETE 0x50e000011300 .
+DEC 0x50e0000114c0/. -> 0
+DELETE 0x50e0000114c0 .
+DEC 0x50e000011680/. -> 0
+DELETE 0x50e000011680 .
+INC 0x50c00001ea00/0 -> 1
+DEC 0x50c00001e100/10 -> 0
+DELETE 0x50c00001e100 10
+INC 0x50c00001eac0/10 -> 1
+INC 0x50c00001ea00/0 -> 2
+INC 0x50c00001eb80/1 -> 1
+DEC 0x50c00001eac0/10 -> 0
+DELETE 0x50c00001eac0 10
+DEC 0x50c00001ea00/0 -> 1
+INC 0x50e0000123a0/. -> 1
+INC 0x50d000001080/[] -> 2
+INC 0x50e0000121e0/<NativeFunction> -> 2
+DEC 0x50d000001080/[] -> 1
+INC 0x50e000012480/. -> 1
+INC 0x50c00001ec40/<null> -> 1
+DEC 0x50e0000121e0/<NativeFunction> -> 1
+DEC 0x50e0000123a0/. -> 0
+DELETE 0x50e0000123a0 .
+DEC 0x50c00001ec40/<null> -> 0
+DELETE 0x50c00001ec40 <null>
+INC 0x50c00001ed00/1 -> 1
+INC 0x50c00001ea00/0 -> 2
+INC 0x50c00001edc0/1 -> 1
+DEC 0x50c00001ed00/1 -> 0
+DELETE 0x50c00001ed00 1
+DEC 0x50c00001ea00/0 -> 1
+DEC 0x50c00001ea00/0 -> 0
+DELETE 0x50c00001ea00 0
+DEC 0x50c00001eb80/1 -> 0
+DELETE 0x50c00001eb80 1
+INC 0x50c00001ee80/10 -> 1
+INC 0x50c00001edc0/1 -> 2
+INC 0x50c00001ef40/1 -> 1
+DEC 0x50c00001ee80/10 -> 0
+DELETE 0x50c00001ee80 10
+DEC 0x50c00001edc0/1 -> 1
+INC 0x50e000012560/. -> 1
+INC 0x50d000001080/[.] -> 2
+INC 0x50e0000121e0/<NativeFunction> -> 2
+DEC 0x50d000001080/[.] -> 1
+INC 0x50e000012640/. -> 1
+INC 0x50c00001f000/<null> -> 1
+DEC 0x50e0000121e0/<NativeFunction> -> 1
+DEC 0x50e000012560/. -> 0
+DELETE 0x50e000012560 .
+DEC 0x50c00001f000/<null> -> 0
+DELETE 0x50c00001f000 <null>
+INC 0x50c00001f0c0/1 -> 1
+INC 0x50c00001edc0/1 -> 2
+INC 0x50c00001f180/2 -> 1
+DEC 0x50c00001f0c0/1 -> 0
+DELETE 0x50c00001f0c0 1
+DEC 0x50c00001edc0/1 -> 1
+DEC 0x50c00001edc0/1 -> 0
+DELETE 0x50c00001edc0 1
+DEC 0x50c00001ef40/1 -> 0
+DELETE 0x50c00001ef40 1
+INC 0x50c00001f240/10 -> 1
+INC 0x50c00001f180/2 -> 2
+INC 0x50c00001f300/1 -> 1
+DEC 0x50c00001f240/10 -> 0
+DELETE 0x50c00001f240 10
+DEC 0x50c00001f180/2 -> 1
+INC 0x50e000012720/. -> 1
+INC 0x50d000001080/[., .] -> 2
+INC 0x50e0000121e0/<NativeFunction> -> 2
+DEC 0x50d000001080/[., .] -> 1
+INC 0x50e000012800/. -> 1
+INC 0x50c00001f3c0/<null> -> 1
+DEC 0x50e0000121e0/<NativeFunction> -> 1
+DEC 0x50e000012720/. -> 0
+DELETE 0x50e000012720 .
+DEC 0x50c00001f3c0/<null> -> 0
+DELETE 0x50c00001f3c0 <null>
+INC 0x50c00001f480/1 -> 1
+INC 0x50c00001f180/2 -> 2
+INC 0x50c00001f540/3 -> 1
+DEC 0x50c00001f480/1 -> 0
+DELETE 0x50c00001f480 1
+DEC 0x50c00001f180/2 -> 1
+DEC 0x50c00001f180/2 -> 0
+DELETE 0x50c00001f180 2
+DEC 0x50c00001f300/1 -> 0
+DELETE 0x50c00001f300 1
+INC 0x50c00001f600/10 -> 1
+INC 0x50c00001f540/3 -> 2
+INC 0x50c00001f6c0/1 -> 1
+DEC 0x50c00001f600/10 -> 0
+DELETE 0x50c00001f600 10
+DEC 0x50c00001f540/3 -> 1
+INC 0x50e0000128e0/. -> 1
+INC 0x50d000001080/[., ., .] -> 2
+INC 0x50e0000121e0/<NativeFunction> -> 2
+DEC 0x50d000001080/[., ., .] -> 1
+INC 0x50e0000129c0/. -> 1
+INC 0x50c00001f780/<null> -> 1
+DEC 0x50e0000121e0/<NativeFunction> -> 1
+DEC 0x50e0000128e0/. -> 0
+DELETE 0x50e0000128e0 .
+DEC 0x50c00001f780/<null> -> 0
+DELETE 0x50c00001f780 <null>
+INC 0x50c00001f840/1 -> 1
+INC 0x50c00001f540/3 -> 2
+INC 0x50c00001f900/4 -> 1
+DEC 0x50c00001f840/1 -> 0
+DELETE 0x50c00001f840 1
+DEC 0x50c00001f540/3 -> 1
+DEC 0x50c00001f540/3 -> 0
+DELETE 0x50c00001f540 3
+DEC 0x50c00001f6c0/1 -> 0
+DELETE 0x50c00001f6c0 1
+INC 0x50c00001f9c0/10 -> 1
+INC 0x50c00001f900/4 -> 2
+INC 0x50c00001fa80/1 -> 1
+DEC 0x50c00001f9c0/10 -> 0
+DELETE 0x50c00001f9c0 10
+DEC 0x50c00001f900/4 -> 1
+INC 0x50e000012aa0/. -> 1
+INC 0x50d000001080/[., ., ., .] -> 2
+INC 0x50e0000121e0/<NativeFunction> -> 2
+DEC 0x50d000001080/[., ., ., .] -> 1
+INC 0x50e000012b80/. -> 1
+INC 0x50c00001fb40/<null> -> 1
+DEC 0x50e0000121e0/<NativeFunction> -> 1
+DEC 0x50e000012aa0/. -> 0
+DELETE 0x50e000012aa0 .
+DEC 0x50c00001fb40/<null> -> 0
+DELETE 0x50c00001fb40 <null>
+INC 0x50c00001fc00/1 -> 1
+INC 0x50c00001f900/4 -> 2
+INC 0x50c00001fcc0/5 -> 1
+DEC 0x50c00001fc00/1 -> 0
+DELETE 0x50c00001fc00 1
+DEC 0x50c00001f900/4 -> 1
+DEC 0x50c00001f900/4 -> 0
+DELETE 0x50c00001f900 4
+DEC 0x50c00001fa80/1 -> 0
+DELETE 0x50c00001fa80 1
+INC 0x50c00001fd80/10 -> 1
+INC 0x50c00001fcc0/5 -> 2
+INC 0x50c00001fe40/1 -> 1
+DEC 0x50c00001fd80/10 -> 0
+DELETE 0x50c00001fd80 10
+DEC 0x50c00001fcc0/5 -> 1
+INC 0x50e000012c60/. -> 1
+INC 0x50d000001080/[., ., ., ., .] -> 2
+INC 0x50e0000121e0/<NativeFunction> -> 2
+DEC 0x50d000001080/[., ., ., ., .] -> 1
+INC 0x50e000012d40/. -> 1
+INC 0x50c00001ff00/<null> -> 1
+DEC 0x50e0000121e0/<NativeFunction> -> 1
+DEC 0x50e000012c60/. -> 0
+DELETE 0x50e000012c60 .
+DEC 0x50c00001ff00/<null> -> 0
+DELETE 0x50c00001ff00 <null>
+INC 0x50c00000c040/1 -> 1
+INC 0x50c00001fcc0/5 -> 2
+INC 0x50c00000c100/6 -> 1
+DEC 0x50c00000c040/1 -> 0
+DELETE 0x50c00000c040 1
+DEC 0x50c00001fcc0/5 -> 1
+DEC 0x50c00001fcc0/5 -> 0
+DELETE 0x50c00001fcc0 5
+DEC 0x50c00001fe40/1 -> 0
+DELETE 0x50c00001fe40 1
+INC 0x50c00000c1c0/10 -> 1
+INC 0x50c00000c100/6 -> 2
+INC 0x50c00000c280/1 -> 1
+DEC 0x50c00000c1c0/10 -> 0
+DELETE 0x50c00000c1c0 10
+DEC 0x50c00000c100/6 -> 1
+INC 0x50e000012e20/. -> 1
+INC 0x50d000001080/[., ., ., ., ., .] -> 2
+INC 0x50e0000121e0/<NativeFunction> -> 2
+DEC 0x50d000001080/[., ., ., ., ., .] -> 1
+INC 0x50e000012f00/. -> 1
+INC 0x50c00000c340/<null> -> 1
+DEC 0x50e0000121e0/<NativeFunction> -> 1
+DEC 0x50e000012e20/. -> 0
+DELETE 0x50e000012e20 .
+DEC 0x50c00000c340/<null> -> 0
+DELETE 0x50c00000c340 <null>
+INC 0x50c00000c400/1 -> 1
+INC 0x50c00000c100/6 -> 2
+INC 0x50c00000c4c0/7 -> 1
+DEC 0x50c00000c400/1 -> 0
+DELETE 0x50c00000c400 1
+DEC 0x50c00000c100/6 -> 1
+DEC 0x50c00000c100/6 -> 0
+DELETE 0x50c00000c100 6
+DEC 0x50c00000c280/1 -> 0
+DELETE 0x50c00000c280 1
+INC 0x50c00000c580/10 -> 1
+INC 0x50c00000c4c0/7 -> 2
+INC 0x50c00000c640/1 -> 1
+DEC 0x50c00000c580/10 -> 0
+DELETE 0x50c00000c580 10
+DEC 0x50c00000c4c0/7 -> 1
+INC 0x50e000012fe0/. -> 1
+INC 0x50d000001080/[., ., ., ., ., ., .] -> 2
+INC 0x50e0000121e0/<NativeFunction> -> 2
+DEC 0x50d000001080/[., ., ., ., ., ., .] -> 1
+INC 0x50e0000130c0/. -> 1
+INC 0x50c00000c700/<null> -> 1
+DEC 0x50e0000121e0/<NativeFunction> -> 1
+DEC 0x50e000012fe0/. -> 0
+DELETE 0x50e000012fe0 .
+DEC 0x50c00000c700/<null> -> 0
+DELETE 0x50c00000c700 <null>
+INC 0x50c00000c7c0/1 -> 1
+INC 0x50c00000c4c0/7 -> 2
+INC 0x50c00000c880/8 -> 1
+DEC 0x50c00000c7c0/1 -> 0
+DELETE 0x50c00000c7c0 1
+DEC 0x50c00000c4c0/7 -> 1
+DEC 0x50c00000c4c0/7 -> 0
+DELETE 0x50c00000c4c0 7
+DEC 0x50c00000c640/1 -> 0
+DELETE 0x50c00000c640 1
+INC 0x50c00000c940/10 -> 1
+INC 0x50c00000c880/8 -> 2
+INC 0x50c00000ca00/1 -> 1
+DEC 0x50c00000c940/10 -> 0
+DELETE 0x50c00000c940 10
+DEC 0x50c00000c880/8 -> 1
+INC 0x50e0000131a0/. -> 1
+INC 0x50d000001080/[., ., ., ., ., ., ., .] -> 2
+INC 0x50e0000121e0/<NativeFunction> -> 2
+DEC 0x50d000001080/[., ., ., ., ., ., ., .] -> 1
+INC 0x50e000013280/. -> 1
+INC 0x50c00000cb80/<null> -> 1
+DEC 0x50e0000121e0/<NativeFunction> -> 1
+DEC 0x50e0000131a0/. -> 0
+DELETE 0x50e0000131a0 .
+DEC 0x50c00000cb80/<null> -> 0
+DELETE 0x50c00000cb80 <null>
+INC 0x50c00000cc40/1 -> 1
+INC 0x50c00000c880/8 -> 2
+INC 0x50c00000cd00/9 -> 1
+DEC 0x50c00000cc40/1 -> 0
+DELETE 0x50c00000cc40 1
+DEC 0x50c00000c880/8 -> 1
+DEC 0x50c00000c880/8 -> 0
+DELETE 0x50c00000c880 8
+DEC 0x50c00000ca00/1 -> 0
+DELETE 0x50c00000ca00 1
+INC 0x50c00000cdc0/10 -> 1
+INC 0x50c00000cd00/9 -> 2
+INC 0x50c00000ce80/1 -> 1
+DEC 0x50c00000cdc0/10 -> 0
+DELETE 0x50c00000cdc0 10
+DEC 0x50c00000cd00/9 -> 1
+INC 0x50e000013360/. -> 1
+INC 0x50d000001080/[., ., ., ., ., ., ., ., .] -> 2
+INC 0x50e0000121e0/<NativeFunction> -> 2
+DEC 0x50d000001080/[., ., ., ., ., ., ., ., .] -> 1
+INC 0x50e000013440/. -> 1
+INC 0x50c00000cf40/<null> -> 1
+DEC 0x50e0000121e0/<NativeFunction> -> 1
+DEC 0x50e000013360/. -> 0
+DELETE 0x50e000013360 .
+DEC 0x50c00000cf40/<null> -> 0
+DELETE 0x50c00000cf40 <null>
+INC 0x50c00000d000/1 -> 1
+INC 0x50c00000cd00/9 -> 2
+INC 0x50c00000d0c0/10 -> 1
+DEC 0x50c00000d000/1 -> 0
+DELETE 0x50c00000d000 1
+DEC 0x50c00000cd00/9 -> 1
+DEC 0x50c00000cd00/9 -> 0
+DELETE 0x50c00000cd00 9
+DEC 0x50c00000ce80/1 -> 0
+DELETE 0x50c00000ce80 1
+INC 0x50c00000d180/10 -> 1
+INC 0x50c00000d0c0/10 -> 2
+INC 0x50c00000d240/0 -> 1
+DEC 0x50c00000d180/10 -> 0
+DELETE 0x50c00000d180 10
+DEC 0x50c00000d0c0/10 -> 1
+DEC 0x50c00000d240/0 -> 0
+DELETE 0x50c00000d240 0
+INC 0x50c00000d300/<null> -> 1
+DEC 0x50c00000d300/<null> -> 0
+DELETE 0x50c00000d300 <null>
+INC 0x50d000001080/[., ., ., ., ., ., ., ., ., .] -> 2
+INC 0x50d0000002b0/[[., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .]] -> 2
+INC 0x50e0000012a0/<NativeFunction> -> 2
+DEC 0x50d0000002b0/[[., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .]] -> 1
+INC 0x50e000013520/. -> 1
+INC 0x50e000013600/. -> 1
+INC 0x50e0000136e0/. -> 1
+INC 0x50e0000137c0/. -> 1
+INC 0x50e0000138a0/. -> 1
+INC 0x50e000013980/. -> 1
+INC 0x50e000013a60/. -> 1
+INC 0x50e000013b40/. -> 1
+INC 0x50e000013c20/. -> 1
+INC 0x50e000013d00/. -> 1
+INC 0x50e000013de0/<NativeFunction> -> 1
+INC 0x50e000013ec0/<NativeFunction> -> 1
+INC 0x50d000001150/[., ., ., ., ., ., ., ., ., .] -> 1
+INC 0x50c00000d6c0/<null> -> 1
+DEC 0x50e0000012a0/<NativeFunction> -> 1
+DEC 0x50d000001080/[., ., ., ., ., ., ., ., ., .] -> 1
+DEC 0x50c00000d6c0/<null> -> 0
+DELETE 0x50c00000d6c0 <null>
+INC 0x50c00000d780/1 -> 1
+INC 0x50c00001e7c0/8 -> 2
+INC 0x50c00000d840/9 -> 1
+DEC 0x50c00000d780/1 -> 0
+DELETE 0x50c00000d780 1
+DEC 0x50c00001e7c0/8 -> 1
+DEC 0x50c00001e7c0/8 -> 0
+DELETE 0x50c00001e7c0 8
+DEC 0x50c00001e940/1 -> 0
+DELETE 0x50c00001e940 1
+INC 0x50c00000d900/10 -> 1
+INC 0x50c00000d840/9 -> 2
+INC 0x50c00000d9c0/1 -> 1
+DEC 0x50c00000d900/10 -> 0
+DELETE 0x50c00000d900 10
+DEC 0x50c00000d840/9 -> 1
+INC 0x50e000013fa0/<NativeFunction> -> 1
+INC 0x50e000014080/<NativeFunction> -> 1
+INC 0x50d000001220/[] -> 1
+DEC 0x50d000001080/[., ., ., ., ., ., ., ., ., .] -> 0
+DELETE 0x50d000001080 [., ., ., ., ., ., ., ., ., .]
+DEC 0x50e000012480/. -> 0
+DELETE 0x50e000012480 .
+DEC 0x50e000012640/. -> 0
+DELETE 0x50e000012640 .
+DEC 0x50e000012800/. -> 0
+DELETE 0x50e000012800 .
+DEC 0x50e0000129c0/. -> 0
+DELETE 0x50e0000129c0 .
+DEC 0x50e000012b80/. -> 0
+DELETE 0x50e000012b80 .
+DEC 0x50e000012d40/. -> 0
+DELETE 0x50e000012d40 .
+DEC 0x50e000012f00/. -> 0
+DELETE 0x50e000012f00 .
+DEC 0x50e0000130c0/. -> 0
+DELETE 0x50e0000130c0 .
+DEC 0x50e000013280/. -> 0
+DELETE 0x50e000013280 .
+DEC 0x50e000013440/. -> 0
+DELETE 0x50e000013440 .
+INC 0x50c00000da80/0 -> 1
+DEC 0x50c00000d0c0/10 -> 0
+DELETE 0x50c00000d0c0 10
+INC 0x50c00000db40/10 -> 1
+INC 0x50c00000da80/0 -> 2
+INC 0x50c00000dc00/1 -> 1
+DEC 0x50c00000db40/10 -> 0
+DELETE 0x50c00000db40 10
+DEC 0x50c00000da80/0 -> 1
+INC 0x50e000014160/. -> 1
+INC 0x50d000001220/[] -> 2
+INC 0x50e000013fa0/<NativeFunction> -> 2
+DEC 0x50d000001220/[] -> 1
+INC 0x50e000014240/. -> 1
+INC 0x50c00000dcc0/<null> -> 1
+DEC 0x50e000013fa0/<NativeFunction> -> 1
+DEC 0x50e000014160/. -> 0
+DELETE 0x50e000014160 .
+DEC 0x50c00000dcc0/<null> -> 0
+DELETE 0x50c00000dcc0 <null>
+INC 0x50c00000dd80/1 -> 1
+INC 0x50c00000da80/0 -> 2
+INC 0x50c00000de40/1 -> 1
+DEC 0x50c00000dd80/1 -> 0
+DELETE 0x50c00000dd80 1
+DEC 0x50c00000da80/0 -> 1
+DEC 0x50c00000da80/0 -> 0
+DELETE 0x50c00000da80 0
+DEC 0x50c00000dc00/1 -> 0
+DELETE 0x50c00000dc00 1
+INC 0x50c00000df00/10 -> 1
+INC 0x50c00000de40/1 -> 2
+INC 0x50c00000dfc0/1 -> 1
+DEC 0x50c00000df00/10 -> 0
+DELETE 0x50c00000df00 10
+DEC 0x50c00000de40/1 -> 1
+INC 0x50e000014320/. -> 1
+INC 0x50d000001220/[.] -> 2
+INC 0x50e000013fa0/<NativeFunction> -> 2
+DEC 0x50d000001220/[.] -> 1
+INC 0x50e000014400/. -> 1
+INC 0x50c00001ffc0/<null> -> 1
+DEC 0x50e000013fa0/<NativeFunction> -> 1
+DEC 0x50e000014320/. -> 0
+DELETE 0x50e000014320 .
+DEC 0x50c00001ffc0/<null> -> 0
+DELETE 0x50c00001ffc0 <null>
+INC 0x50c000020080/1 -> 1
+INC 0x50c00000de40/1 -> 2
+INC 0x50c000020140/2 -> 1
+DEC 0x50c000020080/1 -> 0
+DELETE 0x50c000020080 1
+DEC 0x50c00000de40/1 -> 1
+DEC 0x50c00000de40/1 -> 0
+DELETE 0x50c00000de40 1
+DEC 0x50c00000dfc0/1 -> 0
+DELETE 0x50c00000dfc0 1
+INC 0x50c000020200/10 -> 1
+INC 0x50c000020140/2 -> 2
+INC 0x50c0000202c0/1 -> 1
+DEC 0x50c000020200/10 -> 0
+DELETE 0x50c000020200 10
+DEC 0x50c000020140/2 -> 1
+INC 0x50e0000144e0/. -> 1
+INC 0x50d000001220/[., .] -> 2
+INC 0x50e000013fa0/<NativeFunction> -> 2
+DEC 0x50d000001220/[., .] -> 1
+INC 0x50e0000145c0/. -> 1
+INC 0x50c000020380/<null> -> 1
+DEC 0x50e000013fa0/<NativeFunction> -> 1
+DEC 0x50e0000144e0/. -> 0
+DELETE 0x50e0000144e0 .
+DEC 0x50c000020380/<null> -> 0
+DELETE 0x50c000020380 <null>
+INC 0x50c000020440/1 -> 1
+INC 0x50c000020140/2 -> 2
+INC 0x50c000020500/3 -> 1
+DEC 0x50c000020440/1 -> 0
+DELETE 0x50c000020440 1
+DEC 0x50c000020140/2 -> 1
+DEC 0x50c000020140/2 -> 0
+DELETE 0x50c000020140 2
+DEC 0x50c0000202c0/1 -> 0
+DELETE 0x50c0000202c0 1
+INC 0x50c0000205c0/10 -> 1
+INC 0x50c000020500/3 -> 2
+INC 0x50c000020680/1 -> 1
+DEC 0x50c0000205c0/10 -> 0
+DELETE 0x50c0000205c0 10
+DEC 0x50c000020500/3 -> 1
+INC 0x50e0000146a0/. -> 1
+INC 0x50d000001220/[., ., .] -> 2
+INC 0x50e000013fa0/<NativeFunction> -> 2
+DEC 0x50d000001220/[., ., .] -> 1
+INC 0x50e000014780/. -> 1
+INC 0x50c000020740/<null> -> 1
+DEC 0x50e000013fa0/<NativeFunction> -> 1
+DEC 0x50e0000146a0/. -> 0
+DELETE 0x50e0000146a0 .
+DEC 0x50c000020740/<null> -> 0
+DELETE 0x50c000020740 <null>
+INC 0x50c000020800/1 -> 1
+INC 0x50c000020500/3 -> 2
+INC 0x50c0000208c0/4 -> 1
+DEC 0x50c000020800/1 -> 0
+DELETE 0x50c000020800 1
+DEC 0x50c000020500/3 -> 1
+DEC 0x50c000020500/3 -> 0
+DELETE 0x50c000020500 3
+DEC 0x50c000020680/1 -> 0
+DELETE 0x50c000020680 1
+INC 0x50c000020980/10 -> 1
+INC 0x50c0000208c0/4 -> 2
+INC 0x50c000020a40/1 -> 1
+DEC 0x50c000020980/10 -> 0
+DELETE 0x50c000020980 10
+DEC 0x50c0000208c0/4 -> 1
+INC 0x50e000014860/. -> 1
+INC 0x50d000001220/[., ., ., .] -> 2
+INC 0x50e000013fa0/<NativeFunction> -> 2
+DEC 0x50d000001220/[., ., ., .] -> 1
+INC 0x50e000014940/. -> 1
+INC 0x50c000020b00/<null> -> 1
+DEC 0x50e000013fa0/<NativeFunction> -> 1
+DEC 0x50e000014860/. -> 0
+DELETE 0x50e000014860 .
+DEC 0x50c000020b00/<null> -> 0
+DELETE 0x50c000020b00 <null>
+INC 0x50c000020bc0/1 -> 1
+INC 0x50c0000208c0/4 -> 2
+INC 0x50c000020c80/5 -> 1
+DEC 0x50c000020bc0/1 -> 0
+DELETE 0x50c000020bc0 1
+DEC 0x50c0000208c0/4 -> 1
+DEC 0x50c0000208c0/4 -> 0
+DELETE 0x50c0000208c0 4
+DEC 0x50c000020a40/1 -> 0
+DELETE 0x50c000020a40 1
+INC 0x50c000020d40/10 -> 1
+INC 0x50c000020c80/5 -> 2
+INC 0x50c000020e00/1 -> 1
+DEC 0x50c000020d40/10 -> 0
+DELETE 0x50c000020d40 10
+DEC 0x50c000020c80/5 -> 1
+INC 0x50e000014a20/. -> 1
+INC 0x50d000001220/[., ., ., ., .] -> 2
+INC 0x50e000013fa0/<NativeFunction> -> 2
+DEC 0x50d000001220/[., ., ., ., .] -> 1
+INC 0x50e000014b00/. -> 1
+INC 0x50c000020ec0/<null> -> 1
+DEC 0x50e000013fa0/<NativeFunction> -> 1
+DEC 0x50e000014a20/. -> 0
+DELETE 0x50e000014a20 .
+DEC 0x50c000020ec0/<null> -> 0
+DELETE 0x50c000020ec0 <null>
+INC 0x50c000020f80/1 -> 1
+INC 0x50c000020c80/5 -> 2
+INC 0x50c000021040/6 -> 1
+DEC 0x50c000020f80/1 -> 0
+DELETE 0x50c000020f80 1
+DEC 0x50c000020c80/5 -> 1
+DEC 0x50c000020c80/5 -> 0
+DELETE 0x50c000020c80 5
+DEC 0x50c000020e00/1 -> 0
+DELETE 0x50c000020e00 1
+INC 0x50c000021100/10 -> 1
+INC 0x50c000021040/6 -> 2
+INC 0x50c0000211c0/1 -> 1
+DEC 0x50c000021100/10 -> 0
+DELETE 0x50c000021100 10
+DEC 0x50c000021040/6 -> 1
+INC 0x50e000014be0/. -> 1
+INC 0x50d000001220/[., ., ., ., ., .] -> 2
+INC 0x50e000013fa0/<NativeFunction> -> 2
+DEC 0x50d000001220/[., ., ., ., ., .] -> 1
+INC 0x50e000014cc0/. -> 1
+INC 0x50c000021280/<null> -> 1
+DEC 0x50e000013fa0/<NativeFunction> -> 1
+DEC 0x50e000014be0/. -> 0
+DELETE 0x50e000014be0 .
+DEC 0x50c000021280/<null> -> 0
+DELETE 0x50c000021280 <null>
+INC 0x50c000021340/1 -> 1
+INC 0x50c000021040/6 -> 2
+INC 0x50c000021400/7 -> 1
+DEC 0x50c000021340/1 -> 0
+DELETE 0x50c000021340 1
+DEC 0x50c000021040/6 -> 1
+DEC 0x50c000021040/6 -> 0
+DELETE 0x50c000021040 6
+DEC 0x50c0000211c0/1 -> 0
+DELETE 0x50c0000211c0 1
+INC 0x50c0000214c0/10 -> 1
+INC 0x50c000021400/7 -> 2
+INC 0x50c000021580/1 -> 1
+DEC 0x50c0000214c0/10 -> 0
+DELETE 0x50c0000214c0 10
+DEC 0x50c000021400/7 -> 1
+INC 0x50e000014da0/. -> 1
+INC 0x50d000001220/[., ., ., ., ., ., .] -> 2
+INC 0x50e000013fa0/<NativeFunction> -> 2
+DEC 0x50d000001220/[., ., ., ., ., ., .] -> 1
+INC 0x50e000014e80/. -> 1
+INC 0x50c000021640/<null> -> 1
+DEC 0x50e000013fa0/<NativeFunction> -> 1
+DEC 0x50e000014da0/. -> 0
+DELETE 0x50e000014da0 .
+DEC 0x50c000021640/<null> -> 0
+DELETE 0x50c000021640 <null>
+INC 0x50c000021700/1 -> 1
+INC 0x50c000021400/7 -> 2
+INC 0x50c0000217c0/8 -> 1
+DEC 0x50c000021700/1 -> 0
+DELETE 0x50c000021700 1
+DEC 0x50c000021400/7 -> 1
+DEC 0x50c000021400/7 -> 0
+DELETE 0x50c000021400 7
+DEC 0x50c000021580/1 -> 0
+DELETE 0x50c000021580 1
+INC 0x50c000021880/10 -> 1
+INC 0x50c0000217c0/8 -> 2
+INC 0x50c000021940/1 -> 1
+DEC 0x50c000021880/10 -> 0
+DELETE 0x50c000021880 10
+DEC 0x50c0000217c0/8 -> 1
+INC 0x50e000014f60/. -> 1
+INC 0x50d000001220/[., ., ., ., ., ., ., .] -> 2
+INC 0x50e000013fa0/<NativeFunction> -> 2
+DEC 0x50d000001220/[., ., ., ., ., ., ., .] -> 1
+INC 0x50e000015040/. -> 1
+INC 0x50c000021ac0/<null> -> 1
+DEC 0x50e000013fa0/<NativeFunction> -> 1
+DEC 0x50e000014f60/. -> 0
+DELETE 0x50e000014f60 .
+DEC 0x50c000021ac0/<null> -> 0
+DELETE 0x50c000021ac0 <null>
+INC 0x50c000021b80/1 -> 1
+INC 0x50c0000217c0/8 -> 2
+INC 0x50c000021c40/9 -> 1
+DEC 0x50c000021b80/1 -> 0
+DELETE 0x50c000021b80 1
+DEC 0x50c0000217c0/8 -> 1
+DEC 0x50c0000217c0/8 -> 0
+DELETE 0x50c0000217c0 8
+DEC 0x50c000021940/1 -> 0
+DELETE 0x50c000021940 1
+INC 0x50c000021d00/10 -> 1
+INC 0x50c000021c40/9 -> 2
+INC 0x50c000021dc0/1 -> 1
+DEC 0x50c000021d00/10 -> 0
+DELETE 0x50c000021d00 10
+DEC 0x50c000021c40/9 -> 1
+INC 0x50e000015120/. -> 1
+INC 0x50d000001220/[., ., ., ., ., ., ., ., .] -> 2
+INC 0x50e000013fa0/<NativeFunction> -> 2
+DEC 0x50d000001220/[., ., ., ., ., ., ., ., .] -> 1
+INC 0x50e000015200/. -> 1
+INC 0x50c000021e80/<null> -> 1
+DEC 0x50e000013fa0/<NativeFunction> -> 1
+DEC 0x50e000015120/. -> 0
+DELETE 0x50e000015120 .
+DEC 0x50c000021e80/<null> -> 0
+DELETE 0x50c000021e80 <null>
+INC 0x50c000021f40/1 -> 1
+INC 0x50c000021c40/9 -> 2
+INC 0x50c000022000/10 -> 1
+DEC 0x50c000021f40/1 -> 0
+DELETE 0x50c000021f40 1
+DEC 0x50c000021c40/9 -> 1
+DEC 0x50c000021c40/9 -> 0
+DELETE 0x50c000021c40 9
+DEC 0x50c000021dc0/1 -> 0
+DELETE 0x50c000021dc0 1
+INC 0x50c0000220c0/10 -> 1
+INC 0x50c000022000/10 -> 2
+INC 0x50c000022180/0 -> 1
+DEC 0x50c0000220c0/10 -> 0
+DELETE 0x50c0000220c0 10
+DEC 0x50c000022000/10 -> 1
+DEC 0x50c000022180/0 -> 0
+DELETE 0x50c000022180 0
+INC 0x50c000022240/<null> -> 1
+DEC 0x50c000022240/<null> -> 0
+DELETE 0x50c000022240 <null>
+INC 0x50d000001220/[., ., ., ., ., ., ., ., ., .] -> 2
+INC 0x50d0000002b0/[[., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .]] -> 2
+INC 0x50e0000012a0/<NativeFunction> -> 2
+DEC 0x50d0000002b0/[[., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .]] -> 1
+INC 0x50e0000152e0/. -> 1
+INC 0x50e0000153c0/. -> 1
+INC 0x50e0000154a0/. -> 1
+INC 0x50e000015580/. -> 1
+INC 0x50e000015660/. -> 1
+INC 0x50e000015740/. -> 1
+INC 0x50e000015820/. -> 1
+INC 0x50e000015900/. -> 1
+INC 0x50e0000159e0/. -> 1
+INC 0x50e000015ac0/. -> 1
+INC 0x50e000015ba0/<NativeFunction> -> 1
+INC 0x50e000015c80/<NativeFunction> -> 1
+INC 0x50d0000012f0/[., ., ., ., ., ., ., ., ., .] -> 1
+INC 0x50c000022540/<null> -> 1
+DEC 0x50e0000012a0/<NativeFunction> -> 1
+DEC 0x50d000001220/[., ., ., ., ., ., ., ., ., .] -> 1
+DEC 0x50c000022540/<null> -> 0
+DELETE 0x50c000022540 <null>
+INC 0x50c000022600/1 -> 1
+INC 0x50c00000d840/9 -> 2
+INC 0x50c0000226c0/10 -> 1
+DEC 0x50c000022600/1 -> 0
+DELETE 0x50c000022600 1
+DEC 0x50c00000d840/9 -> 1
+DEC 0x50c00000d840/9 -> 0
+DELETE 0x50c00000d840 9
+DEC 0x50c00000d9c0/1 -> 0
+DELETE 0x50c00000d9c0 1
+INC 0x50c000022780/10 -> 1
+INC 0x50c0000226c0/10 -> 2
+INC 0x50c000022840/0 -> 1
+DEC 0x50c000022780/10 -> 0
+DELETE 0x50c000022780 10
+DEC 0x50c0000226c0/10 -> 1
+DEC 0x50c000022840/0 -> 0
+DELETE 0x50c000022840 0
+INC 0x50c000022900/<null> -> 1
+INC 0x50d0000002b0/[[., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .]] -> 2
+INC 0x50d0000002b0/[[., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .]] -> 3
+DEC 0x50f000000310/<FunctionObject> -> 1
+INC 0x50c000022b40/1 -> 1
+INC 0x50c000022c00/0 -> 1
+INC 0x50e000000d60/<ClassObject> -> 2
+INC 0x50e000000d60/<ClassObject> -> 3
+INC 0x50c000022cc0/1 -> 1
+INC 0x50c000022d80/0 -> 1
+INC 0x50f0000004f0/<FunctionObject> -> 3
+INC 0x50c000022b40/1 -> 2
+INC 0x50c000022c00/0 -> 2
+INC 0x50f000000a90/<FunctionObject> -> 1
+INC 0x50c000022e40/<null> -> 1
+INC 0x50c000022f00/<null> -> 1
+INC 0x50f000000b80/<FunctionObject> -> 1
+INC 0x50c000022fc0/<null> -> 1
+INC 0x50f000000a90/<FunctionObject> -> 2
+INC 0x50f000000b80/<FunctionObject> -> 2
+INC 0x50e000015e40/<ClassObject> -> 1
+INC 0x50f000000c70/<FunctionObject> -> 1
+INC 0x50e000015f20/<NativeFunction> -> 1
+INC 0x50e000016000/. -> 1
+INC 0x50e0000160e0/. -> 1
+INC 0x50e0000161c0/. -> 1
+INC 0x50e0000162a0/. -> 1
+INC 0x50e000016380/. -> 1
+INC 0x50e000016460/. -> 1
+INC 0x50e000016540/. -> 1
+INC 0x50e000016620/. -> 1
+INC 0x50e000016700/. -> 1
+INC 0x50e0000167e0/. -> 1
+INC 0x50e0000168c0/<NativeFunction> -> 1
+INC 0x50e0000169a0/<NativeFunction> -> 1
+INC 0x50d000001560/[., ., ., ., ., ., ., ., ., .] -> 1
+INC 0x50e000016a80/. -> 1
+INC 0x50e000016b60/. -> 1
+INC 0x50e000016c40/. -> 1
+INC 0x50e000016d20/. -> 1
+INC 0x50e000016e00/. -> 1
+INC 0x50e000016ee0/. -> 1
+INC 0x50e000016fc0/. -> 1
+INC 0x50e0000170a0/. -> 1
+INC 0x50e000017180/. -> 1
+INC 0x50e000017260/. -> 1
+INC 0x50e000017340/<NativeFunction> -> 1
+INC 0x50e000017420/<NativeFunction> -> 1
+INC 0x50d000001630/[., ., ., ., ., ., ., ., ., .] -> 1
+INC 0x50e000017500/. -> 1
+INC 0x50e0000175e0/. -> 1
+INC 0x50e0000176c0/. -> 1
+INC 0x50e0000177a0/. -> 1
+INC 0x50e000017880/. -> 1
+INC 0x50e000017960/. -> 1
+INC 0x50e000017a40/. -> 1
+INC 0x50e000017b20/. -> 1
+INC 0x50e000017c00/. -> 1
+INC 0x50e000017ce0/. -> 1
+INC 0x50e000017dc0/<NativeFunction> -> 1
+INC 0x50e000017ea0/<NativeFunction> -> 1
+INC 0x50d000001700/[., ., ., ., ., ., ., ., ., .] -> 1
+INC 0x50e000017f80/. -> 1
+INC 0x50e000018060/. -> 1
+INC 0x50e000018140/. -> 1
+INC 0x50e000018220/. -> 1
+INC 0x50e000018300/. -> 1
+INC 0x50e0000183e0/. -> 1
+INC 0x50e0000184c0/. -> 1
+INC 0x50e0000185a0/. -> 1
+INC 0x50e000018680/. -> 1
+INC 0x50e000018760/. -> 1
+INC 0x50e000018840/<NativeFunction> -> 1
+INC 0x50e000018920/<NativeFunction> -> 1
+INC 0x50d0000017d0/[., ., ., ., ., ., ., ., ., .] -> 1
+INC 0x50e000018a00/. -> 1
+INC 0x50e000018ae0/. -> 1
+INC 0x50e000018bc0/. -> 1
+INC 0x50e000018ca0/. -> 1
+INC 0x50e000018d80/. -> 1
+INC 0x50e000018e60/. -> 1
+INC 0x50e000018f40/. -> 1
+INC 0x50e000019020/. -> 1
+INC 0x50e000019100/. -> 1
+INC 0x50e0000191e0/. -> 1
+INC 0x50e0000192c0/<NativeFunction> -> 1
+INC 0x50e0000193a0/<NativeFunction> -> 1
+INC 0x50d0000018a0/[., ., ., ., ., ., ., ., ., .] -> 1
+INC 0x50e000019480/. -> 1
+INC 0x50e000019560/. -> 1
+INC 0x50e000019640/. -> 1
+INC 0x50e000019720/. -> 1
+INC 0x50e000019800/. -> 1
+INC 0x50e0000198e0/. -> 1
+INC 0x50e0000199c0/. -> 1
+INC 0x50e000019aa0/. -> 1
+INC 0x50e000019b80/. -> 1
+INC 0x50e000019c60/. -> 1
+INC 0x50e000019d40/<NativeFunction> -> 1
+INC 0x50e000019e20/<NativeFunction> -> 1
+INC 0x50d000001970/[., ., ., ., ., ., ., ., ., .] -> 1
+INC 0x50e000019f00/. -> 1
+INC 0x50e000019fe0/. -> 1
+INC 0x50e00001a0c0/. -> 1
+INC 0x50e00001a1a0/. -> 1
+INC 0x50e00001a280/. -> 1
+INC 0x50e00001a360/. -> 1
+INC 0x50e00001a440/. -> 1
+INC 0x50e00001a520/. -> 1
+INC 0x50e00001a600/. -> 1
+INC 0x50e00001a6e0/. -> 1
+INC 0x50e00001a7c0/<NativeFunction> -> 1
+INC 0x50e00001a8a0/<NativeFunction> -> 1
+INC 0x50d000001a40/[., ., ., ., ., ., ., ., ., .] -> 1
+INC 0x50e00001a980/. -> 1
+INC 0x50e00001aa60/. -> 1
+INC 0x50e00001ab40/. -> 1
+INC 0x50e00001ac20/. -> 1
+INC 0x50e00001ad00/. -> 1
+INC 0x50e00001ade0/. -> 1
+INC 0x50e00001aec0/. -> 1
+INC 0x50e00001afa0/. -> 1
+INC 0x50e00001b080/. -> 1
+INC 0x50e00001b160/. -> 1
+INC 0x50e00001b240/<NativeFunction> -> 1
+INC 0x50e00001b320/<NativeFunction> -> 1
+INC 0x50d000001b10/[., ., ., ., ., ., ., ., ., .] -> 1
+INC 0x50e00001b400/. -> 1
+INC 0x50e00001b4e0/. -> 1
+INC 0x50e00001b5c0/. -> 1
+INC 0x50e00001b6a0/. -> 1
+INC 0x50e00001b780/. -> 1
+INC 0x50e00001b860/. -> 1
+INC 0x50e00001b940/. -> 1
+INC 0x50e00001ba20/. -> 1
+INC 0x50e00001bb00/. -> 1
+INC 0x50e00001bbe0/. -> 1
+INC 0x50e00001bcc0/<NativeFunction> -> 1
+INC 0x50e00001bda0/<NativeFunction> -> 1
+INC 0x50d000001be0/[., ., ., ., ., ., ., ., ., .] -> 1
+INC 0x50e00001be80/. -> 1
+INC 0x50e00001bf60/. -> 1
+INC 0x50e00001c040/. -> 1
+INC 0x50e00001c120/. -> 1
+INC 0x50e00001c200/. -> 1
+INC 0x50e00001c2e0/. -> 1
+INC 0x50e00001c3c0/. -> 1
+INC 0x50e00001c4a0/. -> 1
+INC 0x50e00001c580/. -> 1
+INC 0x50e00001c660/. -> 1
+INC 0x50e00001c740/<NativeFunction> -> 1
+INC 0x50e00001c820/<NativeFunction> -> 1
+INC 0x50d000001cb0/[., ., ., ., ., ., ., ., ., .] -> 1
+INC 0x50e00001c900/<NativeFunction> -> 1
+INC 0x50e00001c9e0/<NativeFunction> -> 1
+INC 0x50d000001490/[[., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .], [., ., ., ., ., ., ., ., ., .]] -> 1
+INC 0x50e00001cac0/<NativeFunction> -> 1
+INC 0x50c000023980/1 -> 1
+INC 0x50c000023a40/0 -> 1
+INC 0x50e000000d60/<ClassObject> -> 4
+INC 0x50c000023b00/1 -> 1
+INC 0x50c000023bc0/0 -> 1
+INC 0x50e00001cba0/<InstanceObject> -> 1
+INC 0x50f000000d60/<FunctionObject> -> 1
+INC 0x50c000023c80/1 -> 1
+INC 0x50c000023d40/0 -> 1
+INC 0x50e000015d60/<InstanceObject> -> 1
+INC 0x50c000023c80/1 -> 2
+INC 0x50c000023e00/1 -> 1
+DEC 0x50e000015d60/<InstanceObject> -> 0
+DELETE 0x50e000015d60 <InstanceObject>
