@@ -312,7 +312,7 @@ class FunctionObject:public BasicObj{
       // for (auto k:argNames) std::cout<<k<<std::endl;
       Context local=*c;
       for (int i=0;i<args.size();i++){
-        local.ns[argNames[i]]=args[i]->clone();
+        local.ns[argNames[i]]=args[i];
         inc_ref(local.ns[argNames[i]]);
       }
       if (code.empty()){
@@ -1562,6 +1562,7 @@ int main(){
       };
       class(Player){
         fn(__constructor__)(self,x,y){
+          print("Constructor called with ",x," and ",y);
           self.x=x;
           self.y=y;
         };
